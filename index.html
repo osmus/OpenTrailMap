@@ -199,11 +199,11 @@
           // based on the feature found.
           popup.setLngLat(coordinates).setHTML(desc).addTo(map);
       });
-/*
+
       map.on('click', 'trails', (e) => {
-          window.open('https://openstreetmap.org/way/'+e.features[0].properties['osm_id'], "_blank");
+          window.open('https://openstreetmap.org/way/'+e.features[0].id, "_blank");
       });
-*/
+
       map.on('mouseleave', 'trails', () => {
           map.getCanvas().style.cursor = '';
           popup.remove();
