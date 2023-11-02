@@ -1,0 +1,53 @@
+
+@font-face{
+  src: url('/css/fonts/NationalPark-ExtraBold.otf');
+  font-family: "National Park";
+  font-weight: 800;
+}
+@font-face{
+  src: url('/css/fonts/NationalPark-Bold.otf');
+  font-family: "National Park";
+  font-weight: 700;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "National Park", "Source Sans", "Helvetica", sans-serif;
+}
+h1 {
+  font-weight: 700;
+  font-size: 24px;
+}
+#header {
+  padding: 10px;
+  background-color: #4A282A;
+  color: #F9DDA3;
+  z-index: 1;
+  position: relative;
+  display: inline-block;
+}
+#controls {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 2;
+  background: white;
+  border-radius: 5px;
+}
+#controls select {
+  font-size: 40px;
+  line-height: 2em;
+}
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  z-index: 0;
+}
+#attribution-logo {
+  position: absolute;
+  bottom: 10px;
+  z-index: 100;
+}

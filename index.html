@@ -2,35 +2,20 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
     <title>OpenTrailMap by OpenStreetMap US</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
-    <meta
-      name="viewport"
-      content="initial-scale=1,maximum-scale=1,user-scalable=no"
-    />
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      #map {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 100%;
-      }
-      #attribution-logo {
-        position: absolute;
-        bottom: 10px;
-        z-index: 100;
-      }
-    </style>
+    <link href="/css/reset.css" rel="stylesheet" />
+    <link href="/css/main.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
     <script type="module" src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
     <!-- attempt to load gitignored key in case this is dev environment -->
     <script type="application/javascript" src="/api-keys.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
   </head>
   <body>
+    <div id="header">
+      <h1>OpenTrailMap</h1>
+    </div>
     <div id="map"></div>
     <script type="text/javascript">
 
