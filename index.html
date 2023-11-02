@@ -59,34 +59,53 @@
             url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
             attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
           });
-          let allFilter = 
-              ["!=", "highway", "track"];
-          let lineColors = [
+          var allFilter = 
+            ["any",
+              ["!=", "highway", "track"],
+              ["has", "foot"]
+            ];
+          var lineColors = "#FF3A00";/*[
                 "match", ["get", "highway"],
                 "path", "#FF3A00",
                 "footway", "#723333",
                 "steps", "#723333",
                 "cycleway", "purple",
                 "green"
-              ];
+              ];*/
+          var lineWidth = [
+              "interpolate", ["linear"], ["zoom"],
+              10, 1,
+              22, 5
+            ];
+          var lineOpacity = [
+              "interpolate", ["linear"], ["zoom"],
+              10, 1,
+              22, 0.4
+            ];
           map.addLayer({
             "id": "paths",
             "source": "trails",
             "source-layer": "trail",
             "type": "line",
+            "layout": {
+              "line-cap": "butt",
+              "line-join": "round"
+            },
             "paint": {
+              "line-width": lineWidth,
               "line-color": lineColors,
-              "line-opacity": [
-                "match", ["get", "access"],
-                "private", 0.5,
-                "no", 0.5,
-                1
-              ]
+              "line-opacity": lineOpacity
             },
             "filter": [
               "all",
               allFilter,
-              ["!=", "informal", true]
+              [
+                "all",
+                ["!=", "access", "no"],
+                ["!=", "foot", "no"],
+                ["!=", "foot", "private"],
+                ["!=", "informal", true]
+              ]
             ]
           });
           map.addLayer({
@@ -94,14 +113,26 @@
             "source": "trails",
             "source-layer": "trail",
             "type": "line",
+            "layout": {
+              "line-cap": "butt",
+              "line-join": "round"
+            },
             "paint": {
+              "line-width": lineWidth,
               "line-color": lineColors,
+              "line-opacity": lineOpacity,
               "line-dasharray": [2, 2]
             },
             "filter": [
               "all",
               allFilter,
-              ["==", "informal", true], 
+              [
+                "any",
+                ["==", "access", "no"],
+                ["==", "foot", "no"],
+                ["==", "foot", "private"],
+                ["==", "informal", true]
+              ]
             ]
           });
           map.addLayer({
@@ -111,7 +142,12 @@
             "type": "symbol",
             "layout": {
               "text-field": ['get', 'name'],
+              "text-size": 13,
               "symbol-placement": "line"
+            },
+            "paint": {
+              "text-halo-width": 1,
+              "text-halo-color": "#fff",
             },
             "filter": [
               "all",
@@ -145,6 +181,7 @@
           map.getCanvas().style.cursor = 'pointer';
 
           let desc = '';
+          
 
           for (var key in e.features[0].properties) {
             desc += `${key}=${e.features[0].properties[key]}<br/>`;
