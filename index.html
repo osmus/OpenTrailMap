@@ -53,11 +53,25 @@
 
         function updateLayers() {
 
-          var allFilter = 
-            ["any",
-              ["!=", "highway", "track"],
-              ["has", mode]
-            ];
+          var allFilter;
+
+          if (mode === "bicycle" || mode === "horse") {
+            allFilter =   
+              ["any",
+                ["all",
+                  ["!=", "highway", "track"],
+                  ["!=", "highway", "footway"],
+                ],
+                ["has", mode]
+              ];
+          } else {
+            allFilter = 
+              ["any",
+                ["!=", "highway", "track"],
+                ["has", mode]
+              ];
+          }
+
           var lineColors = [
                 "case",
                 ["any",
