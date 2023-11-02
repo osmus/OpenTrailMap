@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>OpenTrailMap by OpenStreetMap US</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+      #attribution-logo {
+        position: absolute;
+        bottom: 10px;
+        z-index: 100;
+      }
+    </style>
+    <script type="module" src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+    <!-- attempt to load gitignored key in case this is dev environment -->
+    <script type="application/javascript" src="/api-keys.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <script type="text/javascript">
+
+      window.onload = (event) => {
+
+        try {
+          maptilerApiKey;
+        } catch(e) {
+            if(e.name == "ReferenceError") {
+              // Use the production key if we didn't find a dev key (only works on OSM US domains)
+              maptilerApiKey = "qe6b8locBISzDLGJweZ3";
+            }
+        }
+
+        var map = new maplibregl.Map({
+          container: 'map',
+          hash: "map",
+          style: 'https://api.maptiler.com/maps/dataviz/style.json?key=' + maptilerApiKey,
+          center: [-97.9, 38.6],
+          zoom: 3
+        });
+
+        map.on('load', () => {
+          map.addSource("trails", {
+            type: "vector",
+            url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
+            attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+          });
+          let allFilter = 
+              ["!=", "highway", "track"];
+          let lineColors = [
+                "match", ["get", "highway"],
+                "path", "#FF3A00",
+                "footway", "#723333",
+                "steps", "#723333",
+                "cycleway", "purple",
+                "green"
+              ];
+          map.addLayer({
+            "id": "paths",
+            "source": "trails",
+            "source-layer": "trail",
+            "type": "line",
+            "paint": {
+              "line-color": lineColors,
+              "line-opacity": [
+                "match", ["get", "access"],
+                "private", 0.5,
+                "no", 0.5,
+                1
+              ]
+            },
+            "filter": [
+              "all",
+              allFilter,
+              ["!=", "informal", true]
+            ]
+          });
+          map.addLayer({
+            "id": "informal",
+            "source": "trails",
+            "source-layer": "trail",
+            "type": "line",
+            "paint": {
+              "line-color": lineColors,
+              "line-dasharray": [2, 2]
+            },
+            "filter": [
+              "all",
+              allFilter,
+              ["==", "informal", true], 
+            ]
+          });
+          map.addLayer({
+            "id": "trails-labels",
+            "source": "trails",
+            "source-layer": "trail",
+            "type": "symbol",
+            "layout": {
+              "text-field": ['get', 'name'],
+              "symbol-placement": "line"
+            },
+            "filter": [
+              "all",
+              allFilter
+            ]
+          });
+          map.addLayer({
+            "id": "trails",
+            "source": "trails",
+            "source-layer": "trail",
+            "type": "line",
+            "paint": {
+                "line-color": "transparent",
+                "line-width": 16
+            },
+            "filter": [
+              "all",
+              allFilter
+            ]
+          });
+      });
+
+      // Create a popup, but don't add it to the map yet.
+      const popup = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false
+      });
+
+      map.on('mouseenter', 'trails', (e) => {
+          // Change the cursor style as a UI indicator.
+          map.getCanvas().style.cursor = 'pointer';
+
+          let desc = '';
+
+          for (var key in e.features[0].properties) {
+            desc += `${key}=${e.features[0].properties[key]}<br/>`;
+          }
+
+          const coordinates = e.lngLat.wrap();
+
+          // Ensure that if the map is zoomed out such that multiple
+          // copies of the feature are visible, the popup appears
+          // over the copy being pointed to.
+          while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+              coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+          }
+          // Populate the popup and set its coordinates
+          // based on the feature found.
+          popup.setLngLat(coordinates).setHTML(desc).addTo(map);
+      });
+/*
+      map.on('click', 'trails', (e) => {
+          window.open('https://openstreetmap.org/way/'+e.features[0].properties['osm_id'], "_blank");
+      });
+*/
+      map.on('mouseleave', 'trails', () => {
+          map.getCanvas().style.cursor = '';
+          popup.remove();
+      });
+      }
+    </script>
+  </body>
+</html>

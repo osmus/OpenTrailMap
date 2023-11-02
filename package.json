@@ -1,0 +1,7 @@
+{
+    "name": "opentrailmap",
+    "version": "0.0.1",
+    "scripts": {
+        "serve": "node ./serve.js"
+    }
+}
