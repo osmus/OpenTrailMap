@@ -1,11 +1,11 @@
 
 @font-face{
-  src: url('/css/fonts/NationalPark-ExtraBold.otf');
+  src: url('fonts/NationalPark-ExtraBold.otf');
   font-family: "National Park";
   font-weight: 800;
 }
 @font-face{
-  src: url('/css/fonts/NationalPark-Bold.otf');
+  src: url('fonts/NationalPark-Bold.otf');
   font-family: "National Park";
   font-weight: 700;
 }
