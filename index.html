@@ -80,13 +80,17 @@
                   ["!=", "highway", "footway"],
                   ["!=", "highway", "steps"],
                 ],
-                ["has", mode]
+                ["has", "foot"],
+                ["has", "bicycle"],
+                ["has", "horse"]
               ];
           } else {
             allFilter = 
               ["any",
                 ["!=", "highway", "track"],
-                ["has", mode]
+                ["has", "foot"],
+                ["has", "bicycle"],
+                ["has", "horse"]
               ];
           }
           
