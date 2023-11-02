@@ -17,9 +17,22 @@
       <h1>OpenTrailMap</h1>
     </div>
     <div id="map"></div>
+    <div id="controls">
+      <select id="travel-mode">
+        <option value="foot" selected>Hiking & Walking Trails</option>
+        <option value="bicycle">Biking Trails</option>
+        <option value="horse">Horseback Riding Trails</option>
+      </select>
+    </div>
     <script type="text/javascript">
+      var mode = "foot";
 
       window.onload = (event) => {
+        
+        document.getElementById("travel-mode").onchange = function(e) {
+          mode = e.target.value;
+          updateLayers();
+        }
 
         try {
           maptilerApiKey;
@@ -38,34 +51,29 @@
           zoom: 3
         });
 
-        map.on('load', () => {
-          map.addSource("trails", {
-            type: "vector",
-            url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
-            attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
-          });
+        function updateLayers() {
 
           var allFilter = 
             ["any",
               ["!=", "highway", "track"],
-              ["has", "foot"]
+              ["has", mode]
             ];
           var lineColors = [
                 "case",
                 ["any",
                   [
                     "all",
-                    ["!", ["has", "foot"]],
+                    ["!", ["has", mode]],
                     ["!=", ["get", "access"], "no"],
                     ["!=", ["get", "access"], "private"],
                     ["!=", ["get", "access"], "discouraged"]
                   ],
                   [
                     "all",
-                    ["has", "foot"],
-                    ["!=", ["get", "foot"], "no"],
-                    ["!=", ["get", "foot"], "private"],
-                    ["!=", ["get", "foot"], "discouraged"]
+                    ["has", mode],
+                    ["!=", ["get", mode], "no"],
+                    ["!=", ["get", mode], "private"],
+                    ["!=", ["get", mode], "discouraged"]
                   ]
                 ], "#FF3A00",
                 "#a56c5b"
@@ -75,6 +83,32 @@
               10, 1,
               22, 5
             ];
+          
+          map.setFilter('trails-labels', allFilter)
+            .setFilter('trails-pointer-targets', allFilter)
+            .setFilter('paths', [
+              "all",
+              allFilter,
+              ["!=", "informal", true]
+            ])
+            .setFilter('informal', [
+              "all",
+              allFilter,
+              ["==", "informal", true]
+            ])
+            .setPaintProperty('paths', 'line-width', lineWidth)
+            .setPaintProperty('informal', 'line-width', lineWidth)
+            .setPaintProperty('paths', 'line-color', lineColors)
+            .setPaintProperty('informal', 'line-color', lineColors);
+        }
+
+        map.on('load', () => {
+          map.addSource("trails", {
+            type: "vector",
+            url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
+            attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+          });
+
           var lineOpacity = [
               "interpolate", ["linear"], ["zoom"],
               10, 1,
@@ -91,15 +125,8 @@
               "line-join": "round"
             },
             "paint": {
-              "line-width": lineWidth,
-              "line-color": lineColors,
               "line-opacity": lineOpacity
-            },
-            "filter": [
-              "all",
-              allFilter,
-              ["!=", "informal", true]
-            ]
+            }
           });
           map.addLayer({
             "id": "informal",
@@ -111,16 +138,9 @@
               "line-join": "round"
             },
             "paint": {
-              "line-width": lineWidth,
-              "line-color": lineColors,
               "line-opacity": lineOpacity,
               "line-dasharray": [2, 2]
-            },
-            "filter": [
-              "all",
-              allFilter,
-              ["==", "informal", true]
-            ]
+            }
           });
           map.addLayer({
             "id": "trails-labels",
@@ -135,26 +155,20 @@
             "paint": {
               "text-halo-width": 1,
               "text-halo-color": "#fff",
-            },
-            "filter": [
-              "all",
-              allFilter
-            ]
+            }
           });
           map.addLayer({
-            "id": "trails",
+            "id": "trails-pointer-targets",
             "source": "trails",
             "source-layer": "trail",
             "type": "line",
             "paint": {
                 "line-color": "transparent",
                 "line-width": 16
-            },
-            "filter": [
-              "all",
-              allFilter
-            ]
+            }
           });
+
+          updateLayers();
       });
 
       // Create a popup, but don't add it to the map yet.
@@ -163,7 +177,7 @@
           closeOnClick: false
       });
 
-      map.on('mouseenter', 'trails', (e) => {
+      map.on('mouseenter', 'trails-pointer-targets', (e) => {
           // Change the cursor style as a UI indicator.
           map.getCanvas().style.cursor = 'pointer';
 
@@ -187,11 +201,11 @@
           popup.setLngLat(coordinates).setHTML(desc).addTo(map);
       });
 
-      map.on('click', 'trails', (e) => {
+      map.on('click', 'trails-pointer-targets', (e) => {
           window.open('https://openstreetmap.org/way/'+e.features[0].id, "_blank");
       });
 
-      map.on('mouseleave', 'trails', () => {
+      map.on('mouseleave', 'trails-pointer-targets', () => {
           map.getCanvas().style.cursor = '';
           popup.remove();
       });
