@@ -59,19 +59,30 @@
             url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
             attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
           });
+
           var allFilter = 
             ["any",
               ["!=", "highway", "track"],
               ["has", "foot"]
             ];
-          var lineColors = "#FF3A00";/*[
-                "match", ["get", "highway"],
-                "path", "#FF3A00",
-                "footway", "#723333",
-                "steps", "#723333",
-                "cycleway", "purple",
-                "green"
-              ];*/
+          var lineColors = [
+                "case",
+                ["any",
+                  [
+                    "all",
+                    ["!", ["has", "foot"]],
+                    ["!=", ["get", "access"], "no"],
+                    ["!=", ["get", "access"], "private"]
+                  ],
+                  [
+                    "all",
+                    ["has", "foot"],
+                    ["!=", ["get", "foot"], "no"],
+                    ["!=", ["get", "foot"], "private"]
+                  ]
+                ], "#FF3A00",
+                "#a56c5b"
+              ];
           var lineWidth = [
               "interpolate", ["linear"], ["zoom"],
               10, 1,
@@ -82,6 +93,7 @@
               10, 1,
               22, 0.4
             ];
+
           map.addLayer({
             "id": "paths",
             "source": "trails",
@@ -99,13 +111,7 @@
             "filter": [
               "all",
               allFilter,
-              [
-                "all",
-                ["!=", "access", "no"],
-                ["!=", "foot", "no"],
-                ["!=", "foot", "private"],
-                ["!=", "informal", true]
-              ]
+              ["!=", "informal", true]
             ]
           });
           map.addLayer({
@@ -126,13 +132,7 @@
             "filter": [
               "all",
               allFilter,
-              [
-                "any",
-                ["==", "access", "no"],
-                ["==", "foot", "no"],
-                ["==", "foot", "private"],
-                ["==", "informal", true]
-              ]
+              ["==", "informal", true]
             ]
           });
           map.addLayer({
