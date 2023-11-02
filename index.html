@@ -51,6 +51,23 @@
           zoom: 3
         });
 
+        var impliedYesHighways = {
+          foot: [
+            ["!=", ["get", "highway"], "path"],
+            ["!=", ["get", "highway"], "footway"],
+            ["!=", ["get", "highway"], "steps"],
+            ["!=", ["get", "highway"], "bridleway"]
+          ],
+          bicycle: [
+            ["!=", ["get", "highway"], "path"],
+            ["!=", ["get", "highway"], "cycleway"],
+            ["!=", ["get", "highway"], "bridleway"]
+          ],
+          horse: [
+            ["!=", ["get", "highway"], "bridleway"]
+          ]
+        };
+
         function updateLayers() {
 
           var allFilter;
@@ -61,6 +78,7 @@
                 ["all",
                   ["!=", "highway", "track"],
                   ["!=", "highway", "footway"],
+                  ["!=", "highway", "steps"],
                 ],
                 ["has", mode]
               ];
@@ -71,26 +89,38 @@
                 ["has", mode]
               ];
           }
-
-          var lineColors = [
-                "case",
-                ["any",
+          
+          var unspecifiedExpression = ["any",
                   [
                     "all",
                     ["!", ["has", mode]],
-                    ["!=", ["get", "access"], "no"],
-                    ["!=", ["get", "access"], "private"],
-                    ["!=", ["get", "access"], "discouraged"]
-                  ],
-                  [
-                    "all",
-                    ["has", mode],
-                    ["!=", ["get", mode], "no"],
-                    ["!=", ["get", mode], "private"],
-                    ["!=", ["get", mode], "discouraged"]
+                    ...impliedYesHighways[mode]
                   ]
-                ], "#FF3A00",
-                "#a56c5b"
+                ];
+
+          var allowedExpression = ["any",
+            [
+              "all",
+              ["!", ["has", mode]],
+              ["!=", ["get", "access"], "no"],
+              ["!=", ["get", "access"], "private"],
+              ["!=", ["get", "access"], "discouraged"]
+            ],
+            [
+              "all",
+              ["has", mode],
+              ["!=", ["get", mode], "no"],
+              ["!=", ["get", mode], "private"],
+              ["!=", ["get", mode], "discouraged"]
+            ]
+          ];
+
+          var lineColors = [
+                "case",
+                ["all", unspecifiedExpression, allowedExpression], "#ff3a00",
+                unspecifiedExpression, "#a56c5b",
+                allowedExpression, "#005908",
+                "#a2d61d"
               ];
           var lineWidth = [
               "interpolate", ["linear"], ["zoom"],
