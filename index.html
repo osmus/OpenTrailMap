@@ -126,11 +126,6 @@
                 allowedExpression, "#005908",
                 "#a2d61d"
               ];
-          var lineWidth = [
-              "interpolate", ["linear"], ["zoom"],
-              10, 1,
-              22, 5
-            ];
           
           map.setFilter('trails-labels', allFilter)
             .setFilter('trails-pointer-targets', allFilter)
@@ -144,8 +139,6 @@
               allFilter,
               ["==", "informal", true]
             ])
-            .setPaintProperty('paths', 'line-width', lineWidth)
-            .setPaintProperty('informal', 'line-width', lineWidth)
             .setPaintProperty('paths', 'line-color', lineColors)
             .setPaintProperty('informal', 'line-color', lineColors);
         }
@@ -157,9 +150,14 @@
             attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
           });
 
+          var lineWidth = [
+              "interpolate", ["linear"], ["zoom"],
+              12, 1,
+              22, 5
+            ];
           var lineOpacity = [
               "interpolate", ["linear"], ["zoom"],
-              10, 1,
+              12, 1,
               22, 0.4
             ];
 
@@ -173,7 +171,8 @@
               "line-join": "round"
             },
             "paint": {
-              "line-opacity": lineOpacity
+              "line-opacity": lineOpacity,
+              "line-width": lineWidth,
             }
           });
           map.addLayer({
@@ -187,6 +186,7 @@
             },
             "paint": {
               "line-opacity": lineOpacity,
+              "line-width": lineWidth,
               "line-dasharray": [2, 2]
             }
           });
