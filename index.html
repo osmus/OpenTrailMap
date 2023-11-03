@@ -26,8 +26,10 @@
     <div id="controls">
       <select id="travel-mode">
         <option value="foot" selected>Hiking & Walking Trails</option>
+        <option value="dog">Dog Walking Trails</option>
         <option value="bicycle">Biking Trails</option>
         <option value="horse">Horseback Riding Trails</option>
+        <option value="atv">ATV Trails</option>
       </select>
     </div>
     <script type="text/javascript">
@@ -81,6 +83,8 @@
             ["!=", ["get", "highway"], "bridleway"],
             ["!=", ["get", "highway"], "track"]
           ],
+          // dog only allowed if explicit
+          dog: [],
           bicycle: [
             ["!=", ["get", "highway"], "path"],
             ["!=", ["get", "highway"], "cycleway"],
@@ -90,6 +94,9 @@
           horse: [
             ["!=", ["get", "highway"], "bridleway"],
             ["!=", ["get", "highway"], "track"]
+          ],
+          atv: [
+            ["!=", ["get", "highway"], "track"]
           ]
         };
 
@@ -97,7 +104,7 @@
 
           var allFilter;
 
-          if (mode === "bicycle" || mode === "horse") {
+          if (mode === "bicycle" || mode === "horse" || mode === "atv") {
             allFilter =   
               ["any",
                 ["all",
@@ -106,26 +113,38 @@
                   ["!=", "highway", "steps"],
                 ],
                 ["has", "foot"],
+                ["has", "atv"],
                 ["has", "bicycle"],
-                ["has", "horse"]
+                ["has", "horse"],
+                ["has", "dog"],
+                ["has", "wheelchair"]
               ];
           } else {
             allFilter = 
               ["any",
                 ["!=", "highway", "track"],
                 ["has", "foot"],
+                ["has", "atv"],
                 ["has", "bicycle"],
-                ["has", "horse"]
+                ["has", "horse"],
+                ["has", "dog"],
+                ["has", "wheelchair"]
               ];
           }
           
-          var unspecifiedExpression = ["any",
-                  [
-                    "all",
-                    ["!", ["has", mode]],
-                    ...impliedYesHighways[mode]
-                  ]
-                ];
+          var unspecifiedExpression = [
+            "any",
+            [
+              "all",
+              ["!", ["has", mode]],
+              ["!=", ["get", "access"], "no"],
+              ["!=", ["get", "access"], "private"],
+              ["!=", ["get", "access"], "discouraged"],
+              ...impliedYesHighways[mode]
+            ],
+            // if mode is explicitly unknown then mark as unknown 
+            ["==", ["get", mode], "unknown"]
+          ];
 
           var allowedExpression = ["any",
             [
@@ -143,6 +162,40 @@
               ["!=", ["get", mode], "discouraged"]
             ]
           ];
+
+          if (mode === "atv") {
+            allowedExpression = [
+              "all",
+              allowedExpression,
+              [
+                "all",
+                ["!=", ["get", "motor_vehicle"], "no"],
+                ["!=", ["get", "motor_vehicle"], "private"],
+                ["!=", ["get", "motor_vehicle"], "discouraged"]
+              ]
+            ];
+            unspecifiedExpression[1] = unspecifiedExpression[1].concat(
+              [["!=", ["get", "motor_vehicle"], "no"],
+              ["!=", ["get", "motor_vehicle"], "private"],
+              ["!=", ["get", "motor_vehicle"], "discouraged"]]
+            )
+          } else if (mode === "dog") {
+            allowedExpression = [
+              "all",
+              allowedExpression,
+              [
+                "all",
+                ["!=", ["get", "foot"], "no"],
+                ["!=", ["get", "foot"], "private"],
+                ["!=", ["get", "foot"], "discouraged"]
+              ]
+            ];
+            unspecifiedExpression[1] = unspecifiedExpression[1].concat(
+              [["!=", ["get", "foot"], "no"],
+              ["!=", ["get", "foot"], "private"],
+              ["!=", ["get", "foot"], "discouraged"]]
+            )
+          }
 
           var lineColors = [
                 "case",
