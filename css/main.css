@@ -35,10 +35,12 @@ h1 {
   font-size: 24px;
 }
 #header {
-  padding: 10px;
   color: #4A282A;
   z-index: 1;
   position: relative;
+  display: inline-block;
+  left: 10px;
+  top: 10px;
 }
 a.branding {
   display: flex;
