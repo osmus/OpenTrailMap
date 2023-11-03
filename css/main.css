@@ -9,6 +9,21 @@
   font-family: "National Park";
   font-weight: 700;
 }
+@font-face{
+  src: url('fonts/NationalPark-SemiBold.otf');
+  font-family: "National Park";
+  font-weight: 600;
+}
+@font-face{
+  src: url('fonts/NationalPark-Medium.otf');
+  font-family: "National Park";
+  font-weight: 500;
+}
+@font-face{
+  src: url('fonts/NationalPark-Regular.otf');
+  font-family: "National Park";
+  font-weight: 400;
+}
 
 body {
   margin: 0;
@@ -21,11 +36,30 @@ h1 {
 }
 #header {
   padding: 10px;
-  background-color: #4A282A;
-  color: #F9DDA3;
+  color: #4A282A;
   z-index: 1;
   position: relative;
-  display: inline-block;
+}
+a.branding {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+#header img {
+  height: 40px;
+  width: 40px;
+  margin-right: 6px;
+}
+#header .main-title {
+  display: flex;
+  flex-direction: column;
+}
+#header .tagline {
+  font-size: 12.5px;
+  font-weight: 500;
+  margin-top: 6px;
+  text-align: center;
 }
 #controls {
   position: absolute;
@@ -38,6 +72,7 @@ h1 {
 #controls select {
   font-size: 40px;
   line-height: 2em;
+  min-width: 200px;
 }
 #map {
   position: absolute;

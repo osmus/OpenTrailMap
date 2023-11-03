@@ -21,6 +21,9 @@ http.createServer(function (request, response) {
           options.end = parseInt(matches[2])+1;
           response.setHeader('Content-Length', options.end - options.start);
         }
+        if (request.url.endsWith(".svg")) {
+          response.setHeader('Content-Type', "image/svg+xml");
+        }
 
         var fileStream = fs.createReadStream(fsPath, options)
         fileStream.pipe(response)
