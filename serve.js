@@ -14,6 +14,11 @@ http.createServer(function (request, response) {
         // need to use path.normalize so people can't access directories underneath baseDirectory
         var fsPath = baseDirectory + path.normalize(requestUrl.pathname)
 
+        if (fs.statSync(fsPath).isDirectory()) {
+          if (!fsPath.endsWith("/")) fsPath += "/";
+          fsPath += "index.html";
+        }
+        
         var options = {};
         if (request.headers.range && request.headers.range.startsWith('bytes=')) {
           let matches = /bytes=(\d*)-(\d*)/g.exec(request.headers.range);
@@ -21,7 +26,7 @@ http.createServer(function (request, response) {
           options.end = parseInt(matches[2])+1;
           response.setHeader('Content-Length', options.end - options.start);
         }
-        if (request.url.endsWith(".svg")) {
+        if (fsPath.endsWith(".svg")) {
           response.setHeader('Content-Type', "image/svg+xml");
         }
 
