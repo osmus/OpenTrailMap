@@ -56,15 +56,18 @@
             ["!=", ["get", "highway"], "path"],
             ["!=", ["get", "highway"], "footway"],
             ["!=", ["get", "highway"], "steps"],
-            ["!=", ["get", "highway"], "bridleway"]
+            ["!=", ["get", "highway"], "bridleway"],
+            ["!=", ["get", "highway"], "track"]
           ],
           bicycle: [
             ["!=", ["get", "highway"], "path"],
             ["!=", ["get", "highway"], "cycleway"],
-            ["!=", ["get", "highway"], "bridleway"]
+            ["!=", ["get", "highway"], "bridleway"],
+            ["!=", ["get", "highway"], "track"]
           ],
           horse: [
-            ["!=", ["get", "highway"], "bridleway"]
+            ["!=", ["get", "highway"], "bridleway"],
+            ["!=", ["get", "highway"], "track"]
           ]
         };
 
