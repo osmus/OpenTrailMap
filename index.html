@@ -51,6 +51,22 @@
           zoom: 3
         });
 
+        // Add zoom and rotation controls to the map.
+        map
+          .addControl(new maplibregl.NavigationControl({
+            visualizePitch: true
+          }))
+          .addControl(new maplibregl.GeolocateControl({
+              positionOptions: {
+                  enableHighAccuracy: true
+              },
+              trackUserLocation: true
+          }))
+          .addControl(new maplibregl.ScaleControl({
+              maxWidth: 200,
+              unit: 'imperial'
+          }), "bottom-right");
+
         var impliedYesHighways = {
           foot: [
             ["!=", ["get", "highway"], "path"],
