@@ -75,6 +75,12 @@
               unit: 'imperial'
           }), "bottom-right");
 
+        map.loadImage('img/disallowed-stripes.png', (error, image) => {
+          if (error) throw error;
+          map.addImage('disallowed-stripes', image);
+          updateLayers();
+        });
+
         var impliedYesHighways = {
           foot: [
             ["!=", ["get", "highway"], "path"],
@@ -149,17 +155,17 @@
           var allowedExpression = ["any",
             [
               "all",
-              ["!", ["has", mode]],
-              ["!=", ["get", "access"], "no"],
-              ["!=", ["get", "access"], "private"],
-              ["!=", ["get", "access"], "discouraged"]
+              ["!has", mode],
+              ["!=", "access", "no"],
+              ["!=", "access", "private"],
+              ["!=", "access", "discouraged"]
             ],
             [
               "all",
               ["has", mode],
-              ["!=", ["get", mode], "no"],
-              ["!=", ["get", mode], "private"],
-              ["!=", ["get", mode], "discouraged"]
+              ["!=", mode, "no"],
+              ["!=", mode, "private"],
+              ["!=", mode, "discouraged"]
             ]
           ];
 
@@ -169,15 +175,15 @@
               allowedExpression,
               [
                 "all",
-                ["!=", ["get", "motor_vehicle"], "no"],
-                ["!=", ["get", "motor_vehicle"], "private"],
-                ["!=", ["get", "motor_vehicle"], "discouraged"]
+                ["!=", "motor_vehicle", "no"],
+                ["!=", "motor_vehicle", "private"],
+                ["!=", "motor_vehicle", "discouraged"]
               ]
             ];
             unspecifiedExpression[1] = unspecifiedExpression[1].concat(
-              [["!=", ["get", "motor_vehicle"], "no"],
-              ["!=", ["get", "motor_vehicle"], "private"],
-              ["!=", ["get", "motor_vehicle"], "discouraged"]]
+              [["!=", "motor_vehicle", "no"],
+              ["!=", "motor_vehicle", "private"],
+              ["!=", "motor_vehicle", "discouraged"]]
             )
           } else if (mode === "dog") {
             allowedExpression = [
@@ -185,9 +191,9 @@
               allowedExpression,
               [
                 "all",
-                ["!=", ["get", "foot"], "no"],
-                ["!=", ["get", "foot"], "private"],
-                ["!=", ["get", "foot"], "discouraged"]
+                ["!=", "foot", "no"],
+                ["!=", "foot", "private"],
+                ["!=", "foot", "discouraged"]
               ]
             ];
             unspecifiedExpression[1] = unspecifiedExpression[1].concat(
@@ -199,26 +205,39 @@
 
           var lineColors = [
                 "case",
-                ["all", unspecifiedExpression, allowedExpression], "#ff3a00",
+                ["all", unspecifiedExpression], "#ff3a00",
                 unspecifiedExpression, "#a56c5b",
-                allowedExpression, "#005908",
-                "#a2d61d"
+                "#005908"
               ];
           
           map.setFilter('trails-labels', allFilter)
             .setFilter('trails-pointer-targets', allFilter)
             .setFilter('paths', [
               "all",
+              allowedExpression,
               allFilter,
               ["!=", "informal", true]
             ])
-            .setFilter('informal', [
+            .setFilter('disallowed-paths', [
               "all",
+              ["none", allowedExpression],
+              allFilter,
+              ["!=", "informal", true]
+            ])
+            .setFilter('disallowed-informal-paths', [
+              "all",
+              ["none", allowedExpression],
+              allFilter,
+              ["==", "informal", true]
+            ])
+            .setFilter('informal-paths', [
+              "all",
+              allowedExpression,
               allFilter,
               ["==", "informal", true]
             ])
             .setPaintProperty('paths', 'line-color', lineColors)
-            .setPaintProperty('informal', 'line-color', lineColors);
+            .setPaintProperty('informal-paths', 'line-color', lineColors);
         }
 
         map.on('load', () => {
@@ -240,21 +259,7 @@
             ];
 
           map.addLayer({
-            "id": "paths",
-            "source": "trails",
-            "source-layer": "trail",
-            "type": "line",
-            "layout": {
-              "line-cap": "butt",
-              "line-join": "round"
-            },
-            "paint": {
-              "line-opacity": lineOpacity,
-              "line-width": lineWidth,
-            }
-          });
-          map.addLayer({
-            "id": "informal",
+            "id": "informal-paths",
             "source": "trails",
             "source-layer": "trail",
             "type": "line",
@@ -267,8 +272,53 @@
               "line-width": lineWidth,
               "line-dasharray": [2, 2]
             }
-          });
-          map.addLayer({
+          })
+          .addLayer({
+            "id": "disallowed-informal-paths",
+            "source": "trails",
+            "source-layer": "trail",
+            "type": "line",
+            "layout": {
+              "line-cap": "butt",
+              "line-join": "round"
+            },
+            "paint": {
+              "line-opacity": lineOpacity,
+              "line-width": lineWidth,
+              "line-dasharray": [2, 2],
+              "line-color": "#A2D61D",
+            }
+          })
+          .addLayer({
+            "id": "disallowed-paths",
+            "source": "trails",
+            "source-layer": "trail",
+            "type": "line",
+            "layout": {
+              "line-cap": "butt",
+              "line-join": "round",
+            },
+            "paint": {
+              "line-opacity": lineOpacity,
+              "line-width": lineWidth,
+              "line-pattern": ["image", "disallowed-stripes"],
+            }
+          })
+          .addLayer({
+            "id": "paths",
+            "source": "trails",
+            "source-layer": "trail",
+            "type": "line",
+            "layout": {
+              "line-cap": "butt",
+              "line-join": "round",
+            },
+            "paint": {
+              "line-opacity": lineOpacity,
+              "line-width": lineWidth,
+            }
+          })
+          .addLayer({
             "id": "trails-labels",
             "source": "trails",
             "source-layer": "trail",
@@ -282,8 +332,8 @@
               "text-halo-width": 1,
               "text-halo-color": "#fff",
             }
-          });
-          map.addLayer({
+          })
+          .addLayer({
             "id": "trails-pointer-targets",
             "source": "trails",
             "source-layer": "trail",
