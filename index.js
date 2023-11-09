@@ -44,7 +44,12 @@ window.onload = (event) => {
   map.loadImage('img/disallowed-stripes.png', (error, image) => {
     if (error) throw error;
     map.addImage('disallowed-stripes', image);
-    updateLayers();
+    //updateLayers();
+  });
+  map.loadImage('img/map/trailhead.png', (error, image) => {
+    if (error) throw error;
+    map.addImage('trailhead-icon', image, { pixelRatio: 2 });
+    //updateLayers();
   });
 
   var impliedYesHighways = {
@@ -308,24 +313,36 @@ window.onload = (event) => {
           "line-color": "transparent",
           "line-width": 16
       }
+    })
+    .addLayer({
+      "id": "trail-pois",
+      "source": "trails",
+      "source-layer": "trail_poi",
+      "type": "symbol",
+      "layout": {
+        "icon-image": ["image", "trailhead-icon"],
+        "icon-size": [
+          "interpolate", ["linear"], ["zoom"],
+          12, 1/3,
+          22, 1
+        ]
+      }
     });
-
+  
     updateLayers();
-});
+  });
 
-// Create a popup, but don't add it to the map yet.
-const popup = new maplibregl.Popup({
-    closeButton: false,
-    closeOnClick: false
-});
+  // Create a popup, but don't add it to the map yet.
+  const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false
+  });
 
-map.on('mouseenter', 'trails-pointer-targets', (e) => {
+  function didSelect(e) {
     // Change the cursor style as a UI indicator.
     map.getCanvas().style.cursor = 'pointer';
 
-    let desc = '';
-    
-
+    let desc = `<strong>${e.features[0].id}</strong><br/>`;
     for (var key in e.features[0].properties) {
       if ( e.features[0].properties[key] === "null") continue;
       desc += `${key}=${e.features[0].properties[key]}<br/>`;
@@ -342,14 +359,22 @@ map.on('mouseenter', 'trails-pointer-targets', (e) => {
     // Populate the popup and set its coordinates
     // based on the feature found.
     popup.setLngLat(coordinates).setHTML(desc).addTo(map);
-});
+  }
 
-map.on('click', 'trails-pointer-targets', (e) => {
-    window.open('https://openstreetmap.org/way/'+e.features[0].id, "_blank");
-});
-
-map.on('mouseleave', 'trails-pointer-targets', () => {
+  function didDeselect() {
     map.getCanvas().style.cursor = '';
     popup.remove();
-});
+  }
+
+  map
+    .on('mouseenter', 'trails-pointer-targets', didSelect)
+    .on('mouseenter', 'trail-pois', didSelect);
+
+  map.on('click', 'trails-pointer-targets', (e) => {
+    window.open('https://openstreetmap.org/way/'+e.features[0].id, "_blank");
+  });
+
+  map
+    .on('mouseleave', 'trails-pointer-targets', didDeselect)
+    .on('mouseleave', 'trail-pois', didDeselect);
 }
