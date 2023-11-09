@@ -53,25 +53,32 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
 }
-p {
-  margin-bottom: 12px;
-}
 #header {
   width: 100%;
   color: white;
   z-index: 1;
   position: relative;
-  display: inline-block;
-  height: 30px;
-  padding: 5px;
-  background: #4A282A;
-  /*background: linear-gradient(90deg, #4A282A, #66373a);*/
-}
-a.branding {
   display: flex;
   align-items: center;
+  height: 30px;
+  background: #4A282A;
+  padding: 0 10px 0 6px;
+  /*background: linear-gradient(90deg, #4A282A, #66373a);*/
+}
+#header a {
   text-decoration: none;
   color: inherit;
+}
+#header a:hover {
+  text-decoration: underline;
+}
+#header .main-menu {
+  display: flex;
+  flex-basis: 100%;
+  justify-content: end;
+}
+#header .main-menu li {
+  margin-left: 20px;
 }
 #header img {
   height: 20px;
@@ -79,12 +86,15 @@ a.branding {
   margin-right: 6px;
 }
 #header .main-title {
+  white-space: nowrap;
   display: flex;
+  align-items: center;
   flex-direction: row;
   font-size: 15px;
 }
-#header .tagline {
-  font-weight: normal;
+#header .main-title a {
+  display: inline-flex;
+  margin-right: 3px;
 }
 
 #body {
@@ -93,6 +103,9 @@ a.branding {
   position: absolute;
   bottom: 0;
   top: 30px;
+}
+#body p {
+  margin-bottom: 12px;
 }
 #map-wrap {
   z-index: 0;
