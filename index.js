@@ -44,12 +44,10 @@ window.onload = (event) => {
   map.loadImage('img/disallowed-stripes.png', (error, image) => {
     if (error) throw error;
     map.addImage('disallowed-stripes', image);
-    //updateLayers();
   });
   map.loadImage('img/map/trailhead.png', (error, image) => {
     if (error) throw error;
     map.addImage('trailhead-icon', image, { pixelRatio: 2 });
-    //updateLayers();
   });
 
   var impliedYesHighways = {
@@ -323,7 +321,7 @@ window.onload = (event) => {
         "icon-image": ["image", "trailhead-icon"],
         "icon-size": [
           "interpolate", ["linear"], ["zoom"],
-          12, 1/3,
+          12, 0.5,
           22, 1
         ]
       }
@@ -332,49 +330,103 @@ window.onload = (event) => {
     updateLayers();
   });
 
-  // Create a popup, but don't add it to the map yet.
-  const popup = new maplibregl.Popup({
-      closeButton: false,
-      closeOnClick: false
-  });
+  var hoveredFeatureIdentifier;
 
-  function didSelect(e) {
+  function clearHoverState() {
+    if (hoveredFeatureIdentifier) {
+      map.setFeatureState(
+        hoveredFeatureIdentifier,
+        {hover: false}
+      );
+      hoveredFeatureIdentifier = null;
+    }
+  }
+
+  function didHover(e) {
     // Change the cursor style as a UI indicator.
     map.getCanvas().style.cursor = 'pointer';
 
-    let desc = `<strong>${e.features[0].id}</strong><br/>`;
-    for (var key in e.features[0].properties) {
-      if ( e.features[0].properties[key] === "null") continue;
-      desc += `${key}=${e.features[0].properties[key]}<br/>`;
-    }
+    if (e.features.length <= 0) return;
 
-    const coordinates = e.lngLat.wrap();
-
-    // Ensure that if the map is zoomed out such that multiple
-    // copies of the feature are visible, the popup appears
-    // over the copy being pointed to.
-    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-    }
-    // Populate the popup and set its coordinates
-    // based on the feature found.
-    popup.setLngLat(coordinates).setHTML(desc).addTo(map);
+    var feature = e.features[0];
+    
+    clearHoverState();
+    hoveredFeatureIdentifier = {source: feature.source, sourceLayer: feature.sourceLayer, id: feature.id};
+    map.setFeatureState(
+      hoveredFeatureIdentifier,
+      {hover: true}
+    );
   }
 
-  function didDeselect() {
+  function capitalizeFirstLetter(string) {
+    return string[0].toUpperCase() + string.slice(1);
+}
+
+  function didSelect(e) {
+    var feature = e.features.length && e.features[0];
+    let bbox = {
+      left: left = e.lngLat.lng - 0.001,
+      right: right = e.lngLat.lng + 0.001,
+      bottom: left = e.lngLat.lat - 0.001,
+      top: right = e.lngLat.lat + 0.001,
+    };
+    
+
+    var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
+
+    let opQuery = encodeURIComponent(`${type}(${feature.id});\n(._;>;);\nout;`);
+    
+    var desc = '';
+    /*desc += "<div class='top'>";
+    desc += `<strong>${capitalizeFirstLetter(e.features[0].properties.highway)}</strong><br/>`;
+    desc += "</div>";*/
+    desc += "<div class='body'>";
+    desc += "<table>";
+    desc += `<tr><th>Key</th><th>Value</th></tr>`;
+    var keys = Object.keys(feature.properties).sort();
+    for (var i in keys) {
+      var key = keys[i];
+      if (feature.properties[key] === "null") continue;
+      desc += `<tr><td>${key}</td><td>${feature.properties[key]}</td></tr>`;
+    }
+    desc += "</table><br/>";
+    desc += "<h3>View</h3>";
+    desc += "<p class='link-list'>";
+    desc += `<a href="https://openstreetmap.org/${type}/${feature.id}" target="_blank">osm.org</a> `;
+    desc += `<a href="https://www.openstreetmap.org/api/0.6/${type}/${feature.id}" target="_blank">XML</a> `;
+    desc += `<a href="https://pewu.github.io/osm-history/#/${type}/${feature.id}" target="_blank">PeWu</a> `;
+    desc += `<a href="https://overpass-turbo.eu?Q=${opQuery}&R=" target="_blank">Overpass Turbo</a> `;
+    desc += "</p>";
+    desc += "<h3>Edit</h3>";
+    desc += "<p class='link-list'>";
+    desc += `<a href="https://openstreetmap.org/edit?${type}=${feature.id}" target="_blank">iD</a> `;
+    desc += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${feature.id}" target="_blank">JOSM</a> `;
+    desc += `<a href="https://level0.osmz.ru/?url=${type}/${feature.id}" target="_blank">Level0</a> `;
+    desc += "</p>";
+    desc += "</div>";
+
+    document.getElementById('sidebar').innerHTML = desc;
+  }
+
+  function deselectAll() {
+    document.getElementById('sidebar').innerHTML = "";
+  }
+
+  function didUnhover() {
     map.getCanvas().style.cursor = '';
-    popup.remove();
+    clearHoverState();
   }
 
   map
-    .on('mouseenter', 'trails-pointer-targets', didSelect)
-    .on('mouseenter', 'trail-pois', didSelect);
-
-  map.on('click', 'trails-pointer-targets', (e) => {
-    window.open('https://openstreetmap.org/way/'+e.features[0].id, "_blank");
-  });
+    .on('mouseenter', 'trail-pois', didHover)
+    .on('mouseenter', 'trails-pointer-targets', didHover);
 
   map
-    .on('mouseleave', 'trails-pointer-targets', didDeselect)
-    .on('mouseleave', 'trail-pois', didDeselect);
+    .on('click', deselectAll)
+    .on('click', 'trail-pois', didSelect)
+    .on('click', 'trails-pointer-targets', didSelect);
+
+  map
+    .on('mouseleave', 'trail-pois', didUnhover)
+    .on('mouseleave', 'trails-pointer-targets', didUnhover);
 }

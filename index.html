@@ -17,20 +17,24 @@
       <a class="branding" href="https://github.com/osmus/OpenTrailMap" target="_blank">
         <img src="/img/opentrailmap-logo.svg" alt="Stick figure hiker with walking stick and backpack above a dashed line surrounded by a map outline"/>
         <div class="main-title">
-          <h1>OpenTrailMap</h1>
-          <p class="tagline">A tool of OpenStreetMap US</p>
+          <h1>OpenTrailMap <span class="tagline">by OpenStreetMap US</span></h1>
         </div>
       </a>
     </div>
-    <div id="map"></div>
-    <div id="controls">
-      <select id="travel-mode">
-        <option value="foot" selected>Hiking & Walking Trails</option>
-        <option value="dog">Dog Walking Trails</option>
-        <option value="bicycle">Biking Trails</option>
-        <option value="horse">Horseback Riding Trails</option>
-        <option value="atv">ATV Trails</option>
-      </select>
+    <div id="body">
+      <div id="sidebar"></div>
+      <div id="map-wrap">
+        <div id="map"></div>
+        <div id="controls">
+          <select id="travel-mode">
+            <option value="foot" selected>Hiking & Walking Trails</option>
+            <option value="dog">Dog Walking Trails</option>
+            <option value="bicycle">Biking Trails</option>
+            <option value="horse">Horseback Riding Trails</option>
+            <option value="atv">ATV Trails</option>
+          </select>
+        </div>
+      </div>
     </div>
     <script type="application/javascript" src="index.js"></script>
   </body>
