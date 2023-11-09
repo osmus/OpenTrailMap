@@ -327,6 +327,7 @@ map.on('mouseenter', 'trails-pointer-targets', (e) => {
     
 
     for (var key in e.features[0].properties) {
+      if ( e.features[0].properties[key] === "null") continue;
       desc += `${key}=${e.features[0].properties[key]}<br/>`;
     }
 
