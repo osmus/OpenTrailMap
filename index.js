@@ -1,6 +1,18 @@
 
 var mode = "foot";
 
+var osmCache = {};
+
+async function fetchOsmEntity(type, id) {
+  var key = type + id;
+  if (!osmCache[key]) {
+    var url = `https://api.openstreetmap.org/api/0.6/${type}/${id}.json`;
+    var response = await fetch(url);
+    osmCache[key] = await response.json();
+  }
+  return osmCache[key];
+}
+
 window.onload = (event) => {
   
   document.getElementById("travel-mode").onchange = function(e) {
@@ -360,10 +372,23 @@ window.onload = (event) => {
 
   function capitalizeFirstLetter(string) {
     return string[0].toUpperCase() + string.slice(1);
-}
+  }
+
+  function updateForTags(tags) {
+    var html = "";
+    html += `<tr><th>Key</th><th>Value</th></tr>`;
+    var keys = Object.keys(tags).sort();
+    for (var i in keys) {
+      var key = keys[i];
+      html += `<tr><td>${key}</td><td>${tags[key]}</td></tr>`;
+    }
+    document.getElementById('tag-table').innerHTML = html;
+  }
 
   function didSelect(e) {
     var feature = e.features.length && e.features[0];
+    var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
+
     let bbox = {
       left: left = e.lngLat.lng - 0.001,
       right: right = e.lngLat.lng + 0.001,
@@ -371,41 +396,37 @@ window.onload = (event) => {
       top: right = e.lngLat.lat + 0.001,
     };
     
-
-    var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
-
     let opQuery = encodeURIComponent(`${type}(${feature.id});\n(._;>;);\nout;`);
     
-    var desc = '';
-    /*desc += "<div class='top'>";
-    desc += `<strong>${capitalizeFirstLetter(e.features[0].properties.highway)}</strong><br/>`;
-    desc += "</div>";*/
-    desc += "<div class='body'>";
-    desc += "<table>";
-    desc += `<tr><th>Key</th><th>Value</th></tr>`;
-    var keys = Object.keys(feature.properties).sort();
-    for (var i in keys) {
-      var key = keys[i];
-      if (feature.properties[key] === "null") continue;
-      desc += `<tr><td>${key}</td><td>${feature.properties[key]}</td></tr>`;
-    }
-    desc += "</table><br/>";
-    desc += "<h3>View</h3>";
-    desc += "<p class='link-list'>";
-    desc += `<a href="https://openstreetmap.org/${type}/${feature.id}" target="_blank">osm.org</a> `;
-    desc += `<a href="https://www.openstreetmap.org/api/0.6/${type}/${feature.id}" target="_blank">XML</a> `;
-    desc += `<a href="https://pewu.github.io/osm-history/#/${type}/${feature.id}" target="_blank">PeWu</a> `;
-    desc += `<a href="https://overpass-turbo.eu?Q=${opQuery}&R=" target="_blank">Overpass Turbo</a> `;
-    desc += "</p>";
-    desc += "<h3>Edit</h3>";
-    desc += "<p class='link-list'>";
-    desc += `<a href="https://openstreetmap.org/edit?${type}=${feature.id}" target="_blank">iD</a> `;
-    desc += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${feature.id}" target="_blank">JOSM</a> `;
-    desc += `<a href="https://level0.osmz.ru/?url=${type}/${feature.id}" target="_blank">Level0</a> `;
-    desc += "</p>";
-    desc += "</div>";
+    var html = '';
+    /*html += "<div class='top'>";
+    html += `<strong>${capitalizeFirstLetter(e.features[0].properties.highway)}</strong><br/>`;
+    html += "</div>";*/
+    html += "<div class='body'>";
+    html += "<table id='tag-table'>";
+    html += `<tr><th>Key</th><th>Value</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
+    html += "</table><br/>";
+    html += "<h3>View</h3>";
+    html += "<p class='link-list'>";
+    html += `<a href="https://openstreetmap.org/${type}/${feature.id}" target="_blank">osm.org</a> `;
+    html += `<a href="https://www.openstreetmap.org/api/0.6/${type}/${feature.id}" target="_blank">XML</a> `;
+    html += `<a href="https://pewu.github.io/osm-history/#/${type}/${feature.id}" target="_blank">PeWu</a> `;
+    html += `<a href="https://overpass-turbo.eu?Q=${opQuery}&R=" target="_blank">Overpass Turbo</a> `;
+    html += "</p>";
+    html += "<h3>Edit</h3>";
+    html += "<p class='link-list'>";
+    html += `<a href="https://openstreetmap.org/edit?${type}=${feature.id}" target="_blank">iD</a> `;
+    html += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${feature.id}" target="_blank">JOSM</a> `;
+    html += `<a href="https://level0.osmz.ru/?url=${type}/${feature.id}" target="_blank">Level0</a> `;
+    html += "</p>";
+    html += "</div>";
 
-    document.getElementById('sidebar').innerHTML = desc;
+    document.getElementById('sidebar').innerHTML = html;
+
+    fetchOsmEntity(type, feature.id).then(function(result) {
+      var tags = result && result.elements.length && result.elements[0].tags;
+      updateForTags(tags);
+    });
   }
 
   function deselectAll() {
