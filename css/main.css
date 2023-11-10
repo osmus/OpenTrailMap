@@ -55,7 +55,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 #header {
   width: 100%;
-  color: white;
+  color: #FFE2A8;
   z-index: 1;
   position: relative;
   display: flex;
