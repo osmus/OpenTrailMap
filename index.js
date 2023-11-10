@@ -61,6 +61,10 @@ window.onload = (event) => {
     if (error) throw error;
     map.addImage('trailhead-icon', image, { pixelRatio: 2 });
   });
+  map.loadImage('img/map/ranger_station.png', (error, image) => {
+    if (error) throw error;
+    map.addImage('ranger_station-icon', image, { pixelRatio: 2 });
+  });
 
   var impliedYesHighways = {
     foot: [
@@ -330,7 +334,11 @@ window.onload = (event) => {
       "source-layer": "trail_poi",
       "type": "symbol",
       "layout": {
-        "icon-image": ["image", "trailhead-icon"],
+        "icon-image": [
+          "match", ["get", "highway"],
+          "trailhead", ["image", "trailhead-icon"],
+          ["image", "ranger_station-icon"]
+        ],
         "icon-size": [
           "interpolate", ["linear"], ["zoom"],
           12, 0.5,
