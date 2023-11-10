@@ -433,7 +433,7 @@ window.onload = (event) => {
 
     fetchOsmEntity(type, feature.id).then(function(result) {
       var tags = result && result.elements.length && result.elements[0].tags;
-      updateForTags(tags);
+      if (tags) updateForTags(tags);
     });
   }
 
@@ -451,7 +451,7 @@ window.onload = (event) => {
     .on('mouseenter', 'trails-pointer-targets', didHover);
 
   map
-    .on('click', deselectAll)
+    //.on('click', deselectAll)
     .on('click', 'trail-pois', didSelect)
     .on('click', 'trails-pointer-targets', didSelect);
 
