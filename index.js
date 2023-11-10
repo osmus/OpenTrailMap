@@ -197,25 +197,25 @@ window.onload = (event) => {
         "all",
         allowedExpression,
         allFilter,
-        ["!=", "informal", "true"]
+        ["!=", "informal", "yes"]
       ])
       .setFilter('disallowed-paths', [
         "all",
         ["none", allowedExpression],
         allFilter,
-        ["!=", "informal", "true"]
+        ["!=", "informal", "yes"]
       ])
       .setFilter('disallowed-informal-paths', [
         "all",
         ["none", allowedExpression],
         allFilter,
-        ["==", "informal", "true"]
+        ["==", "informal", "yes"]
       ])
       .setFilter('informal-paths', [
         "all",
         allowedExpression,
         allFilter,
-        ["==", "informal", "true"]
+        ["==", "informal", "yes"]
       ])
       .setPaintProperty('paths', 'line-color', lineColors)
       .setPaintProperty('informal-paths', 'line-color', lineColors);
