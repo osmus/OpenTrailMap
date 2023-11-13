@@ -1,6 +1,8 @@
 
 var mode = "foot";
 
+var selectedEntity;
+
 var osmCache = {};
 
 async function fetchOsmEntity(type, id) {
@@ -237,6 +239,11 @@ window.onload = (event) => {
         12, 1,
         22, 5
       ];
+    var focusLineWidth = [
+        "interpolate", ["linear"], ["zoom"],
+        12, 9,
+        22, 13
+      ];
     var lineOpacity = [
         "interpolate", ["linear"], ["zoom"],
         12, 1,
@@ -244,6 +251,40 @@ window.onload = (event) => {
       ];
 
     map.addLayer({
+      "id": "selected-paths",
+      "source": "trails",
+      "source-layer": "trail",
+      "type": "line",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-opacity": 0.4,
+        "line-color": "yellow",
+        "line-width": focusLineWidth,
+      },
+      "filter": [
+        "==", "OSM_ID", -1 
+      ]
+    }).addLayer({
+      "id": "selected-pois",
+      "source": "trails",
+      "source-layer": "trail_poi",
+      "type": "circle",
+      "paint": {
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          12, 10,
+          22, 20
+        ],
+        "circle-opacity": 0.4,
+        "circle-color": "yellow",
+      },
+      "filter": [
+        "==", "OSM_ID", -1 
+      ]
+    }).addLayer({
       "id": "informal-paths",
       "source": "trails",
       "source-layer": "trail",
@@ -393,18 +434,41 @@ window.onload = (event) => {
     document.getElementById('tag-table').innerHTML = html;
   }
 
-  function didSelect(e) {
-    var feature = e.features.length && e.features[0];
-    var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
+  function didClick(e) {
+    selectedEntity = null;
 
-    let bbox = {
-      left: left = e.lngLat.lng - 0.001,
-      right: right = e.lngLat.lng + 0.001,
-      bottom: left = e.lngLat.lat - 0.001,
-      top: right = e.lngLat.lat + 0.001,
+    var feature = e.features.length && e.features[0];
+    if (feature && feature.properties.OSM_ID) {
+      var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
+      selectedEntity = {
+        id: feature.properties.OSM_ID,
+        type: type,
+        focusLngLat: e.lngLat,
+      };
+    }
+    updateForSelection();
+    e.stopPropagation();
+  }
+
+  function updateSidebar(entity) {
+
+    if (!entity) {
+      document.getElementById('sidebar').innerHTML = "";
+      return;
+    }
+
+    var type = entity.type;
+    var entityId = entity.id;
+    var focusLngLat = entity.focusLngLat;
+
+    var bbox = {
+      left: left = focusLngLat.lng - 0.001,
+      right: right = focusLngLat.lng + 0.001,
+      bottom: left = focusLngLat.lat - 0.001,
+      top: right = focusLngLat.lat + 0.001,
     };
     
-    let opQuery = encodeURIComponent(`${type}(${feature.id});\n(._;>;);\nout;`);
+    var opQuery = encodeURIComponent(`${type}(${entityId});\n(._;>;);\nout;`);
     
     var html = '';
     /*html += "<div class='top'>";
@@ -416,29 +480,48 @@ window.onload = (event) => {
     html += "</table><br/>";
     html += "<h3>View</h3>";
     html += "<p class='link-list'>";
-    html += `<a href="https://openstreetmap.org/${type}/${feature.id}" target="_blank">osm.org</a> `;
-    html += `<a href="https://www.openstreetmap.org/api/0.6/${type}/${feature.id}" target="_blank">XML</a> `;
-    html += `<a href="https://pewu.github.io/osm-history/#/${type}/${feature.id}" target="_blank">PeWu</a> `;
+    html += `<a href="https://openstreetmap.org/${type}/${entityId}" target="_blank">osm.org</a> `;
+    html += `<a href="https://www.openstreetmap.org/api/0.6/${type}/${entityId}" target="_blank">XML</a> `;
+    html += `<a href="https://pewu.github.io/osm-history/#/${type}/${entityId}" target="_blank">PeWu</a> `;
     html += `<a href="https://overpass-turbo.eu?Q=${opQuery}&R=" target="_blank">Overpass Turbo</a> `;
     html += "</p>";
     html += "<h3>Edit</h3>";
     html += "<p class='link-list'>";
-    html += `<a href="https://openstreetmap.org/edit?${type}=${feature.id}" target="_blank">iD</a> `;
-    html += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${feature.id}" target="_blank">JOSM</a> `;
-    html += `<a href="https://level0.osmz.ru/?url=${type}/${feature.id}" target="_blank">Level0</a> `;
+    html += `<a href="https://openstreetmap.org/edit?${type}=${entityId}" target="_blank">iD</a> `;
+    html += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${entityId}" target="_blank">JOSM</a> `;
+    html += `<a href="https://level0.osmz.ru/?url=${type}/${entityId}" target="_blank">Level0</a> `;
     html += "</p>";
     html += "</div>";
 
     document.getElementById('sidebar').innerHTML = html;
 
-    fetchOsmEntity(type, feature.id).then(function(result) {
+    fetchOsmEntity(type, entityId).then(function(result) {
       var tags = result && result.elements.length && result.elements[0].tags;
       if (tags) updateForTags(tags);
     });
   }
 
-  function deselectAll() {
-    document.getElementById('sidebar').innerHTML = "";
+  function updateForSelection() {
+    var type = selectedEntity && selectedEntity.type;
+    var entityId = selectedEntity && selectedEntity.id;
+    
+    if (type === "way") {
+      map.setFilter('selected-paths', [
+        "==", "OSM_ID", entityId
+      ]);
+    } else {
+      map.setFilter('selected-paths', ["==", "OSM_ID", -1]);
+    }
+
+    if (type === "node") {
+      map.setFilter('selected-pois', [
+        "==", "OSM_ID", entityId
+      ]);
+    } else {
+      map.setFilter('selected-pois', ["==", "OSM_ID", -1]);
+    } 
+
+    updateSidebar(selectedEntity);
   }
 
   function didUnhover() {
@@ -451,9 +534,12 @@ window.onload = (event) => {
     .on('mouseenter', 'trails-pointer-targets', didHover);
 
   map
-    //.on('click', deselectAll)
-    .on('click', 'trail-pois', didSelect)
-    .on('click', 'trails-pointer-targets', didSelect);
+    .on('click', function() {
+      selectedEntity = null;
+      updateForSelection();
+    })
+    .on('click', 'trail-pois', didClick)
+    .on('click', 'trails-pointer-targets', didClick);
 
   map
     .on('mouseleave', 'trail-pois', didUnhover)
