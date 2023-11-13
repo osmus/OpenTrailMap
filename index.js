@@ -2,6 +2,7 @@
 var mode = "foot";
 
 var selectedEntity;
+var hoveredEntity;
 
 var osmCache = {};
 
@@ -239,10 +240,15 @@ window.onload = (event) => {
         12, 1,
         22, 5
       ];
-    var focusLineWidth = [
+    var selectedLineWidth = [
         "interpolate", ["linear"], ["zoom"],
         12, 9,
         22, 13
+      ];
+    var hoverLineWidth = [
+        "interpolate", ["linear"], ["zoom"],
+        12, 5,
+        22, 7
       ];
     var lineOpacity = [
         "interpolate", ["linear"], ["zoom"],
@@ -251,6 +257,40 @@ window.onload = (event) => {
       ];
 
     map.addLayer({
+      "id": "hovered-paths",
+      "source": "trails",
+      "source-layer": "trail",
+      "type": "line",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-opacity": 0.25,
+        "line-color": "yellow",
+        "line-width": hoverLineWidth,
+      },
+      "filter": [
+        "==", "OSM_ID", -1 
+      ]
+    }).addLayer({
+      "id": "hovered-pois",
+      "source": "trails",
+      "source-layer": "trail_poi",
+      "type": "circle",
+      "paint": {
+        "circle-radius": [
+          "interpolate", ["linear"], ["zoom"],
+          12, 9,
+          22, 18
+        ],
+        "circle-opacity": 0.25,
+        "circle-color": "yellow",
+      },
+      "filter": [
+        "==", "OSM_ID", -1 
+      ]
+    }).addLayer({
       "id": "selected-paths",
       "source": "trails",
       "source-layer": "trail",
@@ -262,7 +302,7 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": 0.4,
         "line-color": "yellow",
-        "line-width": focusLineWidth,
+        "line-width": selectedLineWidth,
       },
       "filter": [
         "==", "OSM_ID", -1 
@@ -391,15 +431,11 @@ window.onload = (event) => {
     updateLayers();
   });
 
-  var hoveredFeatureIdentifier;
-
-  function clearHoverState() {
-    if (hoveredFeatureIdentifier) {
-      map.setFeatureState(
-        hoveredFeatureIdentifier,
-        {hover: false}
-      );
-      hoveredFeatureIdentifier = null;
+  function clearHoverIfSelected() {
+    if (hoveredEntity && selectedEntity &&
+      hoveredEntity.id == selectedEntity.id &&
+      hoveredEntity.type == selectedEntity.type) {
+      hoveredEntity = null;
     }
   }
 
@@ -407,20 +443,10 @@ window.onload = (event) => {
     // Change the cursor style as a UI indicator.
     map.getCanvas().style.cursor = 'pointer';
 
-    if (e.features.length <= 0) return;
-
-    var feature = e.features[0];
-    
-    clearHoverState();
-    hoveredFeatureIdentifier = {source: feature.source, sourceLayer: feature.sourceLayer, id: feature.id};
-    map.setFeatureState(
-      hoveredFeatureIdentifier,
-      {hover: true}
-    );
-  }
-
-  function capitalizeFirstLetter(string) {
-    return string[0].toUpperCase() + string.slice(1);
+    hoveredEntity = entityForEvent(e);
+    clearHoverIfSelected();
+    updateForHover();
+    e.stopPropagation();
   }
 
   function updateForTags(tags) {
@@ -434,18 +460,21 @@ window.onload = (event) => {
     document.getElementById('tag-table').innerHTML = html;
   }
 
-  function didClick(e) {
-    selectedEntity = null;
-
+  function entityForEvent(e) {
     var feature = e.features.length && e.features[0];
     if (feature && feature.properties.OSM_ID) {
       var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
-      selectedEntity = {
+      return {
         id: feature.properties.OSM_ID,
         type: type,
         focusLngLat: e.lngLat,
       };
     }
+    return null;
+  }
+
+  function didClick(e) {
+    selectedEntity = entityForEvent(e);
     updateForSelection();
     e.stopPropagation();
   }
@@ -471,9 +500,6 @@ window.onload = (event) => {
     var opQuery = encodeURIComponent(`${type}(${entityId});\n(._;>;);\nout;`);
     
     var html = '';
-    /*html += "<div class='top'>";
-    html += `<strong>${capitalizeFirstLetter(e.features[0].properties.highway)}</strong><br/>`;
-    html += "</div>";*/
     html += "<div class='body'>";
     html += "<table id='tag-table'>";
     html += `<tr><th>Key</th><th>Value</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
@@ -504,29 +530,28 @@ window.onload = (event) => {
   function updateForSelection() {
     var type = selectedEntity && selectedEntity.type;
     var entityId = selectedEntity && selectedEntity.id;
-    
-    if (type === "way") {
-      map.setFilter('selected-paths', [
-        "==", "OSM_ID", entityId
-      ]);
-    } else {
-      map.setFilter('selected-paths', ["==", "OSM_ID", -1]);
-    }
 
-    if (type === "node") {
-      map.setFilter('selected-pois', [
-        "==", "OSM_ID", entityId
-      ]);
-    } else {
-      map.setFilter('selected-pois', ["==", "OSM_ID", -1]);
-    } 
+    map.setFilter('selected-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
+    map.setFilter('selected-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
+
+    clearHoverIfSelected();
+    updateForHover();
 
     updateSidebar(selectedEntity);
   }
 
+  function updateForHover() {
+    var type = hoveredEntity && hoveredEntity.type;
+    var entityId = hoveredEntity && hoveredEntity.id;
+
+    map.setFilter('hovered-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
+    map.setFilter('hovered-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
+  }
+
   function didUnhover() {
     map.getCanvas().style.cursor = '';
-    clearHoverState();
+    hoveredEntity = null;
+    updateForHover();
   }
 
   map
