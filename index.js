@@ -544,8 +544,9 @@ window.onload = (event) => {
     var type = hoveredEntity && hoveredEntity.type;
     var entityId = hoveredEntity && hoveredEntity.id;
 
-    map.setFilter('hovered-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
-    map.setFilter('hovered-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
+    // disable hover indicator for now
+    // map.setFilter('hovered-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
+    // map.setFilter('hovered-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
   }
 
   function didUnhover() {
