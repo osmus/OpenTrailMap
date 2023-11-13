@@ -518,7 +518,7 @@ window.onload = (event) => {
     hoveredEntity = entityForEvent(e);
     clearHoverIfSelected();
     updateForHover();
-    //e.stopPropagation();
+    e.stopPropagation();
   }
 
   function updateForTags(tags) {
@@ -547,7 +547,7 @@ window.onload = (event) => {
 
   function didClick(e) {
     selectEntity(entityForEvent(e));
-    //e.stopPropagation();
+    e.stopPropagation();
   }
 
   function updateSidebar(entity) {
