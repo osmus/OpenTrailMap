@@ -69,49 +69,70 @@ window.onload = (event) => {
     map.addImage('ranger_station-icon', image, { pixelRatio: 2 });
   });
 
-  var impliedYesHighways = {
+  var impliedYesExpressions = {
     atv: [
-      ["==", ["get", "highway"], "track"]
+      ["==", "highway", "track"]
     ],
     bicycle: [
-      ["==", ["get", "highway"], "path"],
-      ["==", ["get", "highway"], "cycleway"],
-      ["==", ["get", "highway"], "bridleway"],
-      ["==", ["get", "highway"], "track"]
+      ["==", "highway", "path"],
+      ["==", "highway", "cycleway"],
+      ["==", "highway", "bridleway"],
+      ["==", "highway", "track"]
     ],
-    // dog only allowed if explicit
-    dog: [],
     foot: [
-      ["==", ["get", "highway"], "path"],
-      ["==", ["get", "highway"], "footway"],
-      ["==", ["get", "highway"], "steps"],
-      ["==", ["get", "highway"], "bridleway"],
-      ["==", ["get", "highway"], "track"]
+      ["==", "highway", "path"],
+      ["==", "highway", "footway"],
+      ["==", "highway", "steps"],
+      ["==", "highway", "bridleway"],
+      ["==", "highway", "track"]
     ],
     horse: [
-      ["==", ["get", "highway"], "bridleway"],
-      ["==", ["get", "highway"], "track"]
+      ["==", "highway", "bridleway"],
+      ["==", "highway", "track"]
     ],
     wheelchair: [
-      ["==", ["get", "smoothness"], "excellent"],
-      ["==", ["get", "smoothness"], "good"],
-      ["==", ["get", "smoothness"], "intermediate"],
+      ["==", "smoothness", "excellent"],
+      ["==", "smoothness", "good"],
+      ["==", "smoothness", "intermediate"],
     ],
   };
-  var impliedNoHighways = {
-    atv: [],
-    bicycle: [],
-    dog: [],
+  var impliedNoExpressions = {
+    atv: [
+      [
+        "any",
+        ["==", "highway", "footway"],
+        ["==", "highway", "steps"],
+        ["==", "vehicle", "no"],
+        ["==", "vehicle", "private"],
+        ["==", "vehicle", "discouraged"],
+        ["==", "motor_vehicle", "no"],
+        ["==", "motor_vehicle", "private"],
+        ["==", "motor_vehicle", "discouraged"],
+      ]
+    ],
+    bicycle: [
+      [
+        "any",
+        [
+          "all",
+          ["==", "highway", "steps"],
+          ["!=", "ramp:bicycle", "yes"],
+        ],
+        ["==", "vehicle", "no"],
+        ["==", "vehicle", "private"],
+        ["==", "vehicle", "discouraged"],
+      ]
+    ],
     foot: [],
     horse: [],
     wheelchair: [
       [
         "any",
-        ["==", ["get", "highway"], "steps"],
+        ["==", "highway", "steps"],
         [
           "all",
-          ["!=", ["get", "sac_scale"], null],
-          ["!=", ["get", "sac_scale"], "hiking"],
+          ["has", "sac_scale"],
+          ["!=", "sac_scale", "hiking"],
         ]
       ]
     ],
@@ -123,21 +144,18 @@ window.onload = (event) => {
       "any",
       [
         "all",
-        ["!", ["has", mode]],
-        ["!=", ["get", "access"], "no"],
-        ["!=", ["get", "access"], "private"],
-        ["!=", ["get", "access"], "discouraged"],
+        ["!has", mode],
+        ["!=", "access", "no"],
+        ["!=", "access", "private"],
+        ["!=", "access", "discouraged"],
         [
-          "!",
-          [
-            "any",
-            ...impliedYesHighways[mode],
-            ...impliedNoHighways[mode]
-          ]
+          "none",
+          ...impliedYesExpressions[mode],
+          ...impliedNoExpressions[mode]
         ]
       ],
-      // if mode is explicitly unknown then mark as unknown 
-      ["==", ["get", mode], "unknown"]
+      // access if always unspecified if mode is explicitly set to `unknown`
+      ["==", mode, "unknown"],
     ];
 
     var allowedExpression = [
@@ -161,76 +179,51 @@ window.onload = (event) => {
         ],
       ],
     ];
-    if (mode === "wheelchair") {
-      allowedExpression.push([
-        "any",
-        ["==", "wheelchair", "yes"],
-        ["==", "wheelchair", "designated"],
+    if (impliedNoExpressions[mode]) {
+      allowedExpression.push(
         [
-          "all",
-          ["!=", "highway", "steps"],
-          [
-            "any",
-            ["!has", "sac_scale"],
-            ["==", "sac_scale", "hiking"],
-          ]
+          "any",
+          ["has", mode],
+          ["none",
+            ...impliedNoExpressions[mode],
+          ],
         ]
-      ]);
-    } else if (mode === "atv") {
-      allowedExpression.push([
-        "all",
-        ["!=", "motor_vehicle", "no"],
-        ["!=", "motor_vehicle", "private"],
-        ["!=", "motor_vehicle", "discouraged"]
-      ]);
-      unspecifiedExpression[1] = unspecifiedExpression[1].concat(
-        [["!=", "motor_vehicle", "no"],
-        ["!=", "motor_vehicle", "private"],
-        ["!=", "motor_vehicle", "discouraged"]]
-      )
-    } else if (mode === "dog") {
-      allowedExpression.push([
-        "all",
-        ["!=", "foot", "no"],
-        ["!=", "foot", "private"],
-        ["!=", "foot", "discouraged"]
-      ]);
-      unspecifiedExpression[1] = unspecifiedExpression[1].concat(
-        [["!=", ["get", "foot"], "no"],
-        ["!=", ["get", "foot"], "private"],
-        ["!=", ["get", "foot"], "discouraged"]]
-      )
+      );
     }
-
-    var lineColors = [
-          "case",
-          ["all", unspecifiedExpression], "#ff3a00",
-          unspecifiedExpression, "#a56c5b",
-          "#005908"
-        ];
     
     map.setFilter('paths', [
         "all",
         allowedExpression,
+        ["none", unspecifiedExpression],
         ["!=", "informal", "yes"]
       ])
       .setFilter('disallowed-paths', [
         "all",
         ["none", allowedExpression],
+        ["none", unspecifiedExpression],
         ["!=", "informal", "yes"]
       ])
       .setFilter('disallowed-informal-paths', [
         "all",
         ["none", allowedExpression],
+        ["none", unspecifiedExpression],
         ["==", "informal", "yes"]
       ])
       .setFilter('informal-paths', [
         "all",
         allowedExpression,
+        ["none", unspecifiedExpression],
+        ["==", "informal", "yes"]
+      ]).setFilter('unspecified-informal-paths', [
+        "all",
+        unspecifiedExpression,
         ["==", "informal", "yes"]
       ])
-      .setPaintProperty('paths', 'line-color', lineColors)
-      .setPaintProperty('informal-paths', 'line-color', lineColors);
+      .setFilter('unspecified-paths', [
+        "all",
+        unspecifiedExpression,
+        ["!=", "informal", "yes"]
+      ]);
   }
 
   map.on('load', () => {
@@ -341,7 +334,8 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
-        "line-dasharray": [2, 2]
+        "line-color": "#005908",
+        "line-dasharray": [2, 2],
       }
     })
     .addLayer({
@@ -356,8 +350,24 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
-        "line-dasharray": [2, 2],
         "line-color": "#A2D61D",
+        "line-dasharray": [2, 2],
+      }
+    })
+    .addLayer({
+      "id": "unspecified-informal-paths",
+      "source": "trails",
+      "source-layer": "trail",
+      "type": "line",
+      "layout": {
+        "line-cap": "butt",
+        "line-join": "round",
+      },
+      "paint": {
+        "line-opacity": lineOpacity,
+        "line-width": lineWidth,
+        "line-color": "#ff3a00",
+        "line-dasharray": [2, 2],
       }
     })
     .addLayer({
@@ -376,6 +386,21 @@ window.onload = (event) => {
       }
     })
     .addLayer({
+      "id": "unspecified-paths",
+      "source": "trails",
+      "source-layer": "trail",
+      "type": "line",
+      "layout": {
+        "line-cap": "butt",
+        "line-join": "round",
+      },
+      "paint": {
+        "line-opacity": lineOpacity,
+        "line-width": lineWidth,
+        "line-color": "#ff3a00",
+      }
+    })
+    .addLayer({
       "id": "paths",
       "source": "trails",
       "source-layer": "trail",
@@ -387,6 +412,7 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
+        "line-color": "#005908",
       }
     })
     .addLayer({
