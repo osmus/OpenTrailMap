@@ -124,7 +124,9 @@ window.onload = (event) => {
       ]
     ],
     foot: [],
-    horse: [],
+    horse: [
+      ["==", "highway", "steps"],
+    ],
     wheelchair: [
       [
         "any",
