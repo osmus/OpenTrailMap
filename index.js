@@ -387,7 +387,7 @@ window.onload = (event) => {
     .addLayer({
       "id": "trails-labels",
       "source": "trails",
-      "source-layer": "trail",
+      "source-layer": "trail_name",
       "type": "symbol",
       "layout": {
         "text-field": ['get', 'name'],
