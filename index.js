@@ -96,36 +96,6 @@ window.onload = (event) => {
 
   function updateLayers() {
 
-    var allFilter;
-
-    if (mode === "bicycle" || mode === "horse" || mode === "atv") {
-      allFilter =   
-        ["any",
-          ["all",
-            ["!=", "highway", "track"],
-            ["!=", "highway", "footway"],
-            ["!=", "highway", "steps"],
-          ],
-          ["has", "foot"],
-          ["has", "atv"],
-          ["has", "bicycle"],
-          ["has", "horse"],
-          ["has", "dog"],
-          ["has", "wheelchair"]
-        ];
-    } else {
-      allFilter = 
-        ["any",
-          ["!=", "highway", "track"],
-          ["has", "foot"],
-          ["has", "atv"],
-          ["has", "bicycle"],
-          ["has", "horse"],
-          ["has", "dog"],
-          ["has", "wheelchair"]
-        ];
-    }
-    
     var unspecifiedExpression = [
       "any",
       [
@@ -198,30 +168,24 @@ window.onload = (event) => {
           "#005908"
         ];
     
-    map.setFilter('trails-labels', allFilter)
-      .setFilter('trails-pointer-targets', allFilter)
-      .setFilter('paths', [
+    map.setFilter('paths', [
         "all",
         allowedExpression,
-        allFilter,
         ["!=", "informal", "yes"]
       ])
       .setFilter('disallowed-paths', [
         "all",
         ["none", allowedExpression],
-        allFilter,
         ["!=", "informal", "yes"]
       ])
       .setFilter('disallowed-informal-paths', [
         "all",
         ["none", allowedExpression],
-        allFilter,
         ["==", "informal", "yes"]
       ])
       .setFilter('informal-paths', [
         "all",
         allowedExpression,
-        allFilter,
         ["==", "informal", "yes"]
       ])
       .setPaintProperty('paths', 'line-color', lineColors)
