@@ -70,28 +70,51 @@ window.onload = (event) => {
   });
 
   var impliedYesHighways = {
-    foot: [
-      ["!=", ["get", "highway"], "path"],
-      ["!=", ["get", "highway"], "footway"],
-      ["!=", ["get", "highway"], "steps"],
-      ["!=", ["get", "highway"], "bridleway"],
-      ["!=", ["get", "highway"], "track"]
+    atv: [
+      ["==", ["get", "highway"], "track"]
+    ],
+    bicycle: [
+      ["==", ["get", "highway"], "path"],
+      ["==", ["get", "highway"], "cycleway"],
+      ["==", ["get", "highway"], "bridleway"],
+      ["==", ["get", "highway"], "track"]
     ],
     // dog only allowed if explicit
     dog: [],
-    bicycle: [
-      ["!=", ["get", "highway"], "path"],
-      ["!=", ["get", "highway"], "cycleway"],
-      ["!=", ["get", "highway"], "bridleway"],
-      ["!=", ["get", "highway"], "track"]
+    foot: [
+      ["==", ["get", "highway"], "path"],
+      ["==", ["get", "highway"], "footway"],
+      ["==", ["get", "highway"], "steps"],
+      ["==", ["get", "highway"], "bridleway"],
+      ["==", ["get", "highway"], "track"]
     ],
     horse: [
-      ["!=", ["get", "highway"], "bridleway"],
-      ["!=", ["get", "highway"], "track"]
+      ["==", ["get", "highway"], "bridleway"],
+      ["==", ["get", "highway"], "track"]
     ],
-    atv: [
-      ["!=", ["get", "highway"], "track"]
-    ]
+    wheelchair: [
+      ["==", ["get", "smoothness"], "excellent"],
+      ["==", ["get", "smoothness"], "good"],
+      ["==", ["get", "smoothness"], "intermediate"],
+    ],
+  };
+  var impliedNoHighways = {
+    atv: [],
+    bicycle: [],
+    dog: [],
+    foot: [],
+    horse: [],
+    wheelchair: [
+      [
+        "any",
+        ["==", ["get", "highway"], "steps"],
+        [
+          "all",
+          ["!=", ["get", "sac_scale"], null],
+          ["!=", ["get", "sac_scale"], "hiking"],
+        ]
+      ]
+    ],
   };
 
   function updateLayers() {
@@ -104,56 +127,74 @@ window.onload = (event) => {
         ["!=", ["get", "access"], "no"],
         ["!=", ["get", "access"], "private"],
         ["!=", ["get", "access"], "discouraged"],
-        ...impliedYesHighways[mode]
+        [
+          "!",
+          [
+            "any",
+            ...impliedYesHighways[mode],
+            ...impliedNoHighways[mode]
+          ]
+        ]
       ],
       // if mode is explicitly unknown then mark as unknown 
       ["==", ["get", mode], "unknown"]
     ];
 
-    var allowedExpression = ["any",
+    var allowedExpression = [
+      "all",
       [
-        "all",
-        ["!has", mode],
-        ["!=", "access", "no"],
-        ["!=", "access", "private"],
-        ["!=", "access", "discouraged"]
-      ],
-      [
-        "all",
-        ["has", mode],
-        ["!=", mode, "no"],
-        ["!=", mode, "private"],
-        ["!=", mode, "discouraged"]
-      ]
-    ];
-
-    if (mode === "atv") {
-      allowedExpression = [
-        "all",
-        allowedExpression,
+        "any",
         [
           "all",
-          ["!=", "motor_vehicle", "no"],
-          ["!=", "motor_vehicle", "private"],
-          ["!=", "motor_vehicle", "discouraged"]
+          ["!has", mode],
+          ["!=", "access", "no"],
+          ["!=", "access", "private"],
+          ["!=", "access", "discouraged"],
+        ],
+        [
+          "all",
+          ["has", mode],
+          ["!=", mode, "no"],
+          ["!=", mode, "private"],
+          ["!=", mode, "discouraged"],
+          ["!=", mode, "limited"], // for `wheelchair`
+        ],
+      ],
+    ];
+    if (mode === "wheelchair") {
+      allowedExpression.push([
+        "any",
+        ["==", "wheelchair", "yes"],
+        ["==", "wheelchair", "designated"],
+        [
+          "all",
+          ["!=", "highway", "steps"],
+          [
+            "any",
+            ["!has", "sac_scale"],
+            ["==", "sac_scale", "hiking"],
+          ]
         ]
-      ];
+      ]);
+    } else if (mode === "atv") {
+      allowedExpression.push([
+        "all",
+        ["!=", "motor_vehicle", "no"],
+        ["!=", "motor_vehicle", "private"],
+        ["!=", "motor_vehicle", "discouraged"]
+      ]);
       unspecifiedExpression[1] = unspecifiedExpression[1].concat(
         [["!=", "motor_vehicle", "no"],
         ["!=", "motor_vehicle", "private"],
         ["!=", "motor_vehicle", "discouraged"]]
       )
     } else if (mode === "dog") {
-      allowedExpression = [
+      allowedExpression.push([
         "all",
-        allowedExpression,
-        [
-          "all",
-          ["!=", "foot", "no"],
-          ["!=", "foot", "private"],
-          ["!=", "foot", "discouraged"]
-        ]
-      ];
+        ["!=", "foot", "no"],
+        ["!=", "foot", "private"],
+        ["!=", "foot", "discouraged"]
+      ]);
       unspecifiedExpression[1] = unspecifiedExpression[1].concat(
         [["!=", ["get", "foot"], "no"],
         ["!=", ["get", "foot"], "private"],
