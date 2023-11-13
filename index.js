@@ -17,7 +17,45 @@ async function fetchOsmEntity(type, id) {
 }
 
 window.onload = (event) => {
-  
+
+  /*window.addEventListener("hashchange", function () {
+    updateForHash();
+  });*/
+
+  function updateForHash() {
+    var searchParams = new URLSearchParams(window.location.hash.slice(1));
+    if (searchParams.has("selected")) {
+      var value = searchParams.get("selected");
+      var components = value.split("/");
+      if (components.length == 2) {
+        var type = components[0];
+        var id = parseInt(components[1]);
+        if (["node", "way", "relation"].includes(type)) {
+          selectEntity({
+            type: type,
+            id: id,
+          });
+        }
+      }
+    }
+  }
+
+
+  function setHashParameters(params) {
+    var searchParams = new URLSearchParams(window.location.hash.slice(1));
+    for (var key in params) {
+      if (params[key]) {
+        searchParams.set(key, params[key]);
+      } else if (searchParams.has(key)) {
+        searchParams.delete(key);
+      }
+    }
+    var hash = "#" + decodeURIComponent(searchParams.toString());
+    if (hash !== window.location.hash) {
+      window.location.hash = hash;
+    }
+  }
+    
   document.getElementById("travel-mode").onchange = function(e) {
     mode = e.target.value;
     updateLayers();
@@ -462,6 +500,7 @@ window.onload = (event) => {
     });
   
     updateLayers();
+    updateForHash();
   });
 
   function clearHoverIfSelected() {
@@ -479,7 +518,7 @@ window.onload = (event) => {
     hoveredEntity = entityForEvent(e);
     clearHoverIfSelected();
     updateForHover();
-    e.stopPropagation();
+    //e.stopPropagation();
   }
 
   function updateForTags(tags) {
@@ -507,9 +546,8 @@ window.onload = (event) => {
   }
 
   function didClick(e) {
-    selectedEntity = entityForEvent(e);
-    updateForSelection();
-    e.stopPropagation();
+    selectEntity(entityForEvent(e));
+    //e.stopPropagation();
   }
 
   function updateSidebar(entity) {
@@ -523,7 +561,7 @@ window.onload = (event) => {
     var entityId = entity.id;
     var focusLngLat = entity.focusLngLat;
 
-    var bbox = {
+    var bbox = focusLngLat && {
       left: left = focusLngLat.lng - 0.001,
       right: right = focusLngLat.lng + 0.001,
       bottom: left = focusLngLat.lat - 0.001,
@@ -547,7 +585,7 @@ window.onload = (event) => {
     html += "<h3>Edit</h3>";
     html += "<p class='link-list'>";
     html += `<a href="https://openstreetmap.org/edit?${type}=${entityId}" target="_blank">iD</a> `;
-    html += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${entityId}" target="_blank">JOSM</a> `;
+    if (bbox) html += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${entityId}" target="_blank">JOSM</a> `;
     html += `<a href="https://level0.osmz.ru/?url=${type}/${entityId}" target="_blank">Level0</a> `;
     html += "</p>";
     html += "</div>";
@@ -560,9 +598,21 @@ window.onload = (event) => {
     });
   }
 
-  function updateForSelection() {
+  function selectEntity(entity) {
+    if (!selectEntity && !entity) return;
+    if (selectEntity && entity &&
+      selectEntity.id === entity.id &&
+      selectEntity.type === entity.type
+    ) return;
+
+    selectedEntity = entity;
+
     var type = selectedEntity && selectedEntity.type;
     var entityId = selectedEntity && selectedEntity.id;
+
+    setHashParameters({
+      selected: selectedEntity ? type + "/" + entityId : null
+    });
 
     map.setFilter('selected-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
     map.setFilter('selected-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
@@ -594,8 +644,7 @@ window.onload = (event) => {
 
   map
     .on('click', function() {
-      selectedEntity = null;
-      updateForSelection();
+      selectEntity(null);
     })
     .on('click', 'trail-pois', didClick)
     .on('click', 'trails-pointer-targets', didClick);
