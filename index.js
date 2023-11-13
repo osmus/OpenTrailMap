@@ -52,9 +52,9 @@ window.onload = (event) => {
         trackUserLocation: true
     }))
     .addControl(new maplibregl.ScaleControl({
-        maxWidth: 200,
+        maxWidth: 150,
         unit: 'imperial'
-    }), "bottom-right");
+    }), "bottom-left");
 
   map.loadImage('img/disallowed-stripes.png', (error, image) => {
     if (error) throw error;
