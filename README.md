@@ -27,6 +27,9 @@ Some trail-related POIs are included on the map:
 - [`amenity=ranger_station`](https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dranger_station): ranger stations are generally public visitor centers where trail users can get info or seek help
 - [`highway=trailhead`](https://wiki.openstreetmap.org/wiki/Tag:highway%3Dtrailhead): trailheads are access points to trail networks, often with various amenities
 
+## Get involved
+- Join the [#opentrailmap](https://osmus.slack.com/archives/opentrailmap) channel on [OpenStreetMap US Slack](https://openstreetmap.us/slack).
+
 ## Development setup
 1. [Clone the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 2. Open your terminal and `cd` into the repo's directory
