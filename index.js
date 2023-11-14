@@ -7,11 +7,13 @@ var hoveredEntity;
 var osmCache = {};
 
 async function fetchOsmEntity(type, id) {
-  var key = type + id;
+  var key = type[0] + id;
   if (!osmCache[key]) {
     var url = `https://api.openstreetmap.org/api/0.6/${type}/${id}.json`;
     var response = await fetch(url);
-    osmCache[key] = await response.json();
+    let json = await response.json();
+    osmCache[key] = json && json.elements && json.elements.length && json.elements[0];
+    console.log(osmCache[key]);
   }
   return osmCache[key];
 }
@@ -541,6 +543,24 @@ window.onload = (event) => {
     document.getElementById('tag-table').innerHTML = html;
   }
 
+  function getFormattedDate(date) {
+    var offsetDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60 * 1000));
+    var components = offsetDate.toISOString().split('T')
+    return components[0] + " " + components[1].split(".")[0];
+  }
+
+  function updateForMeta(entity) {
+    var formattedDate = getFormattedDate(new Date(entity.timestamp));
+    var html = "";
+    html += `<tr><th colspan='2'>Meta</th></tr>`;
+    html += `<tr><td>ID</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}" target="_blank">${entity.type}/${entity.id}</a></td></tr>`;
+    html += `<tr><td>Version</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}/history" target="_blank">${entity.version}</a></td></tr>`;
+    html += `<tr><td>Changeset</td><td><a href="https://www.openstreetmap.org/changeset/${entity.changeset}" target="_blank">${entity.changeset}</a></td></tr>`;
+    html += `<tr><td>Uploaded</td><td>${formattedDate}</td></tr>`;
+    html += `<tr><td>User</td><td><a href="https://www.openstreetmap.org/user/${entity.user}" target="_blank">${entity.user}</a></td></tr>`;
+    document.getElementById('meta-table').innerHTML = html;
+  }
+
   function entityForEvent(e) {
     var feature = e.features.length && e.features[0];
     if (feature && feature.properties.OSM_ID) {
@@ -584,6 +604,9 @@ window.onload = (event) => {
     html += "<table id='tag-table'>";
     html += `<tr><th>Key</th><th>Value</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
     html += "</table><br/>";
+    html += "<table id='meta-table'>";
+    html += `<tr><th colspan='2'>Meta</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
+    html += "</table><br/>";
     html += "<h3>View</h3>";
     html += "<p class='link-list'>";
     html += `<a href="https://openstreetmap.org/${type}/${entityId}" target="_blank">osm.org</a> `;
@@ -601,8 +624,9 @@ window.onload = (event) => {
 
     document.getElementById('sidebar').innerHTML = html;
 
-    fetchOsmEntity(type, entityId).then(function(result) {
-      var tags = result && result.elements.length && result.elements[0].tags;
+    fetchOsmEntity(type, entityId).then(function(entity) {
+      if (entity) updateForMeta(entity);
+      var tags = entity && entity.tags;
       if (tags) updateForTags(tags);
     });
   }
