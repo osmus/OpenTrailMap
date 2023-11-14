@@ -7,7 +7,7 @@ This is a web map application for viewing [OpenStreetMap](https://openstreetmap.
 The tool is still in development and is subject to change. Have ideas? Please open an [issue](https://github.com/osmus/OpenTrailMap/issues) :)
 
 ## UI features
-- Select between different travel modes (`foot`/`wheelchair`/`bicycle`/`horse`/`atv`).
+- Select between different travel modes ([`foot`](https://wiki.openstreetmap.org/wiki/Key:foot)/[`wheelchair`](https://wiki.openstreetmap.org/wiki/Key:wheelchair)/[`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle)/[`horse`](https://wiki.openstreetmap.org/wiki/Key:horse)/[`atv`](https://wiki.openstreetmap.org/wiki/Key:atv)).
 - Click a feature to view its current tags and metadata.
 - Use quick links to open the feature on [openstreetmap.org](https://openstreetmap.org), iD, JOSM, and other viewers.
 
@@ -17,7 +17,7 @@ Trail vector tiles are currently generated courtesy of [@zelonewolf](https://git
 ### Legend
 - Dark green lines are public paths.
 - Pale green lines indicate the given travel mode is not allowed or not possible. There are a few factors:
-  - `access` or the mode tag (like `foot`) is `no`/`private`/`discouraged`
+  - [`access`](https://wiki.openstreetmap.org/wiki/Key:access) or the mode tag (like `foot`) is `no`/`private`/`discouraged`
   - The infrastructure is not sufficient, such as `smoothness=horrible` for `wheelchair`
 - Dashed lines are `informal=yes`. Solid lines are `infomal=no` or `informal` not given.
 - Orange lines don’t have enough access tags to indicate if the given travel mode is allowed or possible (great mapping opportunities!)
