@@ -4,18 +4,28 @@ var mode = "foot";
 var selectedEntity;
 var hoveredEntity;
 
-var osmCache = {};
+var osmEntityCache = {};
+var osmChangesetCache = {};
 
 async function fetchOsmEntity(type, id) {
   var key = type[0] + id;
-  if (!osmCache[key]) {
+  if (!osmEntityCache[key]) {
     var url = `https://api.openstreetmap.org/api/0.6/${type}/${id}.json`;
     var response = await fetch(url);
     let json = await response.json();
-    osmCache[key] = json && json.elements && json.elements.length && json.elements[0];
-    console.log(osmCache[key]);
+    osmEntityCache[key] = json && json.elements && json.elements.length && json.elements[0];
   }
-  return osmCache[key];
+  return osmEntityCache[key];
+}
+
+async function fetchOsmChangeset(id) {
+  if (!osmChangesetCache[id]) {
+    var url = `https://api.openstreetmap.org/api/0.6/changeset/${id}.json`;
+    var response = await fetch(url);
+    let json = await response.json();
+    osmChangesetCache[id] = json && json.elements && json.elements.length && json.elements[0];
+  }
+  return osmChangesetCache[id];
 }
 
 window.onload = (event) => {
@@ -549,13 +559,15 @@ window.onload = (event) => {
     return components[0] + " " + components[1].split(".")[0];
   }
 
-  function updateForMeta(entity) {
+  function updateForMeta(entity, changeset) {
     var formattedDate = getFormattedDate(new Date(entity.timestamp));
+    var comment = changeset && changeset.tags && changeset.tags.comment || '';
     var html = "";
     html += `<tr><th colspan='2'>Meta</th></tr>`;
     html += `<tr><td>ID</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}" target="_blank">${entity.type}/${entity.id}</a></td></tr>`;
     html += `<tr><td>Version</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}/history" target="_blank">${entity.version}</a></td></tr>`;
     html += `<tr><td>Changeset</td><td><a href="https://www.openstreetmap.org/changeset/${entity.changeset}" target="_blank">${entity.changeset}</a></td></tr>`;
+    html += `<tr><td>Comment</td><td>${comment}</td></tr>`;
     html += `<tr><td>Uploaded</td><td>${formattedDate}</td></tr>`;
     html += `<tr><td>User</td><td><a href="https://www.openstreetmap.org/user/${entity.user}" target="_blank">${entity.user}</a></td></tr>`;
     document.getElementById('meta-table').innerHTML = html;
@@ -625,7 +637,11 @@ window.onload = (event) => {
     document.getElementById('sidebar').innerHTML = html;
 
     fetchOsmEntity(type, entityId).then(function(entity) {
-      if (entity) updateForMeta(entity);
+      if (entity) {
+        fetchOsmChangeset(entity.changeset).then(function(changeset) {
+          updateForMeta(entity, changeset);
+        });
+      }
       var tags = entity && entity.tags;
       if (tags) updateForTags(tags);
     });
