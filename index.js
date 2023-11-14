@@ -130,6 +130,7 @@ window.onload = (event) => {
     ],
     wheelchair: [
       ["==", "smoothness", "excellent"],
+      ["==", "smoothness", "very_good"],
       ["==", "smoothness", "good"],
       ["==", "smoothness", "intermediate"],
     ],
@@ -173,6 +174,14 @@ window.onload = (event) => {
           "all",
           ["has", "sac_scale"],
           ["!=", "sac_scale", "hiking"],
+        ],
+        [
+          "all",
+          ["has", "smoothness"],
+          ["!=", "smoothness", "excellent"],
+          ["!=", "smoothness", "very_good"],
+          ["!=", "smoothness", "good"],
+          ["!=", "smoothness", "intermediate"],
         ]
       ]
     ],
