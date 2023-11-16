@@ -20,7 +20,7 @@ Trail vector tiles are currently generated courtesy of [@zelonewolf](https://git
   - [`access`](https://wiki.openstreetmap.org/wiki/Key:access) or the mode tag (like `foot`) is `no`/`private`/`discouraged`
   - The infrastructure is not sufficient, such as `smoothness=horrible` for `wheelchair`
 - Dashed lines are `informal=yes`. Solid lines are `infomal=no` or `informal` not given.
-- Orange lines don’t have enough access tags to indicate if the given travel mode is allowed or possible (great mapping opportunities!)
+- Purple lines don’t have enough access tags to indicate if the given travel mode is allowed or possible (great mapping opportunities!)
 
 ### Points of interest
 Some trail-related POIs are included on the map:
