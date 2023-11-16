@@ -14,31 +14,32 @@ const colors = {
 
 const poiLabelZoom = 14;
 
-var selectedEntity;
-var hoveredEntity;
+var selectedEntityInfo;
+var hoveredEntityInfo;
 
 var osmEntityCache = {};
 var osmEntityMembershipCache = {};
 var osmChangesetCache = {};
 
-function cacheEntities(elements) {
+function cacheEntities(elements, full) {
   for (var i in elements) {
     var element = elements[i];
     var type = element.type;
     var id = element.id;
     var key = type[0] + id;
     
-    // don't overwrite existing
-    if (!osmEntityCache[key]) osmEntityCache[key] = element;
+    osmEntityCache.full = full;
+
+    osmEntityCache[key] = element;
   }
 }
 
 async function fetchOsmEntity(type, id) {
   var key = type[0] + id;
-  if (!osmEntityCache[key]) {
-    var response = await fetch(`https://api.openstreetmap.org/api/0.6/${type}/${id}.json`);
+  if (!osmEntityCache[key] || !osmEntityCache[key].full) {
+    var response = await fetch(`https://api.openstreetmap.org/api/0.6/${type}/${id}/full.json`);
     var json = await response.json();
-    cacheEntities(json && json.elements || []);
+    cacheEntities(json && json.elements || [], true);
   }
   return osmEntityCache[key];
 }
@@ -64,7 +65,7 @@ async function fetchOsmEntityMemberships(type, id) {
     });
     
     // response relations are fully defined entities so we can cache them for free
-    cacheEntities(rels);
+    cacheEntities(rels, false);
   }
 
   return osmEntityMembershipCache[key];
@@ -81,30 +82,79 @@ async function fetchOsmChangeset(id) {
 }
 
 
-function selectEntity(entity) {
+function selectEntity(entityInfo) {
 
-  if (!selectEntity && !entity) return;
-  if (selectEntity && entity &&
-    selectEntity.id === entity.id &&
-    selectEntity.type === entity.type
+  if (!selectEntity && !entityInfo) return;
+  if (selectEntity && entityInfo &&
+    selectEntity.id === entityInfo.id &&
+    selectEntity.type === entityInfo.type
   ) return;
 
-  selectedEntity = entity;
+  selectedEntityInfo = entityInfo;
 
-  var type = selectedEntity && selectedEntity.type;
-  var entityId = selectedEntity && selectedEntity.id;
+  var type = selectedEntityInfo && selectedEntityInfo.type;
+  var entityId = selectedEntityInfo && selectedEntityInfo.id;
 
   setHashParameters({
-    selected: selectedEntity ? type + "/" + entityId : null
+    selected: selectedEntityInfo ? type + "/" + entityId : null
   });
 
-  map.setFilter('selected-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
-  map.setFilter('selected-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
-
+  updateMapForSelection();
   clearHoverIfSelected();
   updateForHover();
 
-  updateSidebar(selectedEntity);
+  updateSidebar(selectedEntityInfo);
+
+  fetchOsmEntity(type, entityId).then(function(entity) {
+    if (entity) {
+      fetchOsmChangeset(entity.changeset).then(function(changeset) {
+        updateMetaTable(entity, changeset);
+      });
+    }
+    var tags = entity && entity.tags;
+    if (tags) updateTagsTable(tags);
+
+    // update map again in case we selected a relation and want to highlight members
+    updateMapForSelection();
+  });
+
+  fetchOsmEntityMemberships(type, entityId).then(function(memberships) {
+    updateMembershipsTable(memberships);
+  });
+}
+
+function updateMapForSelection() {
+
+  var id = selectedEntityInfo && selectedEntityInfo.id;
+  var type = selectedEntityInfo && selectedEntityInfo.type;
+
+  var wayIds = [type === "way" ? id : -1];
+  var nodeIds = [type === "node" ? id : -1];
+
+  if (type === "relation") {
+    var members = osmEntityCache[type[0] + id]?.members || [];
+    members.forEach(function(member) {
+      if (member.type === "way") {
+        wayIds.push(member.ref);
+      } else if (member.type === "node") {
+        nodeIds.push(member.ref);
+      } else if (member.type === "relation") {
+        // only recurse down if we have the entity cached
+        var childRelationMembers = osmEntityCache[member.type[0] + member.ref]?.members || [];
+        childRelationMembers.forEach(function(member) {
+          if (member.type === "way") {
+            wayIds.push(member.ref);
+          } else if (member.type === "node") {
+            nodeIds.push(member.ref);
+          }
+          // don't recurse relations again in case of self-references
+        });
+      }
+    });
+  }
+
+  map.setFilter('selected-paths', ["in", "OSM_ID", ...wayIds]);
+  map.setFilter('selected-pois', ["in", "OSM_ID", ...nodeIds]);
 }
 
 function setHashParameters(params) {
@@ -124,10 +174,10 @@ function setHashParameters(params) {
 
 
 function clearHoverIfSelected() {
-  if (hoveredEntity && selectedEntity &&
-    hoveredEntity.id == selectedEntity.id &&
-    hoveredEntity.type == selectedEntity.type) {
-    hoveredEntity = null;
+  if (hoveredEntityInfo && selectedEntityInfo &&
+    hoveredEntityInfo.id == selectedEntityInfo.id &&
+    hoveredEntityInfo.type == selectedEntityInfo.type) {
+    hoveredEntityInfo = null;
   }
 }
 
@@ -135,13 +185,13 @@ function didHover(e) {
   // Change the cursor style as a UI indicator.
   map.getCanvas().style.cursor = 'pointer';
 
-  hoveredEntity = entityForEvent(e);
+  hoveredEntityInfo = entityForEvent(e);
   clearHoverIfSelected();
   updateForHover();
   e.stopPropagation();
 }
 
-function updateForTags(tags) {
+function updateTagsTable(tags) {
   var html = "";
   html += `<tr><th>Key</th><th>Value</th></tr>`;
   var keys = Object.keys(tags).sort();
@@ -152,7 +202,7 @@ function updateForTags(tags) {
   document.getElementById('tag-table').innerHTML = html;
 }
 
-function updateForMemberships(memberships) {
+function updateMembershipsTable(memberships) {
   var html = "";
  
   if (memberships.length) {
@@ -185,7 +235,7 @@ function getFormattedDate(date) {
   return components[0] + " " + components[1].split(".")[0];
 }
 
-function updateForMeta(entity, changeset) {
+function updateMetaTable(entity, changeset) {
   var formattedDate = getFormattedDate(new Date(entity.timestamp));
   var comment = changeset && changeset.tags && changeset.tags.comment || '';
   var html = "";
@@ -264,25 +314,11 @@ function updateSidebar(entity) {
   html += "</div>";
 
   document.getElementById('sidebar').innerHTML = html;
-
-  fetchOsmEntity(type, entityId).then(function(entity) {
-    if (entity) {
-      fetchOsmChangeset(entity.changeset).then(function(changeset) {
-        updateForMeta(entity, changeset);
-      });
-    }
-    var tags = entity && entity.tags;
-    if (tags) updateForTags(tags);
-  });
-
-  fetchOsmEntityMemberships(type, entityId).then(function(memberships) {
-    updateForMemberships(memberships);
-  });
 }
 
 function updateForHover() {
-  var type = hoveredEntity && hoveredEntity.type;
-  var entityId = hoveredEntity && hoveredEntity.id;
+  var type = hoveredEntityInfo && hoveredEntityInfo.type;
+  var entityId = hoveredEntityInfo && hoveredEntityInfo.id;
 
   // disable hover indicator for now
   // map.setFilter('hovered-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
@@ -291,7 +327,7 @@ function updateForHover() {
 
 function didUnhover() {
   map.getCanvas().style.cursor = '';
-  hoveredEntity = null;
+  hoveredEntityInfo = null;
   updateForHover();
 }
 
