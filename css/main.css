@@ -172,14 +172,18 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
 }
 #sidebar table td {
-  width: 50%;
   font-family: 'SF Mono', SFMono-Regular, ui-monospace, -apple-system, monospace;
   font-size: 14px;
   overflow-wrap: anywhere;
 }
+#sidebar #tag-table td {
+  width: 50%;
+}
+#sidebar #relations-table td:not(:first-child) {
+  overflow-wrap: normal;
+}
 #sidebar #meta-table td {
   background: rgba(0, 0, 0, 0.02);
-  width: auto;
 }
 #sidebar #meta-table td:first-child {
   font-family: inherit;
