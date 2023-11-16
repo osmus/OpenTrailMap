@@ -1,13 +1,17 @@
 
 var mode = "foot";
 
-var colors = {
+const colors = {
   public: "#005908",
   noaccess: "#A2D61D",
   unspecified: "#8e00cc",
-  labelHalo: "#fff",
+  label: "#000",
+  poiLabel: "#4A282A",
+  labelHalo: "rgba(255, 255, 255, 1)",
   selection: "yellow",
 };
+
+const poiLabelZoom = 15;
 
 var selectedEntity;
 var hoveredEntity;
@@ -322,6 +326,16 @@ window.onload = (event) => {
         12, 1,
         22, 0.4
       ];
+    var poiIconImage = [
+        "match", ["get", "highway"],
+        "trailhead", ["image", "trailhead-icon"],
+        ["image", "ranger_station-icon"]
+      ];
+    var poiIconSize = [
+        "interpolate", ["linear"], ["zoom"],
+        12, 0.5,
+        22, 1
+      ];
 
     map.addLayer({
       "id": "hovered-paths",
@@ -495,7 +509,8 @@ window.onload = (event) => {
         "symbol-placement": "line"
       },
       "paint": {
-        "text-halo-width": 1,
+        "text-color": colors.label,
+        "text-halo-width": 1.5,
         "text-halo-color": colors.labelHalo,
       }
     })
@@ -514,18 +529,46 @@ window.onload = (event) => {
       "source": "trails",
       "source-layer": "trail_poi",
       "type": "symbol",
+      "maxzoom": poiLabelZoom,
       "layout": {
-        "icon-image": [
-          "match", ["get", "highway"],
-          "trailhead", ["image", "trailhead-icon"],
-          ["image", "ranger_station-icon"]
-        ],
-        "icon-size": [
+        "icon-image": poiIconImage,
+        "icon-size": poiIconSize,
+      },
+    })
+    .addLayer({
+      "id": "trail-pois-labeled",
+      "source": "trails",
+      "source-layer": "trail_poi",
+      "type": "symbol",
+      "minzoom": poiLabelZoom,
+      "transition": {
+        "duration": 0,
+        "delay": 0
+      },
+      "layout": {
+        "icon-image": poiIconImage,
+        "icon-size": poiIconSize,
+        "symbol-placement": "point",
+        "text-field": ['get', 'name'],
+        "text-optional": true,
+        "text-size": 11,
+        "text-line-height": 1.1,
+        "text-font": ["Open Sans Semibold", "Arial Unicode MS Semibold"],
+        "text-variable-anchor": ["left", "right", "top", "bottom"],
+        "text-padding": 5,
+        "text-offset": [
           "interpolate", ["linear"], ["zoom"],
-          12, 0.5,
-          22, 1
-        ]
-      }
+          12, ["literal", [0.4, 0.4]],
+          22, ["literal", [1.5, 1.5]]
+        ],
+        "text-justify": "auto",
+      },
+      "paint": {
+        "text-color": colors.poiLabel,
+        "text-halo-width": 2,
+        "text-halo-blur": 1,
+        "text-halo-color": colors.labelHalo,
+      },
     });
   
     updateLayers();
@@ -697,6 +740,7 @@ window.onload = (event) => {
 
   map
     .on('mouseenter', 'trail-pois', didHover)
+    .on('mouseenter', 'trail-pois-labeled', didHover)
     .on('mouseenter', 'trails-pointer-targets', didHover);
 
   map
@@ -704,9 +748,11 @@ window.onload = (event) => {
       selectEntity(null);
     })
     .on('click', 'trail-pois', didClick)
+    .on('click', 'trail-pois-labeled', didClick)
     .on('click', 'trails-pointer-targets', didClick);
 
   map
     .on('mouseleave', 'trail-pois', didUnhover)
+    .on('mouseleave', 'trails-pois-labeled', didUnhover)
     .on('mouseleave', 'trails-pointer-targets', didUnhover);
 }
