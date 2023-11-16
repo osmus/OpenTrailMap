@@ -11,7 +11,7 @@ const colors = {
   selection: "yellow",
 };
 
-const poiLabelZoom = 15;
+const poiLabelZoom = 14;
 
 var selectedEntity;
 var hoveredEntity;
@@ -529,18 +529,6 @@ window.onload = (event) => {
       "source": "trails",
       "source-layer": "trail_poi",
       "type": "symbol",
-      "maxzoom": poiLabelZoom,
-      "layout": {
-        "icon-image": poiIconImage,
-        "icon-size": poiIconSize,
-      },
-    })
-    .addLayer({
-      "id": "trail-pois-labeled",
-      "source": "trails",
-      "source-layer": "trail_poi",
-      "type": "symbol",
-      "minzoom": poiLabelZoom,
       "transition": {
         "duration": 0,
         "delay": 0
@@ -549,7 +537,7 @@ window.onload = (event) => {
         "icon-image": poiIconImage,
         "icon-size": poiIconSize,
         "symbol-placement": "point",
-        "text-field": ['get', 'name'],
+        "text-field": ["step", ["zoom"], "", poiLabelZoom, ["get", "name"]],
         "text-optional": true,
         "text-size": 11,
         "text-line-height": 1.1,
@@ -740,7 +728,6 @@ window.onload = (event) => {
 
   map
     .on('mouseenter', 'trail-pois', didHover)
-    .on('mouseenter', 'trail-pois-labeled', didHover)
     .on('mouseenter', 'trails-pointer-targets', didHover);
 
   map
@@ -748,11 +735,9 @@ window.onload = (event) => {
       selectEntity(null);
     })
     .on('click', 'trail-pois', didClick)
-    .on('click', 'trail-pois-labeled', didClick)
     .on('click', 'trails-pointer-targets', didClick);
 
   map
     .on('mouseleave', 'trail-pois', didUnhover)
-    .on('mouseleave', 'trails-pois-labeled', didUnhover)
     .on('mouseleave', 'trails-pointer-targets', didUnhover);
 }
