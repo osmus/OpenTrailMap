@@ -1,6 +1,14 @@
 
 var mode = "foot";
 
+var colors = {
+  public: "#005908",
+  noaccess: "#A2D61D",
+  unspecified: "#8e00cc",
+  labelHalo: "#fff",
+  selection: "yellow",
+};
+
 var selectedEntity;
 var hoveredEntity;
 
@@ -326,7 +334,7 @@ window.onload = (event) => {
       },
       "paint": {
         "line-opacity": 0.25,
-        "line-color": "yellow",
+        "line-color": colors.selection,
         "line-width": hoverLineWidth,
       },
       "filter": [
@@ -344,7 +352,7 @@ window.onload = (event) => {
           22, 18
         ],
         "circle-opacity": 0.25,
-        "circle-color": "yellow",
+        "circle-color": colors.selection,
       },
       "filter": [
         "==", "OSM_ID", -1 
@@ -360,7 +368,7 @@ window.onload = (event) => {
       },
       "paint": {
         "line-opacity": 0.4,
-        "line-color": "yellow",
+        "line-color": colors.selection,
         "line-width": selectedLineWidth,
       },
       "filter": [
@@ -378,7 +386,7 @@ window.onload = (event) => {
           22, 20
         ],
         "circle-opacity": 0.4,
-        "circle-color": "yellow",
+        "circle-color": colors.selection,
       },
       "filter": [
         "==", "OSM_ID", -1 
@@ -395,7 +403,7 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
-        "line-color": "#005908",
+        "line-color": colors.public,
         "line-dasharray": [2, 2],
       }
     })
@@ -411,7 +419,7 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
-        "line-color": "#A2D61D",
+        "line-color": colors.noaccess,
         "line-dasharray": [2, 2],
       }
     })
@@ -427,7 +435,7 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
-        "line-color": "#ff3a00",
+        "line-color": colors.unspecified,
         "line-dasharray": [2, 2],
       }
     })
@@ -458,7 +466,7 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
-        "line-color": "#ff3a00",
+        "line-color": colors.unspecified,
       }
     })
     .addLayer({
@@ -473,7 +481,7 @@ window.onload = (event) => {
       "paint": {
         "line-opacity": lineOpacity,
         "line-width": lineWidth,
-        "line-color": "#005908",
+        "line-color": colors.public,
       }
     })
     .addLayer({
@@ -488,7 +496,7 @@ window.onload = (event) => {
       },
       "paint": {
         "text-halo-width": 1,
-        "text-halo-color": "#fff",
+        "text-halo-color": colors.labelHalo,
       }
     })
     .addLayer({
