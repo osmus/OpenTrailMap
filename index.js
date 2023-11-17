@@ -37,7 +37,12 @@ function cacheEntities(elements, full) {
 async function fetchOsmEntity(type, id) {
   var key = type[0] + id;
   if (!osmEntityCache[key] || !osmEntityCache[key].full) {
-    var response = await fetch(`https://api.openstreetmap.org/api/0.6/${type}/${id}/full.json`);
+    var url = `https://api.openstreetmap.org/api/0.6/${type}/${id}`;
+    if (type !== 'node') {
+      url += '/full';
+    }
+    url += '.json';
+    var response = await fetch(url);
     var json = await response.json();
     cacheEntities(json && json.elements || [], true);
   }
@@ -84,10 +89,10 @@ async function fetchOsmChangeset(id) {
 
 function selectEntity(entityInfo) {
 
-  if (!selectEntity && !entityInfo) return;
-  if (selectEntity && entityInfo &&
-    selectEntity.id === entityInfo.id &&
-    selectEntity.type === entityInfo.type
+  if (!selectedEntityInfo && !entityInfo) return;
+  if (selectedEntityInfo && entityInfo &&
+    selectedEntityInfo.id === entityInfo.id &&
+    selectedEntityInfo.type === entityInfo.type
   ) return;
 
   selectedEntityInfo = entityInfo;
