@@ -1,6 +1,7 @@
 var map;
 
-var mode = "foot";
+const defaultMode = "foot";
+var mode = defaultMode;
 
 const colors = {
   public: "#005908",
@@ -57,13 +58,23 @@ function selectEntity(entityInfo) {
   });
 }
 
+function setTravelMode(newMode) {
+  if (newMode === null) newMode = defaultMode;
+  if (mode === newMode) return;
+  mode = newMode;
+
+  document.getElementById("travel-mode").value = mode;
+
+  updateMapLayers();
+  setHashParameters({ mode: mode === defaultMode ? null : mode });
+}
+
 window.onload = (event) => {
 
   window.addEventListener("hashchange", updateForHash);
 
   document.getElementById("travel-mode").onchange = function(e) {
-    mode = e.target.value;
-    updateMapLayers();
+    setTravelMode(e.target.value);
   }
 
   try {

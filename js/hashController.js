@@ -13,10 +13,15 @@ function setHashParameters(params) {
   }
 }
 
-function entityInfoFromHash() {
+function hashValue(key) {
   var searchParams = new URLSearchParams(window.location.hash.slice(1));
-  if (searchParams.has("selected")) {
-    var value = searchParams.get("selected");
+  if (searchParams.has(key)) return searchParams.get(key);
+  return null;
+}
+
+function entityInfoFromHash() {
+  var value = hashValue("selected");
+  if (value) {
     var components = value.split("/");
     if (components.length == 2) {
       var type = components[0];
@@ -32,6 +37,7 @@ function entityInfoFromHash() {
   return null;
 }
 
-function updateForHash() {
+function updateForHash() { 
+  setTravelMode(hashValue("mode"));
   selectEntity(entityInfoFromHash());
 }

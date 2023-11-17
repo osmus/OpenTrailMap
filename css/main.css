@@ -135,7 +135,10 @@ h1, h2, h3, h4, h5, h6 {
   width: 100%;
   appearance: none;
   -webkit-appearance: none;
-  border-color: #ddd;
+  -moz-appearance:none;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
   padding: 4px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
