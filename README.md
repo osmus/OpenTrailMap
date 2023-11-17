@@ -5,8 +5,9 @@ _[opentrailmap.us](https://opentrailmap.us)_
 This is a web map application for viewing [OpenStreetMap](https://openstreetmap.org/about) trail data. The tool supports our [Trails Stewardship Initiative](https://openstreetmap.us/our-work/trails/), a community project to improve the quality of trail data in OpenStreetMap. The tool is still in early development, so now is a great time to get involved!
 
 ## UI features
-- Select between different travel modes ([`foot`](https://wiki.openstreetmap.org/wiki/Key:foot)/[`wheelchair`](https://wiki.openstreetmap.org/wiki/Key:wheelchair)/[`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle)/[`horse`](https://wiki.openstreetmap.org/wiki/Key:horse)/[`atv`](https://wiki.openstreetmap.org/wiki/Key:atv)).
-- Click a feature to view its current tags and metadata.
+- Show maps for different travel modes ([`foot`](https://wiki.openstreetmap.org/wiki/Key:foot), [`wheelchair`](https://wiki.openstreetmap.org/wiki/Key:wheelchair), [`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle), [`horse`](https://wiki.openstreetmap.org/wiki/Key:horse), [`atv`](https://wiki.openstreetmap.org/wiki/Key:atv)).
+- Show maps for the completedness of various trail tags ([`operator`](https://wiki.openstreetmap.org/wiki/Key:operator), [`surface`](https://wiki.openstreetmap.org/wiki/Key:surface), [`smoothness`](https://wiki.openstreetmap.org/wiki/Key:smoothness), [`trail_visibility`](https://wiki.openstreetmap.org/wiki/Key:trail_visibility), [`width`](https://wiki.openstreetmap.org/wiki/Key:width), [`incline`](https://wiki.openstreetmap.org/wiki/Key:incline))
+- Click a feature to view its current tags, relations, and metadata.
 - Use quick links to open the feature on [openstreetmap.org](https://openstreetmap.org), iD, JOSM, and other viewers.
 
 ## Trails layer
