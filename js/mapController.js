@@ -80,6 +80,55 @@ var impliedNoExpressions = {
 };
 
 function updateMapLayers() {
+  if (basicMapStyles.includes(mapStyle)) {
+    updateMapLayersForTravelMode(mapStyle);
+  } else {
+    map
+      .setLayoutProperty('disallowed-paths', 'visibility', 'none')
+      .setLayoutProperty('disallowed-informal-paths', 'visibility', 'none');
+    
+    updateMapLayersForAdvanced(mapStyle);
+  }
+}
+
+function updateMapLayersForAdvanced(key) {
+
+  map
+    .setFilter('paths', [
+      "all",
+      ["has", key],
+      ["!=", "informal", "yes"]
+    ])
+    .setFilter('informal-paths', [
+      "all",
+      ["has", key],
+      ["==", "informal", "yes"]
+    ])
+    .setFilter('unspecified-paths', [
+      "all",
+      ["!has", key],
+      ["!=", "informal", "yes"]
+    ])
+    .setFilter('unspecified-informal-paths', [
+      "all",
+      ["!has", key],
+      ["==", "informal", "yes"]
+    ]);
+
+  if (key === 'operator') {
+    // if a path is `informal=yes` then there's probably no operator, always style as complete
+    map
+      .setFilter('informal-paths', [
+        "all",
+        ["==", "informal", "yes"]
+      ]);
+    map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'none');
+  } else {
+    map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible');
+  }
+}
+
+function updateMapLayersForTravelMode(mode) {
 
   var unspecifiedExpression = [
     "any",
@@ -132,11 +181,21 @@ function updateMapLayers() {
     );
   }
   
-  map.setFilter('paths', [
+  map
+    .setLayoutProperty('disallowed-paths', 'visibility', 'visible')
+    .setLayoutProperty('disallowed-informal-paths', 'visibility', 'visible')
+    .setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible')
+    .setFilter('paths', [
       "all",
       allowedExpression,
       ["none", unspecifiedExpression],
       ["!=", "informal", "yes"]
+    ])
+    .setFilter('informal-paths', [
+      "all",
+      allowedExpression,
+      ["none", unspecifiedExpression],
+      ["==", "informal", "yes"]
     ])
     .setFilter('disallowed-paths', [
       "all",
@@ -150,20 +209,15 @@ function updateMapLayers() {
       ["none", unspecifiedExpression],
       ["==", "informal", "yes"]
     ])
-    .setFilter('informal-paths', [
-      "all",
-      allowedExpression,
-      ["none", unspecifiedExpression],
-      ["==", "informal", "yes"]
-    ]).setFilter('unspecified-informal-paths', [
-      "all",
-      unspecifiedExpression,
-      ["==", "informal", "yes"]
-    ])
     .setFilter('unspecified-paths', [
       "all",
       unspecifiedExpression,
       ["!=", "informal", "yes"]
+    ])
+    .setFilter('unspecified-informal-paths', [
+      "all",
+      unspecifiedExpression,
+      ["==", "informal", "yes"]
     ]);
 }
 

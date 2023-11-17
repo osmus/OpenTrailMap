@@ -37,12 +37,21 @@
       <div id="map-wrap">
         <div id="map"></div>
         <div id="controls">
-          <select id="travel-mode">
-            <option value="foot" selected>Hiking & Walking Trails</option>
-            <option value="wheelchair">Wheelchair Trails</option>
-            <option value="bicycle">Biking Trails</option>
-            <option value="horse">Horseback Riding Trails</option>
-            <option value="atv">ATV Trails</option>
+          <select id="map-style">
+            <option value="foot" selected>Hiking & Walking</option>
+            <option value="wheelchair">Wheelchair</option>
+            <option value="bicycle">Biking</option>
+            <option value="horse">Horseback Riding</option>
+            <option value="atv">ATV</option>
+            <option value="advanced">Advanced</option>
+          </select>
+          <select id="advanced-style" style="display: none;">
+            <option value="operator">Operator</option>
+            <option value="surface">Surface</option>
+            <option value="smoothness">Smoothness</option>
+            <option value="trail_visibility">Trail Visibility</option>
+            <option value="width">Width</option>
+            <option value="incline">Incline</option>
           </select>
         </div>
       </div>

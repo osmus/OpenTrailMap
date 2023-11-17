@@ -1,7 +1,16 @@
 var map;
 
-const defaultMode = "foot";
-var mode = defaultMode;
+const basicMapStyles = [
+  "foot",
+  "wheelchair",
+  "bicycle",
+  "horse",
+  "atv"
+];
+const defaultMapStyle = "foot";
+const defaultAdvancedStyle = "operator";
+var mapStyle = defaultMapStyle;
+var lastAdvancedStyle = defaultAdvancedStyle;
 
 const colors = {
   public: "#005908",
@@ -58,24 +67,34 @@ function selectEntity(entityInfo) {
   });
 }
 
-function setTravelMode(newMode) {
-  if (newMode === null) newMode = defaultMode;
-  if (mode === newMode) return;
-  mode = newMode;
+function setMapStyle(newMapStyle) {
+  if (newMapStyle === null) newMapStyle = defaultMapStyle;
+  if (newMapStyle === 'advanced') newMapStyle = lastAdvancedStyle;
+  if (mapStyle === newMapStyle) return;
+  mapStyle = newMapStyle;
 
-  document.getElementById("travel-mode").value = mode;
+  if (!basicMapStyles.includes(mapStyle)) {
+    lastAdvancedStyle = mapStyle
+  }
+
+  document.getElementById("map-style").value = basicMapStyles.includes(mapStyle) ? mapStyle : 'advanced';
+  document.getElementById("advanced-style").value = mapStyle;
+  document.getElementById("advanced-style").style.display = basicMapStyles.includes(mapStyle) ? 'none' : 'block';
 
   updateMapLayers();
-  setHashParameters({ mode: mode === defaultMode ? null : mode });
+  setHashParameters({ style: mapStyle === defaultMapStyle ? null : mapStyle });
 }
 
 window.onload = (event) => {
 
   window.addEventListener("hashchange", updateForHash);
 
-  document.getElementById("travel-mode").onchange = function(e) {
-    setTravelMode(e.target.value);
+  function mapStyleChangeEvent(e) {
+    setMapStyle(e.target.value);
   }
+
+  document.getElementById("map-style").addEventListener('change', mapStyleChangeEvent);
+  document.getElementById("advanced-style").addEventListener('change', mapStyleChangeEvent); 
 
   try {
     maptilerApiKey;

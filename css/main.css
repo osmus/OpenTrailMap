@@ -124,7 +124,6 @@ h1, h2, h3, h4, h5, h6 {
   left: 10px;
   top: 20px;
   z-index: 2;
-  background: white;
   border-radius: 5px;
 }
 #controls select {
@@ -141,6 +140,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: 5px;
   padding: 4px;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+  margin-bottom: 8px;
 }
 #attribution-logo {
   position: absolute;
