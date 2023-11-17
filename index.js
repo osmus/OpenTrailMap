@@ -89,10 +89,8 @@ async function fetchOsmChangeset(id) {
 
 function selectEntity(entityInfo) {
 
-  if (!selectedEntityInfo && !entityInfo) return;
-  if (selectedEntityInfo && entityInfo &&
-    selectedEntityInfo.id === entityInfo.id &&
-    selectedEntityInfo.type === entityInfo.type
+  if (selectedEntityInfo?.id === entityInfo?.id &&
+    selectedEntityInfo?.type === entityInfo?.type
   ) return;
 
   selectedEntityInfo = entityInfo;
@@ -499,11 +497,7 @@ function updateLayers() {
     ]);
 }
 
-/*window.addEventListener("hashchange", function () {
-  updateForHash();
-});*/
-
-function updateForHash() {
+function entityInfoFromHash() {
   var searchParams = new URLSearchParams(window.location.hash.slice(1));
   if (searchParams.has("selected")) {
     var value = searchParams.get("selected");
@@ -512,13 +506,18 @@ function updateForHash() {
       var type = components[0];
       var id = parseInt(components[1]);
       if (["node", "way", "relation"].includes(type)) {
-        selectEntity({
+        return {
           type: type,
           id: id,
-        });
+        };
       }
     }
   }
+  return null;
+}
+
+function updateForHash() {
+  selectEntity(entityInfoFromHash());
 }
 
 function loadInitialMap() {
@@ -790,6 +789,10 @@ function loadInitialMap() {
 }
 
 window.onload = (event) => {
+
+  window.addEventListener("hashchange", function () {
+    updateForHash();
+  });
 
   document.getElementById("travel-mode").onchange = function(e) {
     mode = e.target.value;
