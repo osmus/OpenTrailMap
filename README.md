@@ -2,9 +2,7 @@
 
 _[opentrailmap.us](https://opentrailmap.us)_
 
-This is a web map application for viewing [OpenStreetMap](https://openstreetmap.org/about) trail data. The tool supports our [Trails Stewardship Initiative](https://openstreetmap.us/our-work/trails/), a community project to improve the quality of trail data in OpenStreetMap.
-
-The tool is still in development and is subject to change. Have ideas? Please open an [issue](https://github.com/osmus/OpenTrailMap/issues) :)
+This is a web map application for viewing [OpenStreetMap](https://openstreetmap.org/about) trail data. The tool supports our [Trails Stewardship Initiative](https://openstreetmap.us/our-work/trails/), a community project to improve the quality of trail data in OpenStreetMap. The tool is still in early development, so now is a great time to get involved!
 
 ## UI features
 - Select between different travel modes ([`foot`](https://wiki.openstreetmap.org/wiki/Key:foot)/[`wheelchair`](https://wiki.openstreetmap.org/wiki/Key:wheelchair)/[`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle)/[`horse`](https://wiki.openstreetmap.org/wiki/Key:horse)/[`atv`](https://wiki.openstreetmap.org/wiki/Key:atv)).
@@ -29,8 +27,9 @@ Some trail-related POIs are included on the map:
 
 ## Get involved
 - Join the [#opentrailmap](https://osmus.slack.com/archives/opentrailmap) channel on [OpenStreetMap US Slack](https://openstreetmap.us/slack).
+- Browse or open an [issue](https://github.com/osmus/OpenTrailMap/issues) or [pull request](https://github.com/osmus/OpenTrailMap/pulls).
 
-## Development setup
+### Development setup
 1. [Clone the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 2. Open your terminal and `cd` into the repo's directory
 3. Run `node serve.js` to start the development server
@@ -39,7 +38,7 @@ Some trail-related POIs are included on the map:
 
 OpenTrailMap currently has no package dependencies.
 
-## Code of Conduct
+### Code of Conduct
 
 Participation in OpenTrailMap is subject to the [OpenStreetMap US Code of Conduct](https://wiki.openstreetmap.org/wiki/Foundation/Local_Chapters/United_States/Code_of_Conduct_Committee/OSM_US_Code_of_Conduct). Please take a moment to review the CoC prior to contributing, and remember to be nice :)
 
