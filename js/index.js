@@ -15,6 +15,7 @@ var lastAdvancedStyle = defaultAdvancedStyle;
 const colors = {
   public: "#005908",
   noaccess: "#A2D61D",
+  specified: "#007f79",
   unspecified: "#8e00cc",
   label: "#000",
   poiLabel: "#4A282A",

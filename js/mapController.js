@@ -83,10 +83,6 @@ function updateMapLayers() {
   if (basicMapStyles.includes(mapStyle)) {
     updateMapLayersForTravelMode(mapStyle);
   } else {
-    map
-      .setLayoutProperty('disallowed-paths', 'visibility', 'none')
-      .setLayoutProperty('disallowed-informal-paths', 'visibility', 'none');
-    
     updateMapLayersForAdvanced(mapStyle);
   }
 }
@@ -94,6 +90,10 @@ function updateMapLayers() {
 function updateMapLayersForAdvanced(key) {
 
   map
+    .setLayoutProperty('disallowed-paths', 'visibility', 'none')
+    .setLayoutProperty('disallowed-informal-paths', 'visibility', 'none')
+    .setPaintProperty('paths', 'line-color', colors.specified)
+    .setPaintProperty('informal-paths', 'line-color', colors.specified)
     .setFilter('paths', [
       "all",
       ["has", key],
@@ -185,6 +185,8 @@ function updateMapLayersForTravelMode(mode) {
     .setLayoutProperty('disallowed-paths', 'visibility', 'visible')
     .setLayoutProperty('disallowed-informal-paths', 'visibility', 'visible')
     .setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible')
+    .setPaintProperty('paths', 'line-color', colors.public)
+    .setPaintProperty('informal-paths', 'line-color', colors.public)
     .setFilter('paths', [
       "all",
       allowedExpression,
