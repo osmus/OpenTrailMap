@@ -105,10 +105,11 @@ function selectEntity(entityInfo) {
   });
 
   updateMapForSelection();
-  clearHoverIfSelected();
   updateForHover();
 
   updateSidebar(selectedEntityInfo);
+
+  if (!selectedEntityInfo) return;
 
   fetchOsmEntity(type, entityId).then(function(entity) {
     if (entity) {
@@ -177,25 +178,6 @@ function setHashParameters(params) {
   }
 }
 
-
-function clearHoverIfSelected() {
-  if (hoveredEntityInfo && selectedEntityInfo &&
-    hoveredEntityInfo.id == selectedEntityInfo.id &&
-    hoveredEntityInfo.type == selectedEntityInfo.type) {
-    hoveredEntityInfo = null;
-  }
-}
-
-function didHover(e) {
-  // Change the cursor style as a UI indicator.
-  map.getCanvas().style.cursor = 'pointer';
-
-  hoveredEntityInfo = entityForEvent(e);
-  clearHoverIfSelected();
-  updateForHover();
-  e.stopPropagation();
-}
-
 function updateTagsTable(tags) {
   var html = "";
   html += `<tr><th>Key</th><th>Value</th></tr>`;
@@ -255,7 +237,8 @@ function updateMetaTable(entity, changeset) {
 }
 
 function entityForEvent(e) {
-  var feature = e.features.length && e.features[0];
+  var features = map.queryRenderedFeatures(e.point, {layers: ['trail-pois', 'trails-pointer-targets']});
+  var feature = features.length && features[0];
   if (feature && feature.properties.OSM_ID) {
     var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
     return {
@@ -267,9 +250,22 @@ function entityForEvent(e) {
   return null;
 }
 
-function didClick(e) {
+function didClickMap(e) {
   selectEntity(entityForEvent(e));
-  e.stopPropagation();
+}
+
+function didMouseMoveMap(e) {
+  var newHoveredEntityInfo = entityForEvent(e);
+
+  if (hoveredEntityInfo?.id != newHoveredEntityInfo?.id ||
+    hoveredEntityInfo?.type != newHoveredEntityInfo?.type) {
+    hoveredEntityInfo = newHoveredEntityInfo;
+    
+    // Change the cursor style as a UI indicator
+    map.getCanvas().style.cursor = hoveredEntityInfo ? 'pointer' : '';
+
+    updateForHover();
+  }
 }
 
 function updateSidebar(entity) {
@@ -322,20 +318,18 @@ function updateSidebar(entity) {
 }
 
 function updateForHover() {
-  var type = hoveredEntityInfo && hoveredEntityInfo.type;
-  var entityId = hoveredEntityInfo && hoveredEntityInfo.id;
+  var type = hoveredEntityInfo?.type;
+  var entityId = hoveredEntityInfo?.id || -1;
 
-  // disable hover indicator for now
-  // map.setFilter('hovered-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
-  // map.setFilter('hovered-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
+  if (hoveredEntityInfo?.id == selectedEntityInfo?.id &&
+    hoveredEntityInfo?.type == selectedEntityInfo?.type) {
+    // don't show hover styling if already selected
+    entityId = -1;
+  }
+
+  map.setFilter('hovered-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
+  map.setFilter('hovered-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
 }
-
-function didUnhover() {
-  map.getCanvas().style.cursor = '';
-  hoveredEntityInfo = null;
-  updateForHover();
-}
-
 
 var impliedYesExpressions = {
   atv: [
@@ -789,6 +783,10 @@ function loadInitialMap() {
 
   updateLayers();
   updateForHash();
+
+  // only add UI handlers after we've loaded the layers
+  map.on('mousemove', didMouseMoveMap)
+    .on('click', didClickMap);
 }
 
 window.onload = (event) => {
@@ -844,20 +842,6 @@ window.onload = (event) => {
     map.addImage('ranger_station-icon', image, { pixelRatio: 2 });
   });
 
-  map.on('load', loadInitialMap);
-
   map
-    .on('mouseenter', 'trail-pois', didHover)
-    .on('mouseenter', 'trails-pointer-targets', didHover);
-
-  map
-    .on('click', function() {
-      selectEntity(null);
-    })
-    .on('click', 'trail-pois', didClick)
-    .on('click', 'trails-pointer-targets', didClick);
-
-  map
-    .on('mouseleave', 'trail-pois', didUnhover)
-    .on('mouseleave', 'trails-pointer-targets', didUnhover);
+    .on('load', loadInitialMap);
 }
