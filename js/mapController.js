@@ -80,7 +80,9 @@ var impliedNoExpressions = {
 };
 
 function updateMapLayers() {
-  if (basicMapStyles.includes(mapStyle)) {
+  if (mapStyle === 'access') {
+    updateMapLayersForAllAccess();
+  } else if (basicMapStyles.includes(mapStyle)) {
     updateMapLayersForTravelMode(mapStyle);
   } else {
     updateMapLayersForAdvanced(mapStyle);
@@ -128,59 +130,7 @@ function updateMapLayersForAdvanced(key) {
   }
 }
 
-function updateMapLayersForTravelMode(mode) {
-
-  var unspecifiedExpression = [
-    "any",
-    [
-      "all",
-      ["!has", mode],
-      ["!=", "access", "no"],
-      ["!=", "access", "private"],
-      ["!=", "access", "discouraged"],
-      [
-        "none",
-        ...impliedYesExpressions[mode],
-        ...impliedNoExpressions[mode]
-      ]
-    ],
-    // access if always unspecified if mode is explicitly set to `unknown`
-    ["==", mode, "unknown"],
-  ];
-
-  var allowedExpression = [
-    "all",
-    [
-      "any",
-      [
-        "all",
-        ["!has", mode],
-        ["!=", "access", "no"],
-        ["!=", "access", "private"],
-        ["!=", "access", "discouraged"],
-      ],
-      [
-        "all",
-        ["has", mode],
-        ["!=", mode, "no"],
-        ["!=", mode, "private"],
-        ["!=", mode, "discouraged"],
-        ["!=", mode, "limited"], // for `wheelchair`
-      ],
-    ],
-  ];
-  if (impliedNoExpressions[mode]) {
-    allowedExpression.push(
-      [
-        "any",
-        ["has", mode],
-        ["none",
-          ...impliedNoExpressions[mode],
-        ],
-      ]
-    );
-  }
-  
+function updateMapLayersForAccess(allowedExpression, unspecifiedExpression) {
   map
     .setLayoutProperty('disallowed-paths', 'visibility', 'visible')
     .setLayoutProperty('disallowed-informal-paths', 'visibility', 'visible')
@@ -221,6 +171,95 @@ function updateMapLayersForTravelMode(mode) {
       unspecifiedExpression,
       ["==", "informal", "yes"]
     ]);
+}
+
+function notNoAccessExpressions(mode) {
+  return [
+    ["!=", mode, "no"],
+    ["!=", mode, "private"],
+    ["!=", mode, "discouraged"],
+    ["!=", mode, "customers"],
+    ["!=", mode, "limited"], // for `wheelchair`
+  ];
+}
+
+function modeIsAllowedExpression(mode) {
+  var allowedExpression = [
+    "all",
+    [
+      "any",
+      [
+        "all",
+        ["!has", mode],
+        ...notNoAccessExpressions("access"),
+      ],
+      [
+        "all",
+        ["has", mode],
+        ...notNoAccessExpressions(mode),
+      ],
+    ],
+  ];
+  if (impliedNoExpressions[mode]) {
+    allowedExpression.push(
+      [
+        "any",
+        ["has", mode],
+        ["none",
+          ...impliedNoExpressions[mode],
+        ],
+      ]
+    );
+  }
+  return allowedExpression;
+}
+
+function updateMapLayersForAllAccess() {
+
+  var unspecifiedExpression = [
+    "any",
+    // access not fully unspecified if any access tag is explicitly set to `unknown`
+    ["==", "access", "unknown"],
+    ["==", "foot", "unknown"],
+    ["==", "wheelchair", "unknown"],
+    ["==", "bicycle", "unknown"],
+    ["==", "horse", "unknown"],
+    ["==", "atv", "unknown"],
+  ];
+
+  var allowedExpression = [
+    "any",
+    modeIsAllowedExpression("foot"),
+    modeIsAllowedExpression("wheelchair"),
+    modeIsAllowedExpression("bicycle"),
+    modeIsAllowedExpression("horse"),
+    modeIsAllowedExpression("atv"),
+  ];
+
+  updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
+}
+
+function updateMapLayersForTravelMode(mode) {
+
+  var unspecifiedExpression = [
+    "any",
+    [
+      "all",
+      ["!has", mode],
+      ...notNoAccessExpressions("access"),
+      [
+        "none",
+        ...impliedYesExpressions[mode],
+        ...impliedNoExpressions[mode]
+      ]
+    ],
+    // access if always unspecified if mode is explicitly set to `unknown`
+    ["==", mode, "unknown"],
+  ];
+
+  var allowedExpression = modeIsAllowedExpression(mode);
+
+  updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
 }
 
 function loadInitialMap() {

@@ -8,7 +8,7 @@ const basicMapStyles = [
   "atv"
 ];
 const defaultMapStyle = "foot";
-const defaultAdvancedStyle = "operator";
+const defaultAdvancedStyle = "access";
 var mapStyle = defaultMapStyle;
 var lastAdvancedStyle = defaultAdvancedStyle;
 
@@ -70,7 +70,7 @@ function selectEntity(entityInfo) {
 
 function setMapStyle(newMapStyle) {
   if (newMapStyle === null) newMapStyle = defaultMapStyle;
-  if (newMapStyle === 'advanced') newMapStyle = lastAdvancedStyle;
+  if (newMapStyle === 'all') newMapStyle = lastAdvancedStyle;
   if (mapStyle === newMapStyle) return;
   mapStyle = newMapStyle;
 
@@ -78,7 +78,7 @@ function setMapStyle(newMapStyle) {
     lastAdvancedStyle = mapStyle
   }
 
-  document.getElementById("map-style").value = basicMapStyles.includes(mapStyle) ? mapStyle : 'advanced';
+  document.getElementById("map-style").value = basicMapStyles.includes(mapStyle) ? mapStyle : 'all';
   document.getElementById("advanced-style").value = mapStyle;
   document.getElementById("advanced-style").style.display = basicMapStyles.includes(mapStyle) ? 'none' : 'block';
 
@@ -110,8 +110,8 @@ window.onload = (event) => {
     container: 'map',
     hash: "map",
     style: 'https://api.maptiler.com/maps/dataviz/style.json?key=' + maptilerApiKey,
-    center: [-97.9, 38.6],
-    zoom: 3
+    center: [-111, 39],
+    zoom: 5
   });
 
   // Add zoom and rotation controls to the map.
