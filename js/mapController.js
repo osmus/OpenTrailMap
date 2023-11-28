@@ -455,20 +455,6 @@ function loadInitialMap() {
       "line-color": colors.bgwater,
     }
   }).addLayer({
-    "id": "waterways",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "butt",
-      "line-join": "round"
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.water,
-    }
-  }).addLayer({
     "id": "informal-paths",
     "source": "trails",
     "source-layer": "trail",
@@ -544,6 +530,21 @@ function loadInitialMap() {
       //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.unspecified,
+    }
+  })
+  .addLayer({
+    "id": "waterways",
+    "source": "trails",
+    "source-layer": "trail",
+    "type": "line",
+    "layout": {
+      "line-cap": "butt",
+      "line-join": "round"
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.water,
     }
   })
   .addLayer({
