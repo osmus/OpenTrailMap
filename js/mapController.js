@@ -166,21 +166,25 @@ function updateMapLayersForAdvanced(key) {
       "all",
       ["has", key],
       ["!=", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('informal-paths', [
       "all",
       ["has", key],
-      ["==", "informal", "yes"]
+      ["==", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('unspecified-paths', [
       "all",
       ["!has", key],
-      ["!=", "informal", "yes"]
+      ["!=", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('unspecified-informal-paths', [
       "all",
       ["!has", key],
-      ["==", "informal", "yes"]
+      ["==", "informal", "yes"],
+      ["has", "highway"],
     ]);
 
   if (key === 'operator') {
@@ -188,7 +192,8 @@ function updateMapLayersForAdvanced(key) {
     map
       .setFilter('informal-paths', [
         "all",
-        ["==", "informal", "yes"]
+        ["==", "informal", "yes"],
+        ["has", "highway"],
       ]);
     map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'none');
   } else {
