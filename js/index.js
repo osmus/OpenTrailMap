@@ -7,6 +7,7 @@ const basicMapStyles = [
   "horse",
   "atv",
   "canoe",
+  "snowmobile",
 ];
 const defaultMapStyle = "foot";
 const defaultAdvancedStyle = "access";

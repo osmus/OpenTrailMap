@@ -26,10 +26,25 @@ var impliedYesExpressions = {
     ["==", "smoothness", "intermediate"],
   ],
   canoe: [],
+  snowmobile: [],
 };
 
 var impliedNoExpressions = {
   atv: [
+    [
+      "any",
+      ["==", "highway", "footway"],
+      ["==", "highway", "steps"],
+      ["==", "vehicle", "no"],
+      ["==", "vehicle", "private"],
+      ["==", "vehicle", "discouraged"],
+      ["==", "motor_vehicle", "no"],
+      ["==", "motor_vehicle", "private"],
+      ["==", "motor_vehicle", "discouraged"],
+      ["!has", "highway"],
+    ]
+  ],
+  snowmobile: [
     [
       "any",
       ["==", "highway", "footway"],
