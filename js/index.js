@@ -146,6 +146,10 @@ window.onload = (event) => {
     if (error) throw error;
     map.addImage('ranger_station-icon', image, { pixelRatio: 2 });
   });
+  map.loadImage('img/map/canoe.png', (error, image) => {
+    if (error) throw error;
+    map.addImage('canoe-icon', image, { pixelRatio: 2 });
+  });
 
   map
     .on('load', loadInitialMap);

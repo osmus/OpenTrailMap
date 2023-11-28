@@ -362,9 +362,10 @@ function loadInitialMap() {
       22, 0.4
     ];
   var poiIconImage = [
-      "match", ["get", "amenity"],
-      "ranger_station", ["image", "ranger_station-icon"],
-      ["image", "trailhead-icon"]
+      "case",
+      ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station-icon"],
+      ['==', ["get", "highway"], "trailhead"], ["image", "trailhead-icon"],
+      ["image", "canoe-icon"]
     ];
   var poiIconSize = [
       "interpolate", ["linear"], ["zoom"],
