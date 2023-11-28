@@ -5,7 +5,8 @@ const basicMapStyles = [
   "wheelchair",
   "bicycle",
   "horse",
-  "atv"
+  "atv",
+  "canoe",
 ];
 const defaultMapStyle = "foot";
 const defaultAdvancedStyle = "access";
@@ -17,6 +18,8 @@ const colors = {
   noaccess: "#A2D61D",
   specified: "#007f79",
   unspecified: "#8e00cc",
+  bgwater: "#a6b2c4",
+  water: "#003b93",
   label: "#000",
   poiLabel: "#4A282A",
   labelHalo: "rgba(255, 255, 255, 1)",

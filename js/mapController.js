@@ -25,6 +25,7 @@ var impliedYesExpressions = {
     ["==", "smoothness", "good"],
     ["==", "smoothness", "intermediate"],
   ],
+  canoe: [],
 };
 
 var impliedNoExpressions = {
@@ -39,6 +40,7 @@ var impliedNoExpressions = {
       ["==", "motor_vehicle", "no"],
       ["==", "motor_vehicle", "private"],
       ["==", "motor_vehicle", "discouraged"],
+      ["!has", "highway"],
     ]
   ],
   bicycle: [
@@ -52,11 +54,21 @@ var impliedNoExpressions = {
       ["==", "vehicle", "no"],
       ["==", "vehicle", "private"],
       ["==", "vehicle", "discouraged"],
+      ["!has", "highway"],
     ]
   ],
-  foot: [],
+  foot: [
+    ["!has", "highway"],
+  ],
+  canoe: [
+    ["!has", "canoe"],
+  ],
   horse: [
-    ["==", "highway", "steps"],
+    [
+      "any",
+      ["==", "highway", "steps"],
+      ["!has", "highway"],
+    ],
   ],
   wheelchair: [
     [
@@ -74,7 +86,8 @@ var impliedNoExpressions = {
         ["!=", "smoothness", "very_good"],
         ["!=", "smoothness", "good"],
         ["!=", "smoothness", "intermediate"],
-      ]
+      ],
+      ["!has", "highway"],
     ]
   ],
 };
@@ -86,6 +99,44 @@ function updateMapLayers() {
     updateMapLayersForTravelMode(mapStyle);
   } else {
     updateMapLayersForAdvanced(mapStyle);
+  }
+
+  if (mapStyle === 'canoe') {
+    map
+      .setFilter('disallowed-waterways', [
+        "all",
+        ["!has", "highway"],
+        [
+          "none",
+          [
+            "all",
+            ...notNoAccessExpressions('canoe'),
+          ]
+        ],
+      ])
+      .setFilter('waterways', [
+        "all",
+        ["!has", "highway"],
+        ...notNoAccessExpressions('canoe'),
+      ])
+      .setLayoutProperty('waterways', 'visibility', 'visible')
+      .setFilter('trail-pois', [
+        "any",
+        ["==", "amenity", "ranger_station"],
+        ["==", "canoe", "put_in"],
+      ]);
+  } else {
+    map.setFilter('disallowed-waterways', [
+      "all",
+      ["!has", "highway"],
+      ...notNoAccessExpressions('canoe'),
+    ])
+    .setLayoutProperty('waterways', 'visibility', 'none')
+    .setFilter('trail-pois', [
+      "any",
+      ["==", "amenity", "ranger_station"],
+      ["==", "highway", "trailhead"],
+    ]);
   }
 }
 
@@ -99,7 +150,7 @@ function updateMapLayersForAdvanced(key) {
     .setFilter('paths', [
       "all",
       ["has", key],
-      ["!=", "informal", "yes"]
+      ["!=", "informal", "yes"],
     ])
     .setFilter('informal-paths', [
       "all",
@@ -141,35 +192,41 @@ function updateMapLayersForAccess(allowedExpression, unspecifiedExpression) {
       "all",
       allowedExpression,
       ["none", unspecifiedExpression],
-      ["!=", "informal", "yes"]
+      ["!=", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('informal-paths', [
       "all",
       allowedExpression,
       ["none", unspecifiedExpression],
-      ["==", "informal", "yes"]
+      ["==", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('disallowed-paths', [
       "all",
       ["none", allowedExpression],
       ["none", unspecifiedExpression],
-      ["!=", "informal", "yes"]
+      ["!=", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('disallowed-informal-paths', [
       "all",
       ["none", allowedExpression],
       ["none", unspecifiedExpression],
-      ["==", "informal", "yes"]
+      ["==", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('unspecified-paths', [
       "all",
       unspecifiedExpression,
-      ["!=", "informal", "yes"]
+      ["!=", "informal", "yes"],
+      ["has", "highway"],
     ])
     .setFilter('unspecified-informal-paths', [
       "all",
       unspecifiedExpression,
-      ["==", "informal", "yes"]
+      ["==", "informal", "yes"],
+      ["has", "highway"],
     ]);
 }
 
@@ -290,9 +347,9 @@ function loadInitialMap() {
       22, 0.4
     ];
   var poiIconImage = [
-      "match", ["get", "highway"],
-      "trailhead", ["image", "trailhead-icon"],
-      ["image", "ranger_station-icon"]
+      "match", ["get", "amenity"],
+      "ranger_station", ["image", "ranger_station-icon"],
+      ["image", "trailhead-icon"]
     ];
   var poiIconSize = [
       "interpolate", ["linear"], ["zoom"],
@@ -369,6 +426,34 @@ function loadInitialMap() {
       "==", "OSM_ID", -1 
     ]
   }).addLayer({
+    "id": "disallowed-waterways",
+    "source": "trails",
+    "source-layer": "trail",
+    "type": "line",
+    "layout": {
+      "line-cap": "butt",
+      "line-join": "round"
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.bgwater,
+    }
+  }).addLayer({
+    "id": "waterways",
+    "source": "trails",
+    "source-layer": "trail",
+    "type": "line",
+    "layout": {
+      "line-cap": "butt",
+      "line-join": "round"
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.water,
+    }
+  }).addLayer({
     "id": "informal-paths",
     "source": "trails",
     "source-layer": "trail",
@@ -378,7 +463,7 @@ function loadInitialMap() {
       "line-join": "round"
     },
     "paint": {
-      "line-opacity": lineOpacity,
+      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.public,
       "line-dasharray": [2, 2],
@@ -394,7 +479,7 @@ function loadInitialMap() {
       "line-join": "round"
     },
     "paint": {
-      "line-opacity": lineOpacity,
+      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.noaccess,
       "line-dasharray": [2, 2],
@@ -410,7 +495,7 @@ function loadInitialMap() {
       "line-join": "round",
     },
     "paint": {
-      "line-opacity": lineOpacity,
+      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.unspecified,
       "line-dasharray": [2, 2],
@@ -426,7 +511,7 @@ function loadInitialMap() {
       "line-join": "round",
     },
     "paint": {
-      "line-opacity": lineOpacity,
+      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-pattern": ["image", "disallowed-stripes"],
     }
@@ -441,7 +526,7 @@ function loadInitialMap() {
       "line-join": "round",
     },
     "paint": {
-      "line-opacity": lineOpacity,
+      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.unspecified,
     }
@@ -456,7 +541,7 @@ function loadInitialMap() {
       "line-join": "round",
     },
     "paint": {
-      "line-opacity": lineOpacity,
+      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.public,
     }
@@ -583,7 +668,7 @@ function entityForEvent(e) {
   var features = map.queryRenderedFeatures(e.point, {layers: ['trail-pois', 'trails-pointer-targets']});
   var feature = features.length && features[0];
   if (feature && feature.properties.OSM_ID) {
-    var type = feature.sourceLayer.includes("poi") ? 'node' : 'way';
+    var type = (feature.properties.OSM_TYPE === "way" || !feature.sourceLayer.includes("poi")) ? 'way' : 'node';
     return {
       id: feature.properties.OSM_ID,
       type: type,
