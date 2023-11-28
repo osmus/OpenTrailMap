@@ -464,7 +464,7 @@ function loadInitialMap() {
   .addLayer({
     "id": "trails-labels",
     "source": "trails",
-    "source-layer": "trail_name",
+    "source-layer": "trail",
     "type": "symbol",
     "layout": {
       "text-field": ['get', 'name'],
