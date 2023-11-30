@@ -157,6 +157,9 @@ function updateMapLayers() {
 
 function updateMapLayersForAdvanced(key) {
 
+  var has = key === "fixme" ? "!has" : "has";
+  var noHas = key === "fixme" ? "has" : "!has";
+
   map
     .setLayoutProperty('disallowed-paths', 'visibility', 'none')
     .setLayoutProperty('disallowed-informal-paths', 'visibility', 'none')
@@ -164,25 +167,25 @@ function updateMapLayersForAdvanced(key) {
     .setPaintProperty('informal-paths', 'line-color', colors.specified)
     .setFilter('paths', [
       "all",
-      ["has", key],
+      [has, key],
       ["!=", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('informal-paths', [
       "all",
-      ["has", key],
+      [has, key],
       ["==", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('unspecified-paths', [
       "all",
-      ["!has", key],
+      [noHas, key],
       ["!=", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('unspecified-informal-paths', [
       "all",
-      ["!has", key],
+      [noHas, key],
       ["==", "informal", "yes"],
       ["has", "highway"],
     ]);
