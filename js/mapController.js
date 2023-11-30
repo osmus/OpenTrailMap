@@ -690,7 +690,7 @@ function entityForEvent(e) {
   var features = map.queryRenderedFeatures(e.point, {layers: ['trail-pois', 'trails-pointer-targets']});
   var feature = features.length && features[0];
   if (feature && feature.properties.OSM_ID) {
-    var type = (feature.properties.OSM_TYPE === "way" || !feature.sourceLayer.includes("poi")) ? 'way' : 'node';
+    var type = (feature.properties.SRC_GEOM === "polygon" || !feature.sourceLayer.includes("poi")) ? 'way' : 'node';
     return {
       id: feature.properties.OSM_ID,
       type: type,
