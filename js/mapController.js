@@ -155,6 +155,22 @@ function updateMapLayers() {
   }
 }
 
+var checkDateColors = [
+  "interpolate", ["linear"], [
+    "to-number",
+    ["slice", ["get", "check_date"], 0, 4],
+    ["slice", ["get", "survey:date"], 0, 4],
+  ],
+  2010, '#e7e1ef',
+  2014, '#d4b9da',
+  2016, '#c994c7',
+  2018, '#df65b0',
+  2020, '#e7298a',
+  2021, '#ce1256',
+  2022, '#980043',
+  2023, '#67001f',
+];
+
 function updateMapLayersForAdvanced(key) {
 
   var has = key === "fixme" ? "!has" : "has";
@@ -201,6 +217,12 @@ function updateMapLayersForAdvanced(key) {
     map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'none');
   } else {
     map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible');
+  }
+
+  if (mapStyle === 'check_date') {
+    map
+      .setPaintProperty('paths', 'line-color', checkDateColors)
+      .setPaintProperty('informal-paths', 'line-color', checkDateColors);
   }
 }
 
