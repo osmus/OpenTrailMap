@@ -364,7 +364,23 @@ function updateMapLayersForTravelMode(mode) {
   updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
 }
 
-function loadInitialMap() {
+async function loadInitialMap() {
+
+  let response = await fetch('json/focus.json');
+  const json = await response.json();
+
+  // Add as source to the map
+  map.addSource('focus-source', {
+    'type': 'geojson',
+    'data': json
+  });
+  const coordinates = json.features[0].geometry.coordinates[0][1];
+  const bounds = coordinates.reduce((bounds, coord) => {
+    return bounds.extend(coord);
+  }, new maplibregl.LngLatBounds(coordinates[0], coordinates[0]));
+
+  map.setMaxBounds(new maplibregl.LngLatBounds([bounds.getWest()-1.5,bounds.getSouth()-1], [bounds.getEast()+1.5,bounds.getNorth()+1]));
+
   map.addSource("trails", {
     type: "vector",
     url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
@@ -657,6 +673,16 @@ function loadInitialMap() {
   updateMapLayers();
   updateForHash();
 
+  map.addLayer({
+    'id': 'focus',
+    'type': 'fill',
+    'source': 'focus-source',
+    'paint': {
+        'fill-color': '#FBFAF9',
+        'fill-outline-color': '#E2C6C8',
+    },
+  });
+
   // only add UI handlers after we've loaded the layers
   map.on('mousemove', didMouseMoveMap)
     .on('click', didClickMap);
@@ -712,7 +738,7 @@ function updateMapForHover() {
 }
 
 function entityForEvent(e) {
-  var features = map.queryRenderedFeatures(e.point, {layers: ['trail-pois', 'trails-pointer-targets']});
+  var features = map.queryRenderedFeatures(e.point, {layers: ['focus', 'trail-pois', 'trails-pointer-targets']});
   var feature = features.length && features[0];
   if (feature && feature.properties.OSM_ID) {
     var type = (feature.properties.SRC_GEOM === "polygon" || !feature.sourceLayer.includes("poi")) ? 'way' : 'node';

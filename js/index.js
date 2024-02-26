@@ -104,18 +104,18 @@ window.onload = (event) => {
   try {
     maptilerApiKey;
   } catch(e) {
-      if(e.name == "ReferenceError") {
-        // Use the production key if we didn't find a dev key (only works on OSM US domains)
-        maptilerApiKey = "qe6b8locBISzDLGJweZ3";
-      }
+    if(e.name == "ReferenceError") {
+      // Use the production key if we didn't find a dev key (only works on OSM US domains)
+      maptilerApiKey = "qe6b8locBISzDLGJweZ3";
+    }
   }
 
   map = new maplibregl.Map({
     container: 'map',
     hash: "map",
     style: 'https://api.maptiler.com/maps/dataviz/style.json?key=' + maptilerApiKey,
-    center: [-111, 39],
-    zoom: 5
+    center: [-111.545,39.546],
+    zoom: 6
   });
 
   // Add zoom and rotation controls to the map.
