@@ -134,22 +134,14 @@ window.onload = (event) => {
         unit: 'imperial'
     }), "bottom-left");
 
-  map.loadImage('img/disallowed-stripes.png', (error, image) => {
-    if (error) throw error;
-    map.addImage('disallowed-stripes', image);
-  });
-  map.loadImage('img/map/trailhead.png', (error, image) => {
-    if (error) throw error;
-    map.addImage('trailhead-icon', image, { pixelRatio: 2 });
-  });
-  map.loadImage('img/map/ranger_station.png', (error, image) => {
-    if (error) throw error;
-    map.addImage('ranger_station-icon', image, { pixelRatio: 2 });
-  });
-  map.loadImage('img/map/canoe.png', (error, image) => {
-    if (error) throw error;
-    map.addImage('canoe-icon', image, { pixelRatio: 2 });
-  });
+  const imageToLoad = ['disallowed-stripes', 'trailhead', 'ranger-station', 'canoe'];
+
+  for (let i in imageToLoad) {
+    let img = imageToLoad[i];
+    map.loadImage('img/map/' + img + '.png').then(resp => {
+      map.addImage(img, resp.data, { pixelRatio: 2 });
+    });
+  }
 
   map
     .on('load', loadInitialMap);

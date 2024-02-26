@@ -393,9 +393,9 @@ function loadInitialMap() {
     ];
   var poiIconImage = [
       "case",
-      ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station-icon"],
-      ['==', ["get", "highway"], "trailhead"], ["image", "trailhead-icon"],
-      ["image", "canoe-icon"]
+      ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
+      ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
+      ["image", "canoe"]
     ];
   var poiIconSize = [
       "interpolate", ["linear"], ["zoom"],
