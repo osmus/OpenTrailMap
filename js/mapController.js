@@ -364,23 +364,29 @@ function updateMapLayersForTravelMode(mode) {
   updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
 }
 
+let isFocusing;
+
 async function loadInitialMap() {
 
-  let response = await fetch('json/focus.json');
-  const json = await response.json();
+  let isFocusing = hashValue('focus') !== 'no';
 
-  // Add as source to the map
-  map.addSource('focus-source', {
-    'type': 'geojson',
-    'data': json
-  });
-  const coordinates = json.features[0].geometry.coordinates[0][1];
-  const bounds = coordinates.reduce((bounds, coord) => {
-    return bounds.extend(coord);
-  }, new maplibregl.LngLatBounds(coordinates[0], coordinates[0]));
-
-  map.setMaxBounds(new maplibregl.LngLatBounds([bounds.getWest()-1.5,bounds.getSouth()-1], [bounds.getEast()+1.5,bounds.getNorth()+1]));
-
+  if (isFocusing) {
+    const response = await fetch('json/focus.json');
+    const focusJson = await response.json();
+  
+    // Add as source to the map
+    map.addSource('focus-source', {
+      'type': 'geojson',
+      'data': focusJson
+    });
+    const focusCoords = focusJson.features[0].geometry.coordinates[0][1];
+    const focusBounds = focusCoords.reduce((bounds, coord) => {
+      return bounds.extend(coord);
+    }, new maplibregl.LngLatBounds(focusCoords[0], focusCoords[0]));
+  
+    map.setMaxBounds(new maplibregl.LngLatBounds([focusBounds.getWest()-1.5,focusBounds.getSouth()-1], [focusBounds.getEast()+1.5,focusBounds.getNorth()+1]));
+  }
+  
   map.addSource("trails", {
     type: "vector",
     url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
@@ -673,15 +679,17 @@ async function loadInitialMap() {
   updateMapLayers();
   updateForHash();
 
-  map.addLayer({
-    'id': 'focus',
-    'type': 'fill',
-    'source': 'focus-source',
-    'paint': {
-        'fill-color': '#FBFAF9',
-        'fill-outline-color': '#E2C6C8',
-    },
-  });
+  if (isFocusing) {
+    map.addLayer({
+      'id': 'focus',
+      'type': 'fill',
+      'source': 'focus-source',
+      'paint': {
+          'fill-color': '#FBFAF9',
+          'fill-outline-color': '#E2C6C8',
+      },
+    });
+  }
 
   // only add UI handlers after we've loaded the layers
   map.on('mousemove', didMouseMoveMap)
@@ -738,7 +746,12 @@ function updateMapForHover() {
 }
 
 function entityForEvent(e) {
-  var features = map.queryRenderedFeatures(e.point, {layers: ['focus', 'trail-pois', 'trails-pointer-targets']});
+  let layers = ['trail-pois', 'trails-pointer-targets'];
+  
+  // we need to add focus as a target or else you can click hidden stuff
+  if (isFocusing) layers.unshift('focus');
+
+  var features = map.queryRenderedFeatures(e.point, {layers: layers});
   var feature = features.length && features[0];
   if (feature && feature.properties.OSM_ID) {
     var type = (feature.properties.SRC_GEOM === "polygon" || !feature.sourceLayer.includes("poi")) ? 'way' : 'node';
