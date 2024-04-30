@@ -101,19 +101,10 @@ window.onload = (event) => {
   document.getElementById("map-style").addEventListener('change', mapStyleChangeEvent);
   document.getElementById("advanced-style").addEventListener('change', mapStyleChangeEvent); 
 
-  try {
-    maptilerApiKey;
-  } catch(e) {
-    if(e.name == "ReferenceError") {
-      // Use the production key if we didn't find a dev key (only works on OSM US domains)
-      maptilerApiKey = "qe6b8locBISzDLGJweZ3";
-    }
-  }
-
   map = new maplibregl.Map({
     container: 'map',
     hash: "map",
-    style: 'https://api.maptiler.com/maps/dataviz/style.json?key=' + maptilerApiKey,
+    style: './styles/basemap.json',
     center: [-111.545,39.546],
     zoom: 6
   });

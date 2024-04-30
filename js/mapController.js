@@ -622,6 +622,7 @@ async function loadInitialMap() {
     "type": "symbol",
     "layout": {
       "text-field": ['get', 'name'],
+      "text-font": ["Americana-Regular"],
       "text-size": 13,
       "symbol-placement": "line"
     },
@@ -658,7 +659,7 @@ async function loadInitialMap() {
       "text-optional": true,
       "text-size": 11,
       "text-line-height": 1.1,
-      "text-font": ["Open Sans Semibold", "Arial Unicode MS Semibold"],
+      "text-font": ["Americana-Bold"],
       "text-variable-anchor": ["left", "right", "top", "bottom"],
       "text-padding": 5,
       "text-offset": [
