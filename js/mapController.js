@@ -686,7 +686,7 @@ async function loadInitialMap() {
       'type': 'fill',
       'source': 'focus-source',
       'paint': {
-          'fill-color': '#FBFAF9',
+          'fill-color': '#f9f5ed',
           'fill-outline-color': '#E2C6C8',
       },
     });
