@@ -170,10 +170,23 @@ var checkDateColors = [
   2023, '#67001f',
 ];
 
-function updateMapLayersForAdvanced(key) {
+var keysForStyle = {
+  name: ['name', 'noname'],
+  fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
+  check_date: ['check_date', 'survey:date']
+};
 
-  var has = key === "fixme" ? "!has" : "has";
-  var noHas = key === "fixme" ? "has" : "!has";
+function updateMapLayersForAdvanced(style) {
+
+  var keys = [style];
+  if (keysForStyle[style]) keys = keysForStyle[style];
+
+  var has = style === "fixme" ? "!has" : "has";
+  var noHas = style === "fixme" ? "has" : "!has";
+
+  var hasExpressions = keys.map(key => [has, key]);
+  
+  var noHasExpressions = keys.map(key => [noHas, key]);
 
   map
     .setLayoutProperty('disallowed-paths', 'visibility', 'none')
@@ -182,30 +195,42 @@ function updateMapLayersForAdvanced(key) {
     .setPaintProperty('informal-paths', 'line-color', colors.specified)
     .setFilter('paths', [
       "all",
-      [has, key],
+      [
+        "any",
+        ...hasExpressions, 
+      ],
       ["!=", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('informal-paths', [
       "all",
-      [has, key],
+      [
+        "any",
+        ...hasExpressions, 
+      ],
       ["==", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('unspecified-paths', [
       "all",
-      [noHas, key],
+      [
+        "all",
+        ...noHasExpressions, 
+      ],
       ["!=", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('unspecified-informal-paths', [
       "all",
-      [noHas, key],
+      [
+        "all",
+        ...noHasExpressions, 
+      ],
       ["==", "informal", "yes"],
       ["has", "highway"],
     ]);
 
-  if (key === 'operator') {
+  if (style === 'operator') {
     // if a path is `informal=yes` then there's probably no operator, always style as complete
     map
       .setFilter('informal-paths', [
@@ -218,7 +243,7 @@ function updateMapLayersForAdvanced(key) {
     map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible');
   }
 
-  if (mapStyle === 'check_date') {
+  if (style === 'check_date') {
     map
       .setPaintProperty('paths', 'line-color', checkDateColors)
       .setPaintProperty('informal-paths', 'line-color', checkDateColors);
