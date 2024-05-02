@@ -3,7 +3,6 @@ var impliedYesExpressions = {
     ["==", "highway", "track"]
   ],
   bicycle: [
-    ["==", "highway", "path"],
     ["==", "highway", "cycleway"],
     ["==", "highway", "bridleway"],
     ["==", "highway", "track"]
