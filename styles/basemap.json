@@ -284,7 +284,7 @@
       ],
       "layout": {"line-cap": "square", "line-join": "bevel"},
       "paint": {
-        "line-color": "hsl(0, 0%, 97%)",
+        "line-color": "#fff",
         "line-dasharray": [1, 1],
         "line-width": {"base": 1.55, "stops": [[4, 0.25], [20, 10]]}
       }
@@ -302,7 +302,7 @@
       ],
       "layout": {"line-cap": "round", "line-join": "round"},
       "paint": {
-        "line-color": "hsl(0, 0%, 97%)",
+        "line-color": "#fff",
         "line-width": {"base": 1.55, "stops": [[4, 0.25], [20, 30]]}
       }
     },
