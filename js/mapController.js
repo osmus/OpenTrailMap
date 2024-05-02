@@ -181,12 +181,23 @@ function updateMapLayersForAdvanced(style) {
   var keys = [style];
   if (keysForStyle[style]) keys = keysForStyle[style];
 
-  var has = style === "fixme" ? "!has" : "has";
-  var noHas = style === "fixme" ? "has" : "!has";
+  // for most keys we're looking for missing values, but for fixmes we're looking for extant values
+  var hasKeyMeansSpecified = style !== "fixme";
 
-  var hasExpressions = keys.map(key => [has, key]);
-  
-  var noHasExpressions = keys.map(key => [noHas, key]);
+  var specifiedExpression = [
+    hasKeyMeansSpecified ? "any" : "all",
+    ...keys.map(key => [
+      hasKeyMeansSpecified ? "has" : "!has",
+      key
+    ]),
+  ];
+  var unspecifiedExpression = [
+    hasKeyMeansSpecified ? "all" : "any",
+    ...keys.map(key => [
+      hasKeyMeansSpecified ? "!has" : "has",
+      key
+    ]), 
+  ];
 
   map
     .setLayoutProperty('disallowed-paths', 'visibility', 'none')
@@ -195,37 +206,25 @@ function updateMapLayersForAdvanced(style) {
     .setPaintProperty('informal-paths', 'line-color', colors.specified)
     .setFilter('paths', [
       "all",
-      [
-        "any",
-        ...hasExpressions, 
-      ],
+      specifiedExpression,
       ["!=", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('informal-paths', [
       "all",
-      [
-        "any",
-        ...hasExpressions, 
-      ],
+      specifiedExpression,
       ["==", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('unspecified-paths', [
       "all",
-      [
-        "all",
-        ...noHasExpressions, 
-      ],
+      unspecifiedExpression,
       ["!=", "informal", "yes"],
       ["has", "highway"],
     ])
     .setFilter('unspecified-informal-paths', [
       "all",
-      [
-        "all",
-        ...noHasExpressions, 
-      ],
+      unspecifiedExpression,
       ["==", "informal", "yes"],
       ["has", "highway"],
     ]);
