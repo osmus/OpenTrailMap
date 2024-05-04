@@ -25,6 +25,7 @@ var impliedYesExpressions = {
     ["==", "smoothness", "intermediate"],
   ],
   canoe: [],
+  portage: [],
   snowmobile: [],
 };
 
@@ -76,6 +77,9 @@ var impliedNoExpressions = {
   ],
   canoe: [
     ["!has", "canoe"],
+  ],
+  portage: [
+    ["!has", "portage"],
   ],
   horse: [
     [
@@ -366,23 +370,31 @@ function updateMapLayersForAllAccess() {
 
 function updateMapLayersForTravelMode(mode) {
 
-  var unspecifiedExpression = [
-    "any",
-    [
-      "all",
-      ["!has", mode],
-      ...notNoAccessExpressions("access"),
-      [
-        "none",
-        ...impliedYesExpressions[mode],
-        ...impliedNoExpressions[mode]
-      ]
-    ],
-    // access if always unspecified if mode is explicitly set to `unknown`
-    ["==", mode, "unknown"],
-  ];
+  var modes = [mode];
+  if (mode == 'canoe') modes.push('portage');
 
-  var allowedExpression = modeIsAllowedExpression(mode);
+  var unspecifiedExpression = ["any"];
+  var allowedExpression = ["any"];
+
+  modes.forEach(mode => {
+    unspecifiedExpression.push([
+      "any",
+      [
+        "all",
+        ["!has", mode],
+        ...notNoAccessExpressions("access"),
+        [
+          "none",
+          ...impliedYesExpressions[mode],
+          ...impliedNoExpressions[mode]
+        ]
+      ],
+      // access if always unspecified if mode is explicitly set to `unknown`
+      ["==", mode, "unknown"],
+    ]);
+
+    allowedExpression.push(modeIsAllowedExpression(mode));
+  });
 
   updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
 }
