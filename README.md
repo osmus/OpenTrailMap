@@ -14,10 +14,7 @@ This is a prototype web map application for viewing [OpenStreetMap](https://open
 - Click a feature to view its current tags, relations, and metadata.
 - Use quick links to open the feature on [openstreetmap.org](https://openstreetmap.org), iD, JOSM, and other viewers.
 
-### Map tiles
-Trail vector tiles are rendered by OSM US using the schema file [here](https://github.com/osmus/tileservice/blob/main/renderer/layers/trails.yml) and hosted courtesy of [@zelonewolf](https://github.com/zelonewolf). Render time is currently about 4 hours, so any changes you make will take 4 to 8 hours to appear on the map. Map tiles are not available for public use at this time.
-
-#### Legend
+### Legend
 - Dark green lines are public paths.
 - Pale green lines indicate the given travel mode is not allowed or not possible. There are a few factors:
   - [`access`](https://wiki.openstreetmap.org/wiki/Key:access) or the mode tag (like `foot`) is `no`/`private`/`discouraged`
@@ -25,10 +22,13 @@ Trail vector tiles are rendered by OSM US using the schema file [here](https://g
 - Dashed lines are `informal=yes`. Solid lines are `infomal=no` or `informal` not given.
 - Purple lines don’t have enough access tags to indicate if the given travel mode is allowed or possible (great mapping opportunities!)
 
-#### Points of interest
+### Points of interest
 Some trail-related POIs are included on the map:
 - [`amenity=ranger_station`](https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dranger_station): ranger stations are generally public visitor centers where trail users can get info or seek help
 - [`highway=trailhead`](https://wiki.openstreetmap.org/wiki/Tag:highway%3Dtrailhead): trailheads are access points to trail networks, often with various amenities
+
+### Map tiles
+Trail vector tiles are rendered by OSM US using the schema file [here](https://github.com/osmus/tileservice/blob/main/renderer/layers/trails.yml) and hosted courtesy of [@zelonewolf](https://github.com/zelonewolf). Render time is currently about 4 hours, so any changes you make will take 4 to 8 hours to appear on the map. Map tiles are not available for public use at this time.
 
 ## Get involved
 
