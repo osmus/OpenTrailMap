@@ -5,7 +5,16 @@ var impliedYesExpressions = {
   bicycle: [
     ["==", "highway", "cycleway"],
     ["==", "highway", "bridleway"],
-    ["==", "highway", "track"]
+    ["==", "highway", "track"],
+    ["==", "highway", "service"],
+    ["==", "highway", "unclassified"],
+    ["==", "highway", "residential"],
+    ["==", "highway", "tertiary"],
+    ["==", "highway", "secondary"],
+    ["==", "highway", "primary"],
+    ["==", "highway", "tertiary_link"],
+    ["==", "highway", "secondary_link"],
+    ["==", "highway", "primary_link"],
   ],
   foot: [
     ["==", "highway", "path"],
