@@ -747,8 +747,7 @@ function updateMapForSelection() {
   var id = selectedEntityInfo && selectedEntityInfo.id;
   var type = selectedEntityInfo && selectedEntityInfo.type;
 
-  var wayIds = [type === "way" ? id : -1];
-  var nodeIds = [type === "node" ? id : -1];
+  var idsToHighlight = [id ? id : -1];
 
   if (type === "relation") {
     var members = osmEntityCache[type[0] + id]?.members || [];
@@ -761,23 +760,19 @@ function updateMapForSelection() {
         // only recurse down if we have the entity cached
         var childRelationMembers = osmEntityCache[member.type[0] + member.ref]?.members || [];
         childRelationMembers.forEach(function(member) {
-          if (member.type === "way") {
-            wayIds.push(member.ref);
-          } else if (member.type === "node") {
-            nodeIds.push(member.ref);
-          }
+          idsToHighlight.push(member.ref);
           // don't recurse relations again in case of self-references
         });
       }
     });
   }
 
-  map.setFilter('selected-paths', ["in", "OSM_ID", ...wayIds]);
-  map.setFilter('selected-pois', ["in", "OSM_ID", ...nodeIds]);
+  // this will fail in cases where two features of different types but the same ID are both onscreen
+  map.setFilter('selected-paths', ["in", "OSM_ID", ...idsToHighlight]);
+  map.setFilter('selected-pois', ["in", "OSM_ID", ...idsToHighlight]);
 }
 
 function updateMapForHover() {
-  var type = hoveredEntityInfo?.type;
   var entityId = hoveredEntityInfo?.id || -1;
 
   if (hoveredEntityInfo?.id == selectedEntityInfo?.id &&
@@ -786,8 +781,9 @@ function updateMapForHover() {
     entityId = -1;
   }
 
-  map.setFilter('hovered-paths', ["==", "OSM_ID", type === "way" ? entityId : -1]);
-  map.setFilter('hovered-pois', ["==", "OSM_ID", type === "node" ? entityId : -1]);
+  // this will fail in cases where two features of different types but the same ID are both onscreen
+  map.setFilter('hovered-paths', ["==", "OSM_ID", entityId]);
+  map.setFilter('hovered-pois', ["==", "OSM_ID", entityId]);
 }
 
 function entityForEvent(e) {
@@ -798,11 +794,10 @@ function entityForEvent(e) {
 
   var features = map.queryRenderedFeatures(e.point, {layers: layers});
   var feature = features.length && features[0];
-  if (feature && feature.properties.OSM_ID) {
-    var type = (feature.properties.SRC_GEOM === "polygon" || !feature.sourceLayer.includes("poi")) ? 'way' : 'node';
+  if (feature && feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
     return {
       id: feature.properties.OSM_ID,
-      type: type,
+      type: feature.properties.OSM_TYPE,
       focusLngLat: e.lngLat,
     };
   }
