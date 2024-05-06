@@ -129,6 +129,11 @@ var impliedNoExpressions = {
 };
 
 function updateMapLayers() {
+  map
+    .setFilter('oneway-arrows', [
+      "==", "oneway", "yes" 
+    ]);
+
   if (mapStyle === 'access') {
     updateMapLayersForAllAccess();
   } else if (basicMapStyles.includes(mapStyle)) {
@@ -372,7 +377,7 @@ function updateMapLayersForAllAccess() {
 
   var unspecifiedExpression = [
     "any",
-    // access not fully unspecified if any access tag is explicitly set to `unknown`
+    // access not fully specified if any access tag is explicitly set to `unknown`
     ["==", "access", "unknown"],
     ["==", "foot", "unknown"],
     ["==", "wheelchair", "unknown"],
@@ -393,13 +398,24 @@ function updateMapLayersForAllAccess() {
   updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
 }
 
-function updateMapLayersForTravelMode(mode) {
+function updateMapLayersForTravelMode(mapStyle) {
 
-  var modes = [mode];
-  if (mode == 'canoe') modes.push('portage');
+  var modes = [mapStyle];
+  if (mapStyle == 'canoe') modes.push('portage');
 
   var unspecifiedExpression = ["any"];
   var allowedExpression = ["any"];
+
+  map
+    .setFilter('oneway-arrows', [
+      "any",
+      [
+        "all",
+        ...modes.map(mode => ["!has", "oneway:" + mode]),
+        ["==", "oneway", "yes"],
+      ],
+      ...modes.map(mode => ["==", "oneway:" + mode, "yes"]),
+    ]);
 
   modes.forEach(mode => {
     unspecifiedExpression.push([
@@ -680,6 +696,38 @@ async function loadInitialMap() {
       "line-width": lineWidth,
       "line-color": colors.public,
     }
+  })
+  .addLayer({
+    "id": "oneway-arrows",
+    "source": "trails",
+    "source-layer": "trail",
+    "type": "symbol",
+    "minzoom": 12,
+    "layout": {
+      "icon-image": [
+        "case",
+        ["==", ["get", "oneway"], "-1"], ["image", "oneway-arrow-left"],
+        ["image", "oneway-arrow-right"]
+      ],
+      "icon-padding": 2,
+      "icon-size": [
+        "interpolate", ["linear"], ["zoom"],
+        14, 0.5,
+        22, 1
+      ],
+      "symbol-placement": "line",
+      "symbol-spacing": [
+        "interpolate", ["linear"], ["zoom"],
+        14, 10,
+        18, 50,
+        22, 140
+      ],
+      "icon-overlap": "always",
+      "icon-rotation-alignment": "map",
+    },
+    "paint": {
+      "icon-opacity": 0.8,
+    },
   })
   .addLayer({
     "id": "trails-labels",

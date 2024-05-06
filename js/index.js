@@ -131,7 +131,9 @@ window.onload = (event) => {
     'ranger-station',
     'canoe',
     'slipway-canoe-trailer',
-    'slipway-canoe'
+    'slipway-canoe',
+    'oneway-arrow-right',
+    'oneway-arrow-left',
   ];
 
   for (let i in imageToLoad) {
