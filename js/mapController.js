@@ -805,6 +805,8 @@ function entityForEvent(e) {
     return {
       id: feature.properties.OSM_ID,
       type: feature.properties.OSM_TYPE,
+      version: feature.properties.OSM_VERSION,
+      changeset: feature.properties.OSM_CHANGESET,
       focusLngLat: e.lngLat,
     };
   }
