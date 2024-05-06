@@ -125,7 +125,14 @@ window.onload = (event) => {
         unit: 'imperial'
     }), "bottom-left");
 
-  const imageToLoad = ['disallowed-stripes', 'trailhead', 'ranger-station', 'canoe'];
+  const imageToLoad = [
+    'disallowed-stripes',
+    'trailhead',
+    'ranger-station',
+    'canoe',
+    'slipway-canoe-trailer',
+    'slipway-canoe'
+  ];
 
   for (let i in imageToLoad) {
     let img = imageToLoad[i];

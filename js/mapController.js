@@ -160,6 +160,13 @@ function updateMapLayers() {
         "any",
         ["==", "amenity", "ranger_station"],
         ["==", "canoe", "put_in"],
+        [
+          "all",
+          ["==", "leisure", "slipway"],
+          ["!=", "canoe", "no"],
+          ["!=", "canoe", "private"],
+          ["!=", "canoe", "discouraged"],
+        ],
       ]);
   } else {
     map.setFilter('disallowed-waterways', [
@@ -470,6 +477,12 @@ async function loadInitialMap() {
       "case",
       ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
       ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
+      [
+        'all',
+        ['==', ["get", "leisure"], "slipway"],
+        ['==', ["get", "trailer"], "no"],
+      ], ["image", "slipway-canoe"],
+      ['==', ["get", "leisure"], "slipway"], ["image", "slipway-canoe-trailer"],
       ["image", "canoe"]
     ];
   var poiIconSize = [
