@@ -18,6 +18,9 @@ function updateSidebar(entity) {
   };
   
   var opQuery = encodeURIComponent(`${type}(${entityId});\n(._;>;);\nout;`);
+
+  var xmlLink = `https://www.openstreetmap.org/api/0.6/${type}/${entityId}`;
+  if (type == 'way' || type == 'relation') xmlLink += '/full';
   
   var html = '';
   html += "<div class='body'>";
@@ -33,9 +36,10 @@ function updateSidebar(entity) {
   html += "<h3>View</h3>";
   html += "<p class='link-list'>";
   html += `<a href="https://openstreetmap.org/${type}/${entityId}" target="_blank">osm.org</a> `;
-  html += `<a href="https://www.openstreetmap.org/api/0.6/${type}/${entityId}" target="_blank">XML</a> `;
+  html += `<a href="${xmlLink}" target="_blank">XML</a> `;
   html += `<a href="https://pewu.github.io/osm-history/#/${type}/${entityId}" target="_blank">PeWu</a> `;
   html += `<a href="https://overpass-turbo.eu?Q=${opQuery}&R=" target="_blank">Overpass Turbo</a> `;
+  html += `<a href="https://osmcha.org/changesets/${entity.changeset}" target="_blank">OSMCha</a> `;
   html += "</p>";
   html += "<h3>Edit</h3>";
   html += "<p class='link-list'>";
