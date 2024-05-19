@@ -130,6 +130,7 @@ window.onload = (event) => {
     'trailhead',
     'ranger-station',
     'canoe',
+    'dam',
     'slipway-canoe-trailer',
     'slipway-canoe',
     'oneway-arrow-right',

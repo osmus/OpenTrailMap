@@ -187,28 +187,6 @@ function loadTrailLayers(name) {
       12, 5,
       22, 7
     ];
-  var lineOpacity = [
-      "interpolate", ["linear"], ["zoom"],
-      12, 1,
-      22, 0.4
-    ];
-  var poiIconImage = [
-      "case",
-      ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
-      ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
-      [
-        'all',
-        ['==', ["get", "leisure"], "slipway"],
-        ['==', ["get", "trailer"], "no"],
-      ], ["image", "slipway-canoe"],
-      ['==', ["get", "leisure"], "slipway"], ["image", "slipway-canoe-trailer"],
-      ["image", "canoe"]
-    ];
-  var poiIconSize = [
-      "interpolate", ["linear"], ["zoom"],
-      12, 0.5,
-      22, 1
-    ];
 
   addTrailLayer({
     "id": "hovered-paths",
@@ -292,7 +270,6 @@ function loadTrailLayers(name) {
       "line-join": "round"
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.bgwater,
     },
@@ -318,7 +295,6 @@ function loadTrailLayers(name) {
       "line-join": "round"
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.public,
       "line-dasharray": [2, 2],
@@ -334,7 +310,6 @@ function loadTrailLayers(name) {
       "line-join": "round"
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.noaccess,
       "line-dasharray": [2, 2],
@@ -350,7 +325,6 @@ function loadTrailLayers(name) {
       "line-join": "round",
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.unspecified,
       "line-dasharray": [2, 2],
@@ -366,7 +340,6 @@ function loadTrailLayers(name) {
       "line-join": "round",
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-pattern": ["image", "disallowed-stripes"],
     }
@@ -381,7 +354,6 @@ function loadTrailLayers(name) {
       "line-join": "round",
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.unspecified,
     }
@@ -396,7 +368,6 @@ function loadTrailLayers(name) {
       "line-join": "round"
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.water,
     },
@@ -416,7 +387,6 @@ function loadTrailLayers(name) {
       "line-join": "round",
     },
     "paint": {
-      //"line-opacity": lineOpacity,
       "line-width": lineWidth,
       "line-color": colors.public,
     }
@@ -490,8 +460,24 @@ function loadTrailLayers(name) {
       "delay": 0
     },
     "layout": {
-      "icon-image": poiIconImage,
-      "icon-size": poiIconSize,
+      "icon-image": [
+        "case",
+        ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
+        ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
+        [
+          'all',
+          ['==', ["get", "leisure"], "slipway"],
+          ['==', ["get", "trailer"], "no"],
+        ], ["image", "slipway-canoe"],
+        ['==', ["get", "leisure"], "slipway"], ["image", "slipway-canoe-trailer"],
+        ["image", "canoe"]
+      ],
+      "icon-size": [
+        "interpolate", ["linear"], ["zoom"],
+        12, 0.5,
+        22, 1
+      ],
       "symbol-placement": "point",
       "text-field": ["step", ["zoom"], "", poiLabelZoom, ["get", "name"]],
       "text-optional": true,
@@ -508,7 +494,11 @@ function loadTrailLayers(name) {
       "text-justify": "auto",
     },
     "paint": {
-      "text-color": colors.poiLabel,
+      "text-color":  [
+        "case",
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], colors.label,
+        colors.poiLabel
+      ],
       "text-halo-width": 2,
       "text-halo-blur": 1,
       "text-halo-color": colors.labelHalo,
@@ -518,6 +508,7 @@ function loadTrailLayers(name) {
       ["==", "amenity", "ranger_station"],
       ["==", "highway", "trailhead"],
       ["==", "canoe", "put_in"],
+      ["in", "waterway", "dam", "weir"],
       [
         "all",
         ["==", "leisure", "slipway"],
