@@ -128,7 +128,410 @@ var impliedNoExpressions = {
   ],
 };
 
+function toggleWaterTrailsIfNeeded() {
+
+  if (mapStyle === 'canoe' && !map.getSource('water_trails')) {
+    clearTrailLayers();
+    if (map.getSource('trails')) map.removeSource('trails');
+    map.addSource("water_trails", {
+      type: "vector",
+      url: "https://d1zqyi8v6vm8p9.cloudfront.net/water_trails.json",
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    });
+    map.addSource("water_trails_poi", {
+      type: "vector",
+      url: "https://d1zqyi8v6vm8p9.cloudfront.net/water_trails_poi.json",
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    });
+    loadTrailLayers('water_trail');
+
+  } else if (mapStyle !== 'canoe' && !map.getSource('trails')) {
+    clearTrailLayers();
+    if (map.getSource('water_trails')) map.removeSource('water_trails');
+    if (map.getSource('water_trails_poi')) map.removeSource('water_trails_poi');
+    map.addSource("trails", {
+      type: "vector",
+      url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    });
+    loadTrailLayers('trail');
+  }  
+}
+
+let trailLayerIds = [];
+function addTrailLayer(def) {
+  trailLayerIds.push(def.id);
+  map.addLayer(def);
+}
+function clearTrailLayers() {
+  trailLayerIds.forEach(function(id) {
+    map.removeLayer(id);
+  });
+  trailLayerIds = [];
+}
+
+function loadTrailLayers(name) {
+
+  var lineWidth = [
+    "interpolate", ["linear"], ["zoom"],
+    12, 1,
+    22, 5
+  ];
+  var selectedLineWidth = [
+      "interpolate", ["linear"], ["zoom"],
+      12, 9,
+      22, 13
+    ];
+  var hoverLineWidth = [
+      "interpolate", ["linear"], ["zoom"],
+      12, 5,
+      22, 7
+    ];
+  var lineOpacity = [
+      "interpolate", ["linear"], ["zoom"],
+      12, 1,
+      22, 0.4
+    ];
+  var poiIconImage = [
+      "case",
+      ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
+      ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
+      [
+        'all',
+        ['==', ["get", "leisure"], "slipway"],
+        ['==', ["get", "trailer"], "no"],
+      ], ["image", "slipway-canoe"],
+      ['==', ["get", "leisure"], "slipway"], ["image", "slipway-canoe-trailer"],
+      ["image", "canoe"]
+    ];
+  var poiIconSize = [
+      "interpolate", ["linear"], ["zoom"],
+      12, 0.5,
+      22, 1
+    ];
+
+  addTrailLayer({
+    "id": "hovered-paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      "line-opacity": 0.25,
+      "line-color": colors.selection,
+      "line-width": hoverLineWidth,
+    },
+    "filter": [
+      "==", "OSM_ID", -1 
+    ]
+  });
+  addTrailLayer({
+    "id": "hovered-pois",
+    "source": name == 'trail' ? "trails" : 'water_trails_poi',
+    "source-layer": name == 'trail' ? "trail_poi" : 'water_trail_poi',
+    "type": "circle",
+    "paint": {
+      "circle-radius": [
+        "interpolate", ["linear"], ["zoom"],
+        12, 9,
+        22, 18
+      ],
+      "circle-opacity": 0.25,
+      "circle-color": colors.selection,
+    },
+    "filter": [
+      "==", "OSM_ID", -1 
+    ]
+  });
+  addTrailLayer({
+    "id": "selected-paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      "line-opacity": 0.4,
+      "line-color": colors.selection,
+      "line-width": selectedLineWidth,
+    },
+    "filter": [
+      "==", "OSM_ID", -1 
+    ]
+  });
+  addTrailLayer({
+    "id": "selected-pois",
+    "source": name == 'trail' ? "trails" : 'water_trails_poi',
+    "source-layer": name == 'trail' ? "trail_poi" : 'water_trail_poi',
+    "type": "circle",
+    "paint": {
+      "circle-radius": [
+        "interpolate", ["linear"], ["zoom"],
+        12, 10,
+        22, 20
+      ],
+      "circle-opacity": 0.4,
+      "circle-color": colors.selection,
+    },
+    "filter": [
+      "==", "OSM_ID", -1 
+    ]
+  });
+  addTrailLayer({
+    "id": "disallowed-waterways",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.bgwater,
+    },
+    "filter": [
+      "all",
+      ["!has", "highway"],
+      [
+        "none",
+        [
+          "all",
+          ...notNoAccessExpressions('canoe'),
+        ]
+      ],
+    ]
+  });
+  addTrailLayer({
+    "id": "informal-paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.public,
+      "line-dasharray": [2, 2],
+    }
+  });
+  addTrailLayer({
+    "id": "disallowed-informal-paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.noaccess,
+      "line-dasharray": [2, 2],
+    }
+  });
+  addTrailLayer({
+    "id": "unspecified-informal-paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.unspecified,
+      "line-dasharray": [2, 2],
+    }
+  });
+  addTrailLayer({
+    "id": "disallowed-paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-pattern": ["image", "disallowed-stripes"],
+    }
+  });
+  addTrailLayer({
+    "id": "unspecified-paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.unspecified,
+    }
+  });
+  addTrailLayer({
+    "id": "waterways",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.water,
+    },
+    "filter": [
+      "all",
+      ["!has", "highway"],
+      ...notNoAccessExpressions('canoe'),
+    ]
+  });
+  addTrailLayer({
+    "id": "paths",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round",
+    },
+    "paint": {
+      //"line-opacity": lineOpacity,
+      "line-width": lineWidth,
+      "line-color": colors.public,
+    }
+  });
+  addTrailLayer({
+    "id": "oneway-arrows",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "symbol",
+    "minzoom": 12,
+    "layout": {
+      "icon-image": [
+        "case",
+        ["==", ["get", "oneway"], "-1"], ["image", "oneway-arrow-left"],
+        ["image", "oneway-arrow-right"]
+      ],
+      "icon-padding": 2,
+      "icon-size": [
+        "interpolate", ["linear"], ["zoom"],
+        14, 0.5,
+        22, 1
+      ],
+      "symbol-placement": "line",
+      "symbol-spacing": [
+        "interpolate", ["linear"], ["zoom"],
+        14, 10,
+        18, 50,
+        22, 140
+      ],
+      "icon-overlap": "always",
+      "icon-rotation-alignment": "map",
+    },
+    "paint": {
+      "icon-opacity": 0.8,
+    },
+  });
+  addTrailLayer({
+    "id": "trails-labels",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "symbol",
+    "layout": {
+      "text-field": ['get', 'name'],
+      "text-font": ["Americana-Regular"],
+      "text-size": 13,
+      "symbol-placement": "line"
+    },
+    "paint": {
+      "text-color": colors.label,
+      "text-halo-width": 1.5,
+      "text-halo-color": colors.labelHalo,
+    }
+  });
+  addTrailLayer({
+    "id": "trails-pointer-targets",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "paint": {
+        "line-color": "transparent",
+        "line-width": 16
+    }
+  });
+  addTrailLayer({
+    "id": "trail-pois",
+    "source": name == 'trail' ? "trails" : 'water_trails_poi',
+    "source-layer": name == 'trail' ? "trail_poi" : 'water_trail_poi',
+    "type": "symbol",
+    "transition": {
+      "duration": 0,
+      "delay": 0
+    },
+    "layout": {
+      "icon-image": poiIconImage,
+      "icon-size": poiIconSize,
+      "symbol-placement": "point",
+      "text-field": ["step", ["zoom"], "", poiLabelZoom, ["get", "name"]],
+      "text-optional": true,
+      "text-size": 11,
+      "text-line-height": 1.1,
+      "text-font": ["Americana-Bold"],
+      "text-variable-anchor": ["left", "right", "top", "bottom"],
+      "text-padding": 5,
+      "text-offset": [
+        "interpolate", ["linear"], ["zoom"],
+        12, ["literal", [0.4, 0.4]],
+        22, ["literal", [1.5, 1.5]]
+      ],
+      "text-justify": "auto",
+    },
+    "paint": {
+      "text-color": colors.poiLabel,
+      "text-halo-width": 2,
+      "text-halo-blur": 1,
+      "text-halo-color": colors.labelHalo,
+    },
+    "filter": [
+      "any",
+      ["==", "amenity", "ranger_station"],
+      ["==", "highway", "trailhead"],
+      ["==", "canoe", "put_in"],
+      [
+        "all",
+        ["==", "leisure", "slipway"],
+        ["!=", "canoe", "no"],
+        ["!=", "canoe", "private"],
+        ["!=", "canoe", "discouraged"],
+      ],
+    ]
+  });
+}
+
 function updateMapLayers() {
+  toggleWaterTrailsIfNeeded();
+
   map
     .setFilter('oneway-arrows', [
       "==", "oneway", "yes" 
@@ -140,51 +543,6 @@ function updateMapLayers() {
     updateMapLayersForTravelMode(mapStyle);
   } else {
     updateMapLayersForAdvanced(mapStyle);
-  }
-
-  if (mapStyle === 'canoe') {
-    map
-      .setFilter('disallowed-waterways', [
-        "all",
-        ["!has", "highway"],
-        [
-          "none",
-          [
-            "all",
-            ...notNoAccessExpressions('canoe'),
-          ]
-        ],
-      ])
-      .setFilter('waterways', [
-        "all",
-        ["!has", "highway"],
-        ...notNoAccessExpressions('canoe'),
-      ])
-      .setLayoutProperty('waterways', 'visibility', 'visible')
-      .setFilter('trail-pois', [
-        "any",
-        ["==", "amenity", "ranger_station"],
-        ["==", "canoe", "put_in"],
-        [
-          "all",
-          ["==", "leisure", "slipway"],
-          ["!=", "canoe", "no"],
-          ["!=", "canoe", "private"],
-          ["!=", "canoe", "discouraged"],
-        ],
-      ]);
-  } else {
-    map.setFilter('disallowed-waterways', [
-      "all",
-      ["!has", "highway"],
-      ...notNoAccessExpressions('canoe'),
-    ])
-    .setLayoutProperty('waterways', 'visibility', 'none')
-    .setFilter('trail-pois', [
-      "any",
-      ["==", "amenity", "ranger_station"],
-      ["==", "highway", "trailhead"],
-    ]);
   }
 }
 
@@ -462,337 +820,9 @@ async function loadInitialMap() {
   
     map.setMaxBounds(new maplibregl.LngLatBounds([focusBounds.getWest()-1.5,focusBounds.getSouth()-1], [focusBounds.getEast()+1.5,focusBounds.getNorth()+1]));
   }
-  
-  map.addSource("trails", {
-    type: "vector",
-    url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
-    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
-  });
 
-  var lineWidth = [
-      "interpolate", ["linear"], ["zoom"],
-      12, 1,
-      22, 5
-    ];
-  var selectedLineWidth = [
-      "interpolate", ["linear"], ["zoom"],
-      12, 9,
-      22, 13
-    ];
-  var hoverLineWidth = [
-      "interpolate", ["linear"], ["zoom"],
-      12, 5,
-      22, 7
-    ];
-  var lineOpacity = [
-      "interpolate", ["linear"], ["zoom"],
-      12, 1,
-      22, 0.4
-    ];
-  var poiIconImage = [
-      "case",
-      ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
-      ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
-      [
-        'all',
-        ['==', ["get", "leisure"], "slipway"],
-        ['==', ["get", "trailer"], "no"],
-      ], ["image", "slipway-canoe"],
-      ['==', ["get", "leisure"], "slipway"], ["image", "slipway-canoe-trailer"],
-      ["image", "canoe"]
-    ];
-  var poiIconSize = [
-      "interpolate", ["linear"], ["zoom"],
-      12, 0.5,
-      22, 1
-    ];
-
-  map.addLayer({
-    "id": "hovered-paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round"
-    },
-    "paint": {
-      "line-opacity": 0.25,
-      "line-color": colors.selection,
-      "line-width": hoverLineWidth,
-    },
-    "filter": [
-      "==", "OSM_ID", -1 
-    ]
-  }).addLayer({
-    "id": "hovered-pois",
-    "source": "trails",
-    "source-layer": "trail_poi",
-    "type": "circle",
-    "paint": {
-      "circle-radius": [
-        "interpolate", ["linear"], ["zoom"],
-        12, 9,
-        22, 18
-      ],
-      "circle-opacity": 0.25,
-      "circle-color": colors.selection,
-    },
-    "filter": [
-      "==", "OSM_ID", -1 
-    ]
-  }).addLayer({
-    "id": "selected-paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round"
-    },
-    "paint": {
-      "line-opacity": 0.4,
-      "line-color": colors.selection,
-      "line-width": selectedLineWidth,
-    },
-    "filter": [
-      "==", "OSM_ID", -1 
-    ]
-  }).addLayer({
-    "id": "selected-pois",
-    "source": "trails",
-    "source-layer": "trail_poi",
-    "type": "circle",
-    "paint": {
-      "circle-radius": [
-        "interpolate", ["linear"], ["zoom"],
-        12, 10,
-        22, 20
-      ],
-      "circle-opacity": 0.4,
-      "circle-color": colors.selection,
-    },
-    "filter": [
-      "==", "OSM_ID", -1 
-    ]
-  }).addLayer({
-    "id": "disallowed-waterways",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round"
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.bgwater,
-    }
-  }).addLayer({
-    "id": "informal-paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round"
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.public,
-      "line-dasharray": [2, 2],
-    }
-  })
-  .addLayer({
-    "id": "disallowed-informal-paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round"
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.noaccess,
-      "line-dasharray": [2, 2],
-    }
-  })
-  .addLayer({
-    "id": "unspecified-informal-paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round",
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.unspecified,
-      "line-dasharray": [2, 2],
-    }
-  })
-  .addLayer({
-    "id": "disallowed-paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round",
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-pattern": ["image", "disallowed-stripes"],
-    }
-  })
-  .addLayer({
-    "id": "unspecified-paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round",
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.unspecified,
-    }
-  })
-  .addLayer({
-    "id": "waterways",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round"
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.water,
-    }
-  })
-  .addLayer({
-    "id": "paths",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "layout": {
-      "line-cap": "round",
-      "line-join": "round",
-    },
-    "paint": {
-      //"line-opacity": lineOpacity,
-      "line-width": lineWidth,
-      "line-color": colors.public,
-    }
-  })
-  .addLayer({
-    "id": "oneway-arrows",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "symbol",
-    "minzoom": 12,
-    "layout": {
-      "icon-image": [
-        "case",
-        ["==", ["get", "oneway"], "-1"], ["image", "oneway-arrow-left"],
-        ["image", "oneway-arrow-right"]
-      ],
-      "icon-padding": 2,
-      "icon-size": [
-        "interpolate", ["linear"], ["zoom"],
-        14, 0.5,
-        22, 1
-      ],
-      "symbol-placement": "line",
-      "symbol-spacing": [
-        "interpolate", ["linear"], ["zoom"],
-        14, 10,
-        18, 50,
-        22, 140
-      ],
-      "icon-overlap": "always",
-      "icon-rotation-alignment": "map",
-    },
-    "paint": {
-      "icon-opacity": 0.8,
-    },
-  })
-  .addLayer({
-    "id": "trails-labels",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "symbol",
-    "layout": {
-      "text-field": ['get', 'name'],
-      "text-font": ["Americana-Regular"],
-      "text-size": 13,
-      "symbol-placement": "line"
-    },
-    "paint": {
-      "text-color": colors.label,
-      "text-halo-width": 1.5,
-      "text-halo-color": colors.labelHalo,
-    }
-  })
-  .addLayer({
-    "id": "trails-pointer-targets",
-    "source": "trails",
-    "source-layer": "trail",
-    "type": "line",
-    "paint": {
-        "line-color": "transparent",
-        "line-width": 16
-    }
-  })
-  .addLayer({
-    "id": "trail-pois",
-    "source": "trails",
-    "source-layer": "trail_poi",
-    "type": "symbol",
-    "transition": {
-      "duration": 0,
-      "delay": 0
-    },
-    "layout": {
-      "icon-image": poiIconImage,
-      "icon-size": poiIconSize,
-      "symbol-placement": "point",
-      "text-field": ["step", ["zoom"], "", poiLabelZoom, ["get", "name"]],
-      "text-optional": true,
-      "text-size": 11,
-      "text-line-height": 1.1,
-      "text-font": ["Americana-Bold"],
-      "text-variable-anchor": ["left", "right", "top", "bottom"],
-      "text-padding": 5,
-      "text-offset": [
-        "interpolate", ["linear"], ["zoom"],
-        12, ["literal", [0.4, 0.4]],
-        22, ["literal", [1.5, 1.5]]
-      ],
-      "text-justify": "auto",
-    },
-    "paint": {
-      "text-color": colors.poiLabel,
-      "text-halo-width": 2,
-      "text-halo-blur": 1,
-      "text-halo-color": colors.labelHalo,
-    },
-  });
-
-  updateMapLayers();
   updateForHash();
+  updateMapLayers();
 
   if (isFocusing) {
     map.addLayer({
