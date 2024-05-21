@@ -23,17 +23,17 @@
       "paint": {"background-color": "#f9f5ed"}
     },
     {
-      "id": "landuse-residential",
+      "id": "landuse-developed",
       "type": "fill",
       "source": "openmaptiles",
       "source-layer": "landuse",
       "filter": [
         "all",
         ["==", "$type", "Polygon"],
-        ["in", "class", "residential", "suburb", "neighbourhood"]
+        ["in", "class", "residential", "commercial", "industrial", "garages", "retail", "stadium", "dam", "quarry", "railway"]
       ],
       "layout": {"visibility": "visible"},
-      "paint": {"fill-color": "hsl(47, 13%, 86%)", "fill-opacity": 0.7}
+      "paint": {"fill-color": "hsl(47, 13%, 86%)", "fill-opacity": 0.4}
     },
     {
       "id": "park-fill",
@@ -44,6 +44,19 @@
         "fill-color": "#d0eaaf",
         "fill-opacity": 0.3
       }
+    },
+    {
+      "id": "landuse-exclusion",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "all",
+        ["==", "$type", "Polygon"],
+        ["in", "class", "military"]
+      ],
+      "layout": {"visibility": "visible"},
+      "paint": {"fill-color": "hsl(0, 20%, 88%)", "fill-opacity": 0.75}
     },
     {
       "id": "water",
