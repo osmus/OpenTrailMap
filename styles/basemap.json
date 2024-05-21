@@ -36,22 +36,13 @@
       "paint": {"fill-color": "hsl(47, 13%, 86%)", "fill-opacity": 0.7}
     },
     {
-      "id": "landcover_grass",
+      "id": "park-fill",
       "type": "fill",
       "source": "openmaptiles",
-      "source-layer": "landcover",
-      "filter": ["==", "class", "grass"],
-      "paint": {"fill-color": "hsl(82, 46%, 90%)"}
-    },
-    {
-      "id": "landcover_wood",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "landcover",
-      "filter": ["==", "class", "wood"],
+      "source-layer": "park",
       "paint": {
-        "fill-color": "hsl(82, 46%, 82%)",
-        "fill-opacity": {"base": 1, "stops": [[8, 0.6], [22, 1]]}
+        "fill-color": "#d0eaaf",
+        "fill-opacity": 0.3
       }
     },
     {
@@ -120,14 +111,18 @@
       "paint": {"fill-color": "#eae0d0"}
     },
     {
-      "id": "landuse_overlay_national_park",
-      "type": "fill",
+      "id": "park-outline",
+      "type": "line",
       "source": "openmaptiles",
-      "source-layer": "landcover",
-      "filter": ["==", "class", "national_park"],
+      "source-layer": "park",
+      "minzoom": 10,
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
       "paint": {
-        "fill-color": "#E1EBB0",
-        "fill-opacity": {"base": 1, "stops": [[5, 0], [9, 0.75]]}
+        "line-color": "#b5cc99",
+        "line-opacity": 0.4
       }
     },
     {
@@ -664,6 +659,30 @@
       }
     },
     {
+      "id": "water-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "water_name",
+      "minzoom": 4,
+      "layout": {
+        "symbol-placement": "line-center",
+        "text-anchor": "top",
+        "text-field": "{name:latin}\n{name:nonlatin}",
+        "text-font": ["Americana-Regular"],
+        "text-max-width": 8,
+        "text-offset": [0, 0.5],
+        "text-size": 14,
+        "visibility": "visible",
+        "symbol-avoid-edges": true
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-blur": 1,
+        "text-halo-color": "rgba(255,255,255,1)",
+        "text-halo-width": 1
+      }
+    },
+    {
       "id": "airport-label",
       "type": "symbol",
       "source": "openmaptiles",
@@ -712,6 +731,30 @@
         "text-color": "#000",
         "text-halo-color": "hsl(0, 0%, 100%)",
         "text-halo-width": 2
+      }
+    },
+    {
+      "id": "park-label",
+      "type": "symbol",
+      "source": "openmaptiles",
+      "source-layer": "park",
+      "minzoom": 8,
+      "layout": {
+        "symbol-placement": "line",
+        "icon-size": 1,
+        "text-anchor": "top",
+        "text-field": "{name:latin}\n{name:nonlatin}",
+        "text-font": ["Americana-Regular"],
+        "text-max-width": 8,
+        "text-offset": [0, 0.5],
+        "text-size": 12,
+        "visibility": "visible"
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-blur": 1,
+        "text-halo-color": "rgba(255,255,255,1)",
+        "text-halo-width": 1
       }
     },
     {
