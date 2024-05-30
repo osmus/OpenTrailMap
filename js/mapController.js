@@ -464,6 +464,7 @@ function loadTrailLayers(name) {
         "case",
         ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
+        ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
         ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
         [
           'all',
@@ -496,7 +497,7 @@ function loadTrailLayers(name) {
     "paint": {
       "text-color":  [
         "case",
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], colors.label,
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]], colors.label,
         colors.poiLabel
       ],
       "text-halo-width": 2,
@@ -508,7 +509,7 @@ function loadTrailLayers(name) {
       ["==", "amenity", "ranger_station"],
       ["==", "highway", "trailhead"],
       ["==", "canoe", "put_in"],
-      ["in", "waterway", "dam", "weir"],
+      ["in", "waterway", "dam", "weir", "waterfall"],
       [
         "all",
         ["==", "leisure", "slipway"],

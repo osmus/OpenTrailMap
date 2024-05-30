@@ -135,6 +135,7 @@ window.onload = (event) => {
     'slipway-canoe',
     'oneway-arrow-right',
     'oneway-arrow-left',
+    'waterfall',
   ];
 
   for (let i in imageToLoad) {
