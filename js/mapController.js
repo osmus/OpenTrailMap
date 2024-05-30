@@ -793,7 +793,7 @@ let isFocusing;
 
 async function loadInitialMap() {
 
-  let isFocusing = hashValue('focus') !== 'no';
+  isFocusing = false;//hashValue('focus') !== 'no';
 
   if (isFocusing) {
     const response = await fetch('json/focus.json');
