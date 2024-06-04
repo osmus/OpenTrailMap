@@ -12,7 +12,7 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://d1zqyi8v6vm8p9.cloudfront.net/planet.json"
+      "url": "https://tile.ourmap.us/data/v3.json"
     }
   },
   "glyphs": "https://osm-americana.github.io/fontstack66/{fontstack}/{range}.pbf",
