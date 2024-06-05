@@ -135,12 +135,12 @@ function toggleWaterTrailsIfNeeded() {
     if (map.getSource('trails')) map.removeSource('trails');
     map.addSource("water_trails", {
       type: "vector",
-      url: "https://d1zqyi8v6vm8p9.cloudfront.net/water_trails.json",
+      url: "https://d3q606tnrqtayr.cloudfront.net/water_trails.json",
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
     map.addSource("water_trails_poi", {
       type: "vector",
-      url: "https://d1zqyi8v6vm8p9.cloudfront.net/water_trails_poi.json",
+      url: "https://d3q606tnrqtayr.cloudfront.net/water_trails_poi.json",
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
     loadTrailLayers('water_trail');
@@ -151,7 +151,7 @@ function toggleWaterTrailsIfNeeded() {
     if (map.getSource('water_trails_poi')) map.removeSource('water_trails_poi');
     map.addSource("trails", {
       type: "vector",
-      url: "https://d1zqyi8v6vm8p9.cloudfront.net/trails.json",
+      url: "https://d3q606tnrqtayr.cloudfront.net/trails.json",
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
     loadTrailLayers('trail');
