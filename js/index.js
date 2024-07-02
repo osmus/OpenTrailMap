@@ -9,10 +9,23 @@ const basicMapStyles = [
   "canoe",
   "snowmobile",
 ];
+const advancedMapStyles = [
+  "access",
+  "name",
+  "operator",
+  "surface",
+  "smoothness",
+  "trail_visibility",
+  "width",
+  "incline",
+  "fixme",
+  "check_date"
+];
 const defaultMapStyle = "foot";
 const defaultAdvancedStyle = "access";
 var mapStyle = defaultMapStyle;
 var lastAdvancedStyle = defaultAdvancedStyle;
+var lastCanoeStyle = "canoe";
 
 const colors = {
   public: "#005908",
@@ -75,16 +88,23 @@ function selectEntity(entityInfo) {
 function setMapStyle(newMapStyle) {
   if (newMapStyle === null) newMapStyle = defaultMapStyle;
   if (newMapStyle === 'all') newMapStyle = lastAdvancedStyle;
+  if (!mapStyle.startsWith('canoe') && newMapStyle === 'canoe') newMapStyle = lastCanoeStyle;
+
   if (mapStyle === newMapStyle) return;
   mapStyle = newMapStyle;
 
-  if (!basicMapStyles.includes(mapStyle)) {
-    lastAdvancedStyle = mapStyle
+  if (advancedMapStyles.includes(mapStyle)) {
+    lastAdvancedStyle = mapStyle;
+  }
+  if (mapStyle.startsWith('canoe')) {
+    lastCanoeStyle = mapStyle;
   }
 
-  document.getElementById("map-style").value = basicMapStyles.includes(mapStyle) ? mapStyle : 'all';
+  document.getElementById("map-style").value = mapStyle.startsWith('canoe') ? 'canoe' : basicMapStyles.includes(mapStyle) ? mapStyle : 'all';
   document.getElementById("advanced-style").value = mapStyle;
-  document.getElementById("advanced-style").style.display = basicMapStyles.includes(mapStyle) ? 'none' : 'block';
+  document.getElementById("canoe-style").value = mapStyle;
+  document.getElementById("advanced-style").style.display = advancedMapStyles.includes(mapStyle) ? 'block' : 'none';
+  document.getElementById("canoe-style").style.display = mapStyle.startsWith('canoe') ? 'block' : 'none';
 
   updateMapLayers();
   setHashParameters({ style: mapStyle === defaultMapStyle ? null : mapStyle });
@@ -99,7 +119,8 @@ window.onload = (event) => {
   }
 
   document.getElementById("map-style").addEventListener('change', mapStyleChangeEvent);
-  document.getElementById("advanced-style").addEventListener('change', mapStyleChangeEvent); 
+  document.getElementById("advanced-style").addEventListener('change', mapStyleChangeEvent);
+  document.getElementById("canoe-style").addEventListener('change', mapStyleChangeEvent); 
 
   map = new maplibregl.Map({
     container: 'map',

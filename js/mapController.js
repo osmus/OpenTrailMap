@@ -130,7 +130,7 @@ var impliedNoExpressions = {
 
 function toggleWaterTrailsIfNeeded() {
 
-  if (mapStyle === 'canoe' && !map.getSource('water_trails')) {
+  if (mapStyle.startsWith('canoe') && !map.getSource('water_trails')) {
     clearTrailLayers();
     if (map.getSource('trails')) map.removeSource('trails');
     map.addSource("water_trails", {
@@ -145,7 +145,7 @@ function toggleWaterTrailsIfNeeded() {
     });
     loadTrailLayers('water_trail');
 
-  } else if (mapStyle !== 'canoe' && !map.getSource('trails')) {
+  } else if (!mapStyle.startsWith('canoe') && !map.getSource('trails')) {
     clearTrailLayers();
     if (map.getSource('water_trails')) map.removeSource('water_trails');
     if (map.getSource('water_trails_poi')) map.removeSource('water_trails_poi');
@@ -359,6 +359,20 @@ function loadTrailLayers(name) {
     }
   });
   addTrailLayer({
+    "id": "unspecified-waterways",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
+      "line-join": "round"
+    },
+    "paint": {
+      "line-width": lineWidth,
+      "line-color": colors.unspecified,
+    }
+  });
+  addTrailLayer({
     "id": "waterways",
     "source": name + 's',
     "source-layer": name,
@@ -370,12 +384,7 @@ function loadTrailLayers(name) {
     "paint": {
       "line-width": lineWidth,
       "line-color": colors.water,
-    },
-    "filter": [
-      "all",
-      ["!has", "highway"],
-      ...notNoAccessExpressions('canoe'),
-    ]
+    }
   });
   addTrailLayer({
     "id": "paths",
@@ -556,17 +565,20 @@ var checkDateColors = [
 
 var keysForStyle = {
   name: ['name', 'noname'],
+  'canoe-name': ['name', 'noname', 'waterbody:name'],
   fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
   check_date: ['check_date', 'survey:date']
 };
 
 function updateMapLayersForAdvanced(style) {
 
-  var keys = [style];
+  var mainKey = style.startsWith('canoe') ?  style.substring(6) : style;
+
+  var keys = [mainKey];
   if (keysForStyle[style]) keys = keysForStyle[style];
 
   // for most keys we're looking for missing values, but for fixmes we're looking for extant values
-  var hasKeyMeansSpecified = style !== "fixme";
+  var hasKeyMeansSpecified = mainKey !== "fixme";
 
   var specifiedExpression = [
     hasKeyMeansSpecified ? "any" : "all",
@@ -580,8 +592,20 @@ function updateMapLayersForAdvanced(style) {
     ...keys.map(key => [
       hasKeyMeansSpecified ? "!has" : "has",
       key
-    ]), 
+    ]),
   ];
+  if (mapStyle.startsWith('canoe')) {
+    specifiedExpression = [
+      "any",
+      specifiedExpression,
+      ["has", "highway"],
+    ];
+    unspecifiedExpression = [
+      "all",
+      unspecifiedExpression,
+      ["!has", "highway"],
+    ];
+  }
 
   map
     .setLayoutProperty('disallowed-paths', 'visibility', 'none')
@@ -611,9 +635,21 @@ function updateMapLayersForAdvanced(style) {
       unspecifiedExpression,
       ["==", "informal", "yes"],
       ["has", "highway"],
+    ])
+    .setFilter('unspecified-waterways', [
+      "all",
+      unspecifiedExpression,
+      ["!has", "highway"],
+      ...notNoAccessExpressions('canoe'),
+    ])
+    .setFilter('waterways', [
+      "all",
+      specifiedExpression,
+      ["!has", "highway"],
+      ...notNoAccessExpressions('canoe'),
     ]);
 
-  if (style === 'operator') {
+  if (mainKey === 'operator') {
     // if a path is `informal=yes` then there's probably no operator, always style as complete
     map
       .setFilter('informal-paths', [
@@ -626,7 +662,7 @@ function updateMapLayersForAdvanced(style) {
     map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible');
   }
 
-  if (style === 'check_date') {
+  if (mainKey === 'check_date') {
     map
       .setPaintProperty('paths', 'line-color', checkDateColors)
       .setPaintProperty('informal-paths', 'line-color', checkDateColors);
@@ -679,6 +715,14 @@ function updateMapLayersForAccess(allowedExpression, unspecifiedExpression) {
       unspecifiedExpression,
       ["==", "informal", "yes"],
       ["has", "highway"],
+    ])
+    .setFilter('unspecified-waterways', [
+      "all", false
+    ])
+    .setFilter('waterways', [
+      "all",
+      ["!has", "highway"],
+      ...notNoAccessExpressions('canoe'),
     ]);
 }
 
