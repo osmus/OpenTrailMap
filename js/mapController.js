@@ -566,6 +566,7 @@ var checkDateColors = [
 var keysForStyle = {
   name: ['name', 'noname'],
   'canoe-name': ['name', 'noname', 'waterbody:name'],
+  'canoe-oneway:canoe': ['oneway:canoe', 'oneway:boat'],
   fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
   check_date: ['check_date', 'survey:date']
 };
@@ -604,6 +605,30 @@ function updateMapLayersForAdvanced(style) {
       "all",
       unspecifiedExpression,
       ["!has", "highway"],
+    ];
+  }
+  if (mapStyle === 'canoe-tidal') {
+    specifiedExpression = [
+      "any",
+      specifiedExpression,
+      ["==", "waterway", "tidal_channel"],
+    ];
+    unspecifiedExpression = [
+      "all",
+      unspecifiedExpression,
+      ["!=", "waterway", "tidal_channel"],
+    ];
+  }
+  if (mapStyle === 'canoe-open_water') {
+    specifiedExpression = [
+      "any",
+      specifiedExpression,
+      ["!in", "waterway", "fairway", "flowline"],
+    ];
+    unspecifiedExpression = [
+      "all",
+      unspecifiedExpression,
+      ["in", "waterway", "fairway", "flowline"],
     ];
   }
 
