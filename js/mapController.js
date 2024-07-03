@@ -438,7 +438,7 @@ function loadTrailLayers(name) {
     "source-layer": name,
     "type": "symbol",
     "layout": {
-      "text-field": ['get', 'name'],
+      "text-field": ["coalesce", ['get', 'name'], ['get', 'waterbody:name']],
       "text-font": ["Americana-Regular"],
       "text-size": 13,
       "symbol-placement": "line"
