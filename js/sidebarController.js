@@ -40,6 +40,9 @@ function updateSidebar(entity) {
   html += `<a href="https://pewu.github.io/osm-history/#/${type}/${entityId}" target="_blank">PeWu</a> `;
   html += `<a href="https://overpass-turbo.eu?Q=${opQuery}&R=" target="_blank">Overpass Turbo</a> `;
   html += `<a href="https://osmcha.org/changesets/${entity.changeset}" target="_blank">OSMCha</a> `;
+  if (type === 'relation') {
+    html += `<a href="http://ra.osmsurround.org/analyzeRelation?relationId=${entityId}" target="_blank">Relation Analyzer</a> `;
+  }
   html += "</p>";
   html += "<h3>Edit</h3>";
   html += "<p class='link-list'>";
