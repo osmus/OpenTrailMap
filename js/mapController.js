@@ -473,15 +473,23 @@ function loadTrailLayers(name) {
         "case",
         ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
-        ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
         [
           'all',
           ['==', ["get", "leisure"], "slipway"],
           ['==', ["get", "trailer"], "no"],
         ], ["image", "slipway-canoe"],
         ['==', ["get", "leisure"], "slipway"], ["image", "slipway-canoe-trailer"],
-        ["image", "canoe"]
+        ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
+        ["all", ["has", "canoe"], ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]], ["case",
+          ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
+          ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
+          ['in', ["get", "waterway"], ["literal", ["canal", "river", "stream"]]], ["image", "lock-canoeable"],
+          ""
+        ],
+        ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
+        ['in', ["get", "waterway"], ["literal", ["canal", "river", "stream"]]], ["image", "lock"],
+        ""
       ],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
@@ -489,7 +497,14 @@ function loadTrailLayers(name) {
         22, 1
       ],
       "symbol-placement": "point",
-      "text-field": ["step", ["zoom"], "", poiLabelZoom, ["get", "name"]],
+      "text-field": [
+        "step", ["zoom"], "",
+        poiLabelZoom, [
+          "case",
+          ['in', ["get", "waterway"], ["literal", ["canal", "river", "stream"]]], "",
+          ["get", "name"]
+        ]
+      ],
       "text-optional": true,
       "text-size": 11,
       "text-line-height": 1.1,
@@ -519,6 +534,7 @@ function loadTrailLayers(name) {
       ["==", "highway", "trailhead"],
       ["==", "canoe", "put_in"],
       ["in", "waterway", "dam", "weir", "waterfall"],
+      ["in", "waterway", "canal", "river", "stream"],
       [
         "all",
         ["==", "leisure", "slipway"],

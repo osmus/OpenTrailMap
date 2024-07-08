@@ -147,16 +147,20 @@ window.onload = (event) => {
     }), "bottom-left");
 
   const imageToLoad = [
-    'disallowed-stripes',
-    'trailhead',
-    'ranger-station',
     'canoe',
     'dam',
-    'slipway-canoe-trailer',
-    'slipway-canoe',
+    'dam-canoeable',
+    'disallowed-stripes',
+    'lock',
+    'lock-canoeable',
     'oneway-arrow-right',
     'oneway-arrow-left',
+    'ranger-station',
+    'slipway-canoe-trailer',
+    'slipway-canoe',
+    'trailhead',
     'waterfall',
+    'waterfall-canoeable',
   ];
 
   for (let i in imageToLoad) {
