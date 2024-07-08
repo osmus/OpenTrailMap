@@ -9,26 +9,65 @@ This is a prototype web map application for viewing [OpenStreetMap](https://open
 ## Prototype functionality
 
 ### UI features
-- Show maps for different travel modes ([`foot`](https://wiki.openstreetmap.org/wiki/Key:foot), [`wheelchair`](https://wiki.openstreetmap.org/wiki/Key:wheelchair), [`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle), [`horse`](https://wiki.openstreetmap.org/wiki/Key:horse), [`atv`](https://wiki.openstreetmap.org/wiki/Key:atv), [`canoe`](https://wiki.openstreetmap.org/wiki/Key:canoe), [`snowmobile`](https://wiki.openstreetmap.org/wiki/Key:snowmobile)).
-- Show maps for the presence of various trail tags ([`operator`](https://wiki.openstreetmap.org/wiki/Key:operator)/[`informal`](https://wiki.openstreetmap.org/wiki/Key:informal), [`name`](https://wiki.openstreetmap.org/wiki/Key:name)/[`noname`](https://wiki.openstreetmap.org/wiki/Key:noname), [`surface`](https://wiki.openstreetmap.org/wiki/Key:surface), [`smoothness`](https://wiki.openstreetmap.org/wiki/Key:smoothness), [`trail_visibility`](https://wiki.openstreetmap.org/wiki/Key:trail_visibility), [`width`](https://wiki.openstreetmap.org/wiki/Key:width), [`incline`](https://wiki.openstreetmap.org/wiki/Key:incline), [`fixme`](https://wiki.openstreetmap.org/wiki/Key:fixme)/[`todo`](https://wiki.openstreetmap.org/wiki/Key:todo), [`check_date`](https://wiki.openstreetmap.org/wiki/Key:check_date)/[`survey:date`](https://wiki.openstreetmap.org/wiki/Key:survey:date))
+
+- View OpenStreetMap trail data using various map styles.
 - Click a feature to view its current tags, relations, and metadata.
 - Use quick links to open the feature on [openstreetmap.org](https://openstreetmap.org), iD, JOSM, and other viewers.
 
-### Legend
-- Dark green lines are public paths.
-- Pale green lines indicate the given travel mode is not allowed or not possible. There are a few factors:
-  - [`access`](https://wiki.openstreetmap.org/wiki/Key:access) or the mode tag (like `foot`) is `no`/`private`/`discouraged`
-  - The infrastructure is not sufficient, such as `smoothness=horrible` for `wheelchair`
-- Dashed lines are `informal=yes`. Solid lines are `infomal=no` or `informal` not given.
-- Purple lines don’t have enough access tags to indicate if the given travel mode is allowed or possible (great mapping opportunities!)
+### Map styles
 
-### Points of interest
-Some trail-related POIs are included on the map:
+OpenTrailMap aims to display all land trails, snow trails, and water trails present in OpenStreetMap.
+
+#### Land and snow trails
+
+The following styles show allowed trail access for different travel modes. Dark green lines are public paths, while striped pale green lines are restricted or infeasible for the given travel mode. Dashed lines are `informal=yes`, while solid lines are `infomal=no` or `informal` not given.
+
+- Hiking & Walking Trails ([`foot`](https://wiki.openstreetmap.org/wiki/Key:foot) access)
+- Wheelchair Trails ([`wheelchair`](https://wiki.openstreetmap.org/wiki/Key:wheelchair) access)
+- Bicycle Trails ([`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle) access)
+- Horseback Riding Trails ([`horse`](https://wiki.openstreetmap.org/wiki/Key:horse) access)
+- ATV Trails ([`atv`](https://wiki.openstreetmap.org/wiki/Key:atv) access)
+- Snowmobile Trails ([`snowmobile`](https://wiki.openstreetmap.org/wiki/Key:snowmobile) access)
+
+The following styles highlight the presence and values of trail attribute tags. Purple lines mean an attribute is missing, incomplete, or needs review, while teal lines indicate the attribute is good to go.
+
+- [`operator`](https://wiki.openstreetmap.org/wiki/Key:operator)/[`informal`](https://wiki.openstreetmap.org/wiki/Key:informal)
+- [`name`](https://wiki.openstreetmap.org/wiki/Key:name)/[`noname`](https://wiki.openstreetmap.org/wiki/Key:noname)
+- [`surface`](https://wiki.openstreetmap.org/wiki/Key:surface)
+- [`smoothness`](https://wiki.openstreetmap.org/wiki/Key:smoothness)
+- [`trail_visibility`](https://wiki.openstreetmap.org/wiki/Key:trail_visibility)
+- [`width`](https://wiki.openstreetmap.org/wiki/Key:width)
+- [`incline`](https://wiki.openstreetmap.org/wiki/Key:incline)
+- [`fixme`](https://wiki.openstreetmap.org/wiki/Key:fixme)/[`todo`](https://wiki.openstreetmap.org/wiki/Key:todo)
+- [`check_date`](https://wiki.openstreetmap.org/wiki/Key:check_date)/[`survey:date`](https://wiki.openstreetmap.org/wiki/Key:survey:date)
+
+In all the land and snow styles, some trail-related points of interest are included on the map:
+
 - [`amenity=ranger_station`](https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dranger_station): ranger stations are generally public visitor centers where trail users can get info or seek help
 - [`highway=trailhead`](https://wiki.openstreetmap.org/wiki/Tag:highway%3Dtrailhead): trailheads are access points to trail networks, often with various amenities
 
+#### Water trails
+
+Currently, just one marine travel mode is supported:
+
+- Canoe & Kayak Trails ([`canoe`](https://wiki.openstreetmap.org/wiki/Key:canoe)/[`portage`](https://wiki.openstreetmap.org/wiki/Key:portage) access)
+
+The following water trail attribute styles are supported:
+
+- [`name`](https://wiki.openstreetmap.org/wiki/Key:name)/[`noname`](https://wiki.openstreetmap.org/wiki/Key:noname)/[`waterbody:name`](https://wiki.openstreetmap.org/wiki/Key:waterbody:name)
+- [`tidal`](https://wiki.openstreetmap.org/wiki/Key:tidal)
+- [`intermittent`](https://wiki.openstreetmap.org/wiki/Key:intermittent)
+- [`rapids`](https://wiki.openstreetmap.org/wiki/Key:rapids)
+- [`open_water`](https://wiki.openstreetmap.org/wiki/Key:open_water)
+- [`oneway:canoe`](https://wiki.openstreetmap.org/wiki/Key:oneway:canoe)/[`oneway:boat`](https://wiki.openstreetmap.org/wiki/Key:oneway:boat)
+- [`width`](https://wiki.openstreetmap.org/wiki/Key:width)
+- [`fixme`](https://wiki.openstreetmap.org/wiki/Key:fixme)/[`todo`](https://wiki.openstreetmap.org/wiki/Key:todo)
+- [`check_date`](https://wiki.openstreetmap.org/wiki/Key:check_date)/[`survey:date`](https://wiki.openstreetmap.org/wiki/Key:survey:date)
+
 ### Map tiles
-Trail vector tiles are rendered by OSM US using the schema file [here](https://github.com/osmus/tileservice/blob/main/renderer/layers/trails.yml) and hosted courtesy of [@zelonewolf](https://github.com/zelonewolf). Render time is currently about 4 hours, so any changes you make will take 4 to 8 hours to appear on the map. Map tiles are not available for public use at this time.
+Trail vector tiles are rendered and hosted by OpenStreetMap US using the schema files [here](https://github.com/osmus/tileservice/blob/main/renderer/layers). Thank you to [@zelonewolf](https://github.com/zelonewolf) for setting up the vector tile pipeline. Render time is currently about 4 hours, so any changes you make will take 4 to 8 hours to appear on the map. Map tiles are not available for public use at this time.
+
+The trail vector tilesets are segmented so you do not have to download data that you're not viewing. Namely, the water trail tiles are distinct from the land trail tiles.
 
 ## Get involved
 
