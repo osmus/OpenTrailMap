@@ -483,12 +483,12 @@ function loadTrailLayers(name) {
         ["all", ["has", "canoe"], ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]], ["case",
           ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
           ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
-          ['in', ["get", "waterway"], ["literal", ["canal", "river", "stream"]]], ["image", "lock-canoeable"],
+          ['==', ["get", "lock"], "yes"], ["image", "lock-canoeable"],
           ""
         ],
         ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
         ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
-        ['in', ["get", "waterway"], ["literal", ["canal", "river", "stream"]]], ["image", "lock"],
+        ['==', ["get", "lock"], "yes"], ["image", "lock"],
         ""
       ],
       "icon-size": [
@@ -501,7 +501,7 @@ function loadTrailLayers(name) {
         "step", ["zoom"], "",
         poiLabelZoom, [
           "case",
-          ['in', ["get", "waterway"], ["literal", ["canal", "river", "stream"]]], "",
+          ['==', ["get", "lock"], "yes"], ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]],
           ["get", "name"]
         ]
       ],
@@ -521,7 +521,7 @@ function loadTrailLayers(name) {
     "paint": {
       "text-color":  [
         "case",
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]], colors.label,
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall", "river", "canal", "stream"]]], colors.label,
         colors.poiLabel
       ],
       "text-halo-width": 2,
@@ -534,7 +534,7 @@ function loadTrailLayers(name) {
       ["==", "highway", "trailhead"],
       ["==", "canoe", "put_in"],
       ["in", "waterway", "dam", "weir", "waterfall"],
-      ["in", "waterway", "canal", "river", "stream"],
+      ["==", "lock", "yes"],
       [
         "all",
         ["==", "leisure", "slipway"],
