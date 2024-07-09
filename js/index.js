@@ -158,6 +158,7 @@ window.onload = (event) => {
     'ranger-station',
     'slipway-canoe-trailer',
     'slipway-canoe',
+    'streamgage',
     'trailhead',
     'waterfall',
     'waterfall-canoeable',

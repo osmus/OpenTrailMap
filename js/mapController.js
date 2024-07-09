@@ -473,6 +473,7 @@ function loadTrailLayers(name) {
         "case",
         ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
+        ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
         [
           'all',
           ['==', ["get", "leisure"], "slipway"],
@@ -533,6 +534,7 @@ function loadTrailLayers(name) {
       ["==", "amenity", "ranger_station"],
       ["==", "highway", "trailhead"],
       ["==", "canoe", "put_in"],
+      ["==", "man_made", "monitoring_station"],
       ["in", "waterway", "dam", "weir", "waterfall"],
       ["==", "lock", "yes"],
       [
