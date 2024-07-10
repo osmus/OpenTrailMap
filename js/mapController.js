@@ -1,11 +1,8 @@
 var impliedYesExpressions = {
-  atv: [
-    ["==", "highway", "track"]
-  ],
+  atv: [],
   bicycle: [
     ["==", "highway", "cycleway"],
     ["==", "highway", "bridleway"],
-    ["==", "highway", "track"],
     ["==", "highway", "service"],
     ["==", "highway", "unclassified"],
     ["==", "highway", "residential"],
@@ -21,7 +18,6 @@ var impliedYesExpressions = {
     ["==", "highway", "footway"],
     ["==", "highway", "steps"],
     ["==", "highway", "bridleway"],
-    ["==", "highway", "track"],
     ["==", "highway", "service"],
     ["==", "highway", "unclassified"],
     ["==", "highway", "residential"],
@@ -33,8 +29,7 @@ var impliedYesExpressions = {
     ["==", "highway", "primary_link"],
   ],
   horse: [
-    ["==", "highway", "bridleway"],
-    ["==", "highway", "track"]
+    ["==", "highway", "bridleway"]
   ],
   wheelchair: [
     ["==", "smoothness", "excellent"],
