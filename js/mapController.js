@@ -1,3 +1,18 @@
+var checkDateColors = [
+  "interpolate", ["linear"], [
+    "to-number",
+    ["slice", ["get", "check_date"], 0, 4],
+    ["slice", ["get", "survey:date"], 0, 4],
+  ],
+  2010, '#e7e1ef',
+  2014, '#d4b9da',
+  2016, '#c994c7',
+  2018, '#df65b0',
+  2020, '#e7298a',
+  2021, '#ce1256',
+  2022, '#980043',
+  2023, '#67001f',
+];
 var impliedYesExpressions = {
   atv: [],
   bicycle: [
@@ -125,7 +140,7 @@ var impliedNoExpressions = {
 
 function toggleWaterTrailsIfNeeded() {
 
-  if (mapStyle.startsWith('canoe') && !map.getSource('water_trails')) {
+  if (travelMode === 'canoe' && !map.getSource('water_trails')) {
     clearTrailLayers();
     if (map.getSource('trails')) map.removeSource('trails');
     map.addSource("water_trails", {
@@ -140,7 +155,7 @@ function toggleWaterTrailsIfNeeded() {
     });
     loadTrailLayers('water_trail');
 
-  } else if (!mapStyle.startsWith('canoe') && !map.getSource('trails')) {
+  } else if (travelMode !== 'canoe' && !map.getSource('trails')) {
     clearTrailLayers();
     if (map.getSource('water_trails')) map.removeSource('water_trails');
     if (map.getSource('water_trails_poi')) map.removeSource('water_trails_poi');
@@ -267,18 +282,7 @@ function loadTrailLayers(name) {
     "paint": {
       "line-width": lineWidth,
       "line-color": colors.bgwater,
-    },
-    "filter": [
-      "all",
-      ["!has", "highway"],
-      [
-        "none",
-        [
-          "all",
-          ...notNoAccessExpressions('canoe'),
-        ]
-      ],
-    ]
+    }
   });
   addTrailLayer({
     "id": "informal-paths",
@@ -543,225 +547,238 @@ function loadTrailLayers(name) {
   });
 }
 
-function updateMapLayers() {
+function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
 
-  map
-    .setFilter('oneway-arrows', [
-      "==", "oneway", "yes" 
-    ]);
+  var isWaterTrails = travelMode === 'canoe';
 
-  if (mapStyle === 'access') {
-    updateMapLayersForAllAccess();
-  } else if (basicMapStyles.includes(mapStyle)) {
-    updateMapLayersForTravelMode(mapStyle);
-  } else {
-    updateMapLayersForAdvanced(mapStyle);
-  }
-}
+  // ["!=", "true", "false"] always evalutes to true because "true" actually refers to the name of a
+  // data attribute key, which is always undefined, while "false" is the string it's compared to.
+  var allowedAccessExpression = ["!=", "true", "false"];
+  var specifiedAccessExpression = ["!=", "true", "false"];
+  var specifiedAttributeExpression = ["!=", "true", "false"];
+  var specifiedExpression;
 
-var checkDateColors = [
-  "interpolate", ["linear"], [
-    "to-number",
-    ["slice", ["get", "check_date"], 0, 4],
-    ["slice", ["get", "survey:date"], 0, 4],
-  ],
-  2010, '#e7e1ef',
-  2014, '#d4b9da',
-  2016, '#c994c7',
-  2018, '#df65b0',
-  2020, '#e7298a',
-  2021, '#ce1256',
-  2022, '#980043',
-  2023, '#67001f',
-];
+  var showDisallowedPathsExpression = [lens === "access" ? "!=" : '==', "true", "false"];
+  var showUnspecifiedPathsExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
-var keysForStyle = {
-  name: ['name', 'noname'],
-  'canoe-name': ['name', 'noname', 'waterbody:name'],
-  'canoe-oneway:canoe': ['oneway:canoe', 'oneway:boat'],
-  fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
-  check_date: ['check_date', 'survey:date']
-};
+  let pathsColors = colors.public;
 
-function updateMapLayersForAdvanced(style) {
-
-  var mainKey = style.startsWith('canoe') ?  style.substring(6) : style;
-
-  var keys = [mainKey];
-  if (keysForStyle[style]) keys = keysForStyle[style];
-
-  // for most keys we're looking for missing values, but for fixmes we're looking for extant values
-  var hasKeyMeansSpecified = mainKey !== "fixme";
-
-  var specifiedExpression = [
-    hasKeyMeansSpecified ? "any" : "all",
-    ...keys.map(key => [
-      hasKeyMeansSpecified ? "has" : "!has",
-      key
-    ]),
+  var onewayArrowsFilter = [
+    "==", "oneway", "yes" 
   ];
-  var unspecifiedExpression = [
-    hasKeyMeansSpecified ? "all" : "any",
-    ...keys.map(key => [
-      hasKeyMeansSpecified ? "!has" : "has",
-      key
-    ]),
-  ];
-  if (mapStyle.startsWith('canoe')) {
-    specifiedExpression = [
-      "any",
-      specifiedExpression,
-      ["has", "highway"],
-    ];
-    unspecifiedExpression = [
-      "all",
-      unspecifiedExpression,
-      ["!has", "highway"],
-    ];
-  }
-  if (mapStyle === 'canoe-tidal') {
-    specifiedExpression = [
-      "any",
-      specifiedExpression,
-      ["==", "waterway", "tidal_channel"],
-    ];
-    unspecifiedExpression = [
-      "all",
-      unspecifiedExpression,
-      ["!=", "waterway", "tidal_channel"],
-    ];
-  }
-  if (mapStyle === 'canoe-open_water') {
-    specifiedExpression = [
-      "any",
-      specifiedExpression,
-      ["!in", "waterway", "fairway", "flowline"],
-    ];
-    unspecifiedExpression = [
-      "all",
-      unspecifiedExpression,
-      ["in", "waterway", "fairway", "flowline"],
-    ];
-  }
 
-  map
-    .setLayoutProperty('disallowed-paths', 'visibility', 'none')
-    .setLayoutProperty('disallowed-informal-paths', 'visibility', 'none')
-    .setPaintProperty('paths', 'line-color', colors.specified)
-    .setPaintProperty('informal-paths', 'line-color', colors.specified)
-    .setFilter('paths', [
-      "all",
-      specifiedExpression,
-      ["!=", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('informal-paths', [
-      "all",
-      specifiedExpression,
-      ["==", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('unspecified-paths', [
-      "all",
-      unspecifiedExpression,
-      ["!=", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('unspecified-informal-paths', [
-      "all",
-      unspecifiedExpression,
-      ["==", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('unspecified-waterways', [
-      "all",
-      unspecifiedExpression,
-      ["!has", "highway"],
-      ...notNoAccessExpressions('canoe'),
-    ])
-    .setFilter('waterways', [
-      "all",
-      specifiedExpression,
-      ["!has", "highway"],
-      ...notNoAccessExpressions('canoe'),
-    ]);
+  if (travelMode !== 'all') {
 
-  if (mainKey === 'operator') {
-    // if a path is `informal=yes` then there's probably no operator, always style as complete
-    map
-      .setFilter('informal-paths', [
+    var modes = [travelMode];
+    if (travelMode == 'canoe') modes.push('portage');
+  
+    allowedAccessExpression = ["any"];
+  
+    onewayArrowsFilter = [
+      "any",
+      [
         "all",
-        ["==", "informal", "yes"],
+        ...modes.map(mode => ["!has", "oneway:" + mode]),
+        ["==", "oneway", "yes"],
+      ],
+      ...modes.map(mode => ["==", "oneway:" + mode, "yes"]),
+    ];
+    
+    specifiedAccessExpression = ["any"];
+  
+    modes.forEach(mode => {
+      specifiedAccessExpression.push([
+          "none",
+          ["any",
+            [
+              "all",
+              ["!has", mode],
+              ...notNoAccessExpressions("access"),
+              [
+                "none",
+                ...impliedYesExpressions[mode],
+                ...impliedNoExpressions[mode]
+              ]
+            ],
+            // access if always unspecified if mode is explicitly set to `unknown`
+            ["==", mode, "unknown"],
+          ]
+        ]);
+  
+      allowedAccessExpression.push(modeIsAllowedExpression(mode));
+    });
+  } else if (lens === 'access') {
+
+    specifiedAccessExpression = [
+      "all",
+      // access not fully specified if any access tag is explicitly set to `unknown`
+      ["!=", "access", "unknown"],
+      ["!=", "foot", "unknown"],
+      ["!=", "wheelchair", "unknown"],
+      ["!=", "bicycle", "unknown"],
+      ["!=", "horse", "unknown"],
+      ["!=", "atv", "unknown"],
+    ];
+  
+    allowedAccessExpression = [
+      "any",
+      modeIsAllowedExpression("foot"),
+      modeIsAllowedExpression("wheelchair"),
+      modeIsAllowedExpression("bicycle"),
+      modeIsAllowedExpression("horse"),
+      modeIsAllowedExpression("atv"),
+    ];
+  }
+
+  if (lens !== "" && lens !== "access") {
+    
+    pathsColors = lens === 'check_date' ? checkDateColors : colors.specified;
+
+    var keys = [lens];
+
+    var keysForStyle = {
+      name: ['name', 'noname'],
+      'canoe-name': ['name', 'noname', 'waterbody:name'],
+      'canoe-oneway': ['oneway:canoe', 'oneway:boat'],
+      fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
+      check_date: ['check_date', 'survey:date']
+    };
+    var style = isWaterTrails ? 'canoe-' + lens : lens;
+    if (keysForStyle[style]) keys = keysForStyle[style];
+  
+    // for most keys we're looking for missing values, but for fixmes we're looking for extant values
+    var hasKeyMeansSpecified = lens !== "fixme";
+  
+    specifiedAttributeExpression = [
+      hasKeyMeansSpecified ? "any" : "all",
+      ...keys.map(key => [
+        hasKeyMeansSpecified ? "has" : "!has",
+        key
+      ]),
+    ];
+    if (isWaterTrails) {
+      // don't expect waterway attributes on portage segments
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
         ["has", "highway"],
-      ]);
-    map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'none');
+      ];
+    }
+    if (lens === 'tidal') {
+      // assume tidal channels are always tidal=yes
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["==", "waterway", "tidal_channel"],
+      ];
+    }
+    if (lens === 'open_water') {
+      // only expect open_water tag on certain features
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["!in", "waterway", "fairway", "flowline"],
+      ];
+    }
+    if (lens === 'operator') {
+      // if a path is `informal=yes` then there's probably no operator, always style as complete
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["==", "informal", "yes"],
+      ];
+    }
+    specifiedExpression = specifiedAttributeExpression;
+    allowedAccessExpression = [
+      "all",
+      allowedAccessExpression,
+      specifiedAccessExpression
+    ];
   } else {
-    map.setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible');
+    specifiedExpression = specifiedAccessExpression;
   }
 
-  if (mainKey === 'check_date') {
-    map
-      .setPaintProperty('paths', 'line-color', checkDateColors)
-      .setPaintProperty('informal-paths', 'line-color', checkDateColors);
-  }
-}
-
-function updateMapLayersForAccess(allowedExpression, unspecifiedExpression) {
   map
-    .setLayoutProperty('disallowed-paths', 'visibility', 'visible')
-    .setLayoutProperty('disallowed-informal-paths', 'visibility', 'visible')
-    .setLayoutProperty('unspecified-informal-paths', 'visibility', 'visible')
-    .setPaintProperty('paths', 'line-color', colors.public)
-    .setPaintProperty('informal-paths', 'line-color', colors.public)
-    .setFilter('paths', [
-      "all",
-      allowedExpression,
-      ["none", unspecifiedExpression],
-      ["!=", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('informal-paths', [
-      "all",
-      allowedExpression,
-      ["none", unspecifiedExpression],
-      ["==", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('disallowed-paths', [
-      "all",
-      ["none", allowedExpression],
-      ["none", unspecifiedExpression],
-      ["!=", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('disallowed-informal-paths', [
-      "all",
-      ["none", allowedExpression],
-      ["none", unspecifiedExpression],
-      ["==", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('unspecified-paths', [
-      "all",
-      unspecifiedExpression,
-      ["!=", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('unspecified-informal-paths', [
-      "all",
-      unspecifiedExpression,
-      ["==", "informal", "yes"],
-      ["has", "highway"],
-    ])
-    .setFilter('unspecified-waterways', [
-      "all", false
-    ])
-    .setFilter('waterways', [
-      "all",
-      ["!has", "highway"],
-      ...notNoAccessExpressions('canoe'),
-    ]);
+    .setPaintProperty('paths', 'line-color', pathsColors)
+    .setPaintProperty('informal-paths', 'line-color', pathsColors)
+    .setFilter('oneway-arrows', onewayArrowsFilter);
+
+  var combinedFilterExpression = ["any"];
+  function setTrailsLayerFilter(layerId, filter) {
+    map.setFilter(layerId, filter);
+    combinedFilterExpression.push(filter);
+  }
+  
+  setTrailsLayerFilter('paths', [
+    "all",
+    allowedAccessExpression,
+    specifiedExpression,
+    ["!=", "informal", "yes"],
+    ["has", "highway"],
+  ]);
+  setTrailsLayerFilter('informal-paths', [
+    "all",
+    allowedAccessExpression,
+    specifiedExpression,
+    ["==", "informal", "yes"],
+    ["has", "highway"],
+  ]);
+  setTrailsLayerFilter('disallowed-paths', [
+    "all",
+    showDisallowedPathsExpression,
+    ["none", allowedAccessExpression],
+    specifiedExpression,
+    ["!=", "informal", "yes"],
+    ["has", "highway"],
+  ]);
+  setTrailsLayerFilter('disallowed-informal-paths', [
+    "all",
+    showDisallowedPathsExpression,
+    ["none", allowedAccessExpression],
+    specifiedExpression,
+    ["==", "informal", "yes"],
+    ["has", "highway"],
+  ]);
+  setTrailsLayerFilter('unspecified-paths', [
+    "all",
+    showUnspecifiedPathsExpression,
+    allowedAccessExpression,
+    ["none", specifiedExpression],
+    ["!=", "informal", "yes"],
+    ["has", "highway"],
+  ]);
+  setTrailsLayerFilter('unspecified-informal-paths', [
+    "all",
+    showUnspecifiedPathsExpression,
+    allowedAccessExpression,
+    ["none", specifiedExpression],
+    ["==", "informal", "yes"],
+    ["has", "highway"],
+  ]);
+  setTrailsLayerFilter('disallowed-waterways', [
+    "all",
+    showDisallowedPathsExpression,
+    ["none", allowedAccessExpression],
+    specifiedExpression,
+    ["!has", "highway"],
+  ]);
+  setTrailsLayerFilter('unspecified-waterways', [
+    "all",
+    allowedAccessExpression,
+    ["none", specifiedExpression],
+    ["!has", "highway"],
+  ]);
+  setTrailsLayerFilter('waterways', [
+    "all",
+    allowedAccessExpression,
+    specifiedExpression,
+    ["!has", "highway"],
+  ]);
+
+  map
+    .setFilter('trails-labels', combinedFilterExpression)
+    .setFilter('trails-pointer-targets', combinedFilterExpression);
 }
 
 function notNoAccessExpressions(mode) {
@@ -775,7 +792,7 @@ function notNoAccessExpressions(mode) {
 }
 
 function modeIsAllowedExpression(mode) {
-  var allowedExpression = [
+  var allowedAccessExpression = [
     "all",
     [
       "any",
@@ -792,7 +809,7 @@ function modeIsAllowedExpression(mode) {
     ],
   ];
   if (impliedNoExpressions[mode]) {
-    allowedExpression.push(
+    allowedAccessExpression.push(
       [
         "any",
         ["has", mode],
@@ -802,74 +819,7 @@ function modeIsAllowedExpression(mode) {
       ]
     );
   }
-  return allowedExpression;
-}
-
-function updateMapLayersForAllAccess() {
-
-  var unspecifiedExpression = [
-    "any",
-    // access not fully specified if any access tag is explicitly set to `unknown`
-    ["==", "access", "unknown"],
-    ["==", "foot", "unknown"],
-    ["==", "wheelchair", "unknown"],
-    ["==", "bicycle", "unknown"],
-    ["==", "horse", "unknown"],
-    ["==", "atv", "unknown"],
-  ];
-
-  var allowedExpression = [
-    "any",
-    modeIsAllowedExpression("foot"),
-    modeIsAllowedExpression("wheelchair"),
-    modeIsAllowedExpression("bicycle"),
-    modeIsAllowedExpression("horse"),
-    modeIsAllowedExpression("atv"),
-  ];
-
-  updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
-}
-
-function updateMapLayersForTravelMode(mapStyle) {
-
-  var modes = [mapStyle];
-  if (mapStyle == 'canoe') modes.push('portage');
-
-  var unspecifiedExpression = ["any"];
-  var allowedExpression = ["any"];
-
-  map
-    .setFilter('oneway-arrows', [
-      "any",
-      [
-        "all",
-        ...modes.map(mode => ["!has", "oneway:" + mode]),
-        ["==", "oneway", "yes"],
-      ],
-      ...modes.map(mode => ["==", "oneway:" + mode, "yes"]),
-    ]);
-
-  modes.forEach(mode => {
-    unspecifiedExpression.push([
-      "any",
-      [
-        "all",
-        ["!has", mode],
-        ...notNoAccessExpressions("access"),
-        [
-          "none",
-          ...impliedYesExpressions[mode],
-          ...impliedNoExpressions[mode]
-        ]
-      ],
-      // access if always unspecified if mode is explicitly set to `unknown`
-      ["==", mode, "unknown"],
-    ]);
-
-    allowedExpression.push(modeIsAllowedExpression(mode));
-  });
-
-  updateMapLayersForAccess(allowedExpression, unspecifiedExpression);
+  return allowedAccessExpression;
 }
 
 let isFocusing;
@@ -896,7 +846,7 @@ async function loadInitialMap() {
   }
 
   updateForHash();
-  updateMapLayers();
+  updateTrailLayers();
 
   if (isFocusing) {
     map.addLayer({

@@ -36,7 +36,7 @@
       <div id="map-wrap">
         <div id="map"></div>
         <div id="controls">
-          <select id="map-style">
+          <select id="travel-mode">
             <optgroup label="Trails">
               <option value="all">All Trails</option>
               <option value="foot" selected>Hiking & Walking Trails</option>
@@ -50,7 +50,8 @@
               <option value="canoe">Canoe & Kayak Trails</option>
             </optgroup>
           </select>
-          <select id="advanced-style" style="display: none;">
+          <select id="lens">
+            <option value="">General</option>
             <option value="access">Access</option>
             <option value="name">Name</option>
             <option value="operator">Operator</option>
@@ -61,18 +62,12 @@
             <option value="incline">Incline</option>
             <option value="fixme">Fixme Requests</option>
             <option value="check_date">Last Checked Date</option>
-          </select>
-          <select id="canoe-style" style="display: none;">
-            <option value="canoe">General</option>
-            <option value="canoe-name">Name</option>
-            <option value="canoe-tidal">Tidal</option>
-            <option value="canoe-intermittent">Intermittent</option>
-            <option value="canoe-rapids">Rapids</option>
-            <option value="canoe-open_water">Open Water</option>
-            <option value="canoe-oneway:canoe">Oneway</option>
-            <option value="canoe-width">Width</option>
-            <option value="canoe-fixme">Fixme Requests</option>
-            <option value="canoe-check_date">Last Checked Date</option>
+
+            <option value="tidal">Tidal</option>
+            <option value="intermittent">Intermittent</option>
+            <option value="rapids">Rapids</option>
+            <option value="open_water">Open Water</option>
+            <option value="oneway">Oneway</option>
           </select>
         </div>
       </div>

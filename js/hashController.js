@@ -38,6 +38,7 @@ function entityInfoFromHash() {
 }
 
 function updateForHash() { 
-  setMapStyle(hashValue("style"));
+  setTravelMode(hashValue("mode"));
+  setLens(hashValue("lens"));
   selectEntity(entityInfoFromHash());
 }
