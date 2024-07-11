@@ -658,12 +658,21 @@ function updateTrailLayers() {
       ]),
     ];
     if (isWaterTrails) {
-      // don't expect waterway attributes on portage segments
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["has", "highway"],
-      ];
+      if (waterwayOnlyLenses.includes(lens)) {
+        // don't expect waterway-only attributes on highways
+        specifiedAttributeExpression = [
+          "any",
+          specifiedAttributeExpression,
+          ["has", "highway"],
+        ];
+      } else if (highwayOnlyLenses.includes(lens)) {
+        // don't expect highway-only attributes on waterways
+        specifiedAttributeExpression = [
+          "any",
+          specifiedAttributeExpression,
+          ["!has", "highway"],
+        ];
+      }
     }
     if (lens === 'tidal') {
       // assume tidal channels are always tidal=yes

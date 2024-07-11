@@ -17,23 +17,24 @@ const landTrailLenses = [
   "surface",
   "smoothness",
   "trail_visibility",
-  "width",
   "incline",
+  "width",
   "fixme",
   "check_date"
 ];
-const waterTrailLenses = [
-  "",
-  "access",
-  "name",
+const highwayOnlyLenses = [
+  "operator",
+  "surface",
+  "smoothness",
+  "trail_visibility",
+  "incline",
+];
+const waterwayOnlyLenses = [
   "tidal",
   "intermittent",
   "rapids",
   "open_water",
   "oneway",
-  "width",
-  "fixme",
-  "check_date"
 ];
 const defaultTravelMode = "foot";
 const defaultLens= "";
@@ -110,7 +111,6 @@ function setTravelMode(value) {
 }
 function setLens(value) {
   if (value === null) value = defaultLens;
-  if (travelMode === 'canoe' && !waterTrailLenses.includes(value)) value = waterTrailLenses[0];
   if (travelMode !== 'canoe' && !landTrailLenses.includes(value)) value = landTrailLenses[0];
 
   if (lens === value) return;
@@ -122,27 +122,6 @@ function setLens(value) {
   setHashParameters({ lens: lens === defaultLens ? null : value });
 }
 
-/*
-function setMapStyle(newMapStyle) {
-  //if (newMapStyle === null) newMapStyle = defaultMapStyle;
-  //if (newMapStyle === 'all') newMapStyle = lastAdvancedStyle;
-  //if (!mapStyle.startsWith('canoe') && newMapStyle === 'canoe') newMapStyle = lastCanoeStyle;
-
-  
-
-  //if (advancedMapStyles.includes(mapStyle)) lastAdvancedStyle = mapStyle;
-  //if (mapStyle.startsWith('canoe')) lastCanoeStyle = mapStyle;
-
-  //document.getElementById("map-style").value = mapStyle.startsWith('canoe') ? 'canoe' : basicMapStyles.includes(mapStyle) ? mapStyle : 'all';
-  //document.getElementById("advanced-style").value = mapStyle;
-  //document.getElementById("canoe-style").value = mapStyle;
-  //document.getElementById("advanced-style").style.display = advancedMapStyles.includes(mapStyle) ? 'block' : 'none';
-  //document.getElementById("canoe-style").style.display = mapStyle.startsWith('canoe') ? 'block' : 'none';
-
-  updateTrailLayers();
-  setHashParameters({ style: mapStyle === defaultMapStyle ? null : mapStyle });
-}
-*/
 window.onload = (event) => {
 
   window.addEventListener("hashchange", updateForHash);
