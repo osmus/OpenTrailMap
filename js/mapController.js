@@ -1,3 +1,4 @@
+var thisYear = new Date().getFullYear();
 var checkDateColors = [
   "interpolate", ["linear"], [
     "to-number",
@@ -11,7 +12,21 @@ var checkDateColors = [
   2020, '#e7298a',
   2021, '#ce1256',
   2022, '#980043',
-  2023, '#67001f',
+  thisYear, '#67001f',
+];
+var editedDateColors = [
+  "interpolate", ["linear"], [
+    // convert unix timestamp to year
+    "floor", ["+", ["/", ["get", "OSM_TIMESTAMP"], 31536000], 1970],
+  ],
+  2004, '#e7e1ef',
+  2008, '#d4b9da',
+  2012, '#c994c7',
+  2016, '#df65b0',
+  2018, '#e7298a',
+  2020, '#ce1256',
+  2022, '#980043',
+  thisYear, '#380010',
 ];
 var impliedYesExpressions = {
   atv: [],
@@ -562,7 +577,8 @@ function updateTrailLayers() {
   var showDisallowedPathsExpression = [lens === "access" ? "!=" : '==', "true", "false"];
   var showUnspecifiedPathsExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
-  let pathsColors = colors.public;
+  var pathsColors = colors.public;
+  var waterwaysColors = colors.water;
 
   var onewayArrowsFilter = [
     "==", "oneway", "yes" 
@@ -632,8 +648,12 @@ function updateTrailLayers() {
   }
 
   if (lens !== "" && lens !== "access") {
+
+    pathsColors = lens === 'check_date' ? checkDateColors :
+      lens === 'OSM_TIMESTAMP' ? editedDateColors :
+      colors.specified;
     
-    pathsColors = lens === 'check_date' ? checkDateColors : colors.specified;
+    if (lens === 'check_date' || lens === 'OSM_TIMESTAMP') waterwaysColors = pathsColors;
 
     var keys = [lens];
 
@@ -711,6 +731,7 @@ function updateTrailLayers() {
   map
     .setPaintProperty('paths', 'line-color', pathsColors)
     .setPaintProperty('informal-paths', 'line-color', pathsColors)
+    .setPaintProperty('waterways', 'line-color', waterwaysColors)
     .setFilter('oneway-arrows', onewayArrowsFilter);
 
   var combinedFilterExpression = ["any"];
@@ -926,6 +947,7 @@ function entityForEvent(e) {
   var features = map.queryRenderedFeatures(e.point, {layers: layers});
   var feature = features.length && features[0];
   if (feature && feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
+    console.log(feature.properties.OSM_TIMESTAMP)
     return {
       id: feature.properties.OSM_ID,
       type: feature.properties.OSM_TYPE,

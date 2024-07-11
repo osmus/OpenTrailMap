@@ -20,7 +20,8 @@ const landTrailLenses = [
   "incline",
   "width",
   "fixme",
-  "check_date"
+  "check_date",
+  "OSM_TIMESTAMP"
 ];
 const highwayOnlyLenses = [
   "operator",
