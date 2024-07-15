@@ -947,7 +947,6 @@ function entityForEvent(e) {
   var features = map.queryRenderedFeatures(e.point, {layers: layers});
   var feature = features.length && features[0];
   if (feature && feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
-    console.log(feature.properties.OSM_TIMESTAMP)
     return {
       id: feature.properties.OSM_ID,
       type: feature.properties.OSM_TYPE,
