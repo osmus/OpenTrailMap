@@ -734,12 +734,6 @@ function updateTrailLayers() {
     specifiedExpression = specifiedAccessExpression;
   }
 
-  map
-    .setPaintProperty('paths', 'line-color', pathsColors)
-    .setPaintProperty('informal-paths', 'line-color', pathsColors)
-    .setPaintProperty('waterways', 'line-color', waterwaysColors)
-    .setFilter('oneway-arrows', onewayArrowsFilter);
-
   var combinedFilterExpression = ["any"];
   function setTrailsLayerFilter(layerId, filter) {
     map.setFilter(layerId, filter);
@@ -813,6 +807,10 @@ function updateTrailLayers() {
   ]);
 
   map
+    .setPaintProperty('paths', 'line-color', pathsColors)
+    .setPaintProperty('informal-paths', 'line-color', pathsColors)
+    .setPaintProperty('waterways', 'line-color', waterwaysColors)
+    .setFilter('oneway-arrows', ["all", onewayArrowsFilter, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
     .setFilter('trails-pointer-targets', combinedFilterExpression);
 }
