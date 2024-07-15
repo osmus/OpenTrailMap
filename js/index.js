@@ -167,6 +167,7 @@ window.onload = (event) => {
     'lock-canoeable',
     'oneway-arrow-right',
     'oneway-arrow-left',
+    'question',
     'ranger-station',
     'slipway-canoe-trailer',
     'slipway-canoe',

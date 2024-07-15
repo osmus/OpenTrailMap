@@ -566,6 +566,25 @@ function loadTrailLayers(name) {
       ],
     ]
   });
+  addTrailLayer({
+    "id": "trails-qa",
+    "source": name + 's',
+    "source-layer": name + '_qa',
+    "type": "symbol",
+    "transition": {
+      "duration": 0,
+      "delay": 0
+    },
+    "layout": {
+      "icon-image": ["image", "question"],
+      "icon-size": [
+        "interpolate", ["linear"], ["zoom"],
+        12, 0.5,
+        22, 1
+      ],
+      "symbol-placement": "point"
+    }
+  });
 }
 
 function updateTrailLayers() {
