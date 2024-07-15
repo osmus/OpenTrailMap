@@ -599,6 +599,7 @@ function updateTrailLayers() {
   var specifiedAttributeExpression = ["!=", "true", "false"];
   var specifiedExpression;
 
+  var showFixmesExpression = [lens === "fixme" ? "!=" : '==', "true", "false"];
   var showDisallowedPathsExpression = [lens === "access" ? "!=" : '==', "true", "false"];
   var showUnspecifiedPathsExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
@@ -830,6 +831,7 @@ function updateTrailLayers() {
     .setPaintProperty('informal-paths', 'line-color', pathsColors)
     .setPaintProperty('waterways', 'line-color', waterwaysColors)
     .setFilter('oneway-arrows', ["all", onewayArrowsFilter, combinedFilterExpression])
+    .setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
     .setFilter('trails-pointer-targets', combinedFilterExpression);
 }
