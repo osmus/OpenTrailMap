@@ -158,6 +158,7 @@ function toggleWaterTrailsIfNeeded() {
   if (travelMode === 'canoe' && !map.getSource('water_trails')) {
     clearTrailLayers();
     if (map.getSource('trails')) map.removeSource('trails');
+    if (map.getSource('trails_poi')) map.removeSource('trails_poi');
     map.addSource("water_trails", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/water_trails.json",
@@ -177,6 +178,11 @@ function toggleWaterTrailsIfNeeded() {
     map.addSource("trails", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    });
+    map.addSource("trails_poi", {
+      type: "vector",
+      url: "https://dwuxtsziek7cf.cloudfront.net/trails_poi.json",
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
     loadTrailLayers('trail');
@@ -233,8 +239,8 @@ function loadTrailLayers(name) {
   });
   addTrailLayer({
     "id": "hovered-pois",
-    "source": name == 'trail' ? "trails" : 'water_trails_poi',
-    "source-layer": name == 'trail' ? "trail_poi" : 'water_trail_poi',
+    "source": name + 's_poi',
+    "source-layer": name + '_poi',
     "type": "circle",
     "paint": {
       "circle-radius": [
@@ -269,8 +275,8 @@ function loadTrailLayers(name) {
   });
   addTrailLayer({
     "id": "selected-pois",
-    "source": name == 'trail' ? "trails" : 'water_trails_poi',
-    "source-layer": name == 'trail' ? "trail_poi" : 'water_trail_poi',
+    "source": name + 's_poi',
+    "source-layer": name + '_poi',
     "type": "circle",
     "paint": {
       "circle-radius": [
@@ -475,8 +481,8 @@ function loadTrailLayers(name) {
   });
   addTrailLayer({
     "id": "trail-pois",
-    "source": name == 'trail' ? "trails" : 'water_trails_poi',
-    "source-layer": name == 'trail' ? "trail_poi" : 'water_trail_poi',
+    "source": name + 's_poi',
+    "source-layer": name + '_poi',
     "type": "symbol",
     "transition": {
       "duration": 0,
