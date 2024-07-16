@@ -9,6 +9,160 @@ const travelModes = [
   "canoe",
   "snowmobile",
 ];
+const landLabels = [
+  {
+    id: "",
+    label: "General"
+  },
+  {
+    label: "Attributes",
+    subitems: [
+      {
+        id: "access",
+        label: "Access"
+      },
+      {
+        id: "incline",
+        label: "Incline"
+      },
+      {
+        id: "name",
+        label: "Name"
+      },
+      {
+        id: "oneway",
+        label: "Oneway"
+      },
+      {
+        id: "operator",
+        label: "Operator"
+      },
+      {
+        id: "surface",
+        label: "Surface"
+      },
+      {
+        id: "smoothness",
+        label: "Smoothness"
+      },
+      {
+        id: "trail_visibility",
+        label: "Trail Visibility"
+      },
+      {
+        id: "width",
+        label: "Width"
+      },
+    ]
+  },
+  {
+    label: "Metadata",
+    subitems: [
+      {
+        id: "fixme",
+        label: "Fixme Requests"
+      },
+      {
+        id: "check_date",
+        label: "Last Checked Date"
+      },
+      {
+        id: "OSM_TIMESTAMP",
+        label: "Last Edited Date"
+      },
+    ]
+  },
+];
+const canoeLabels = [
+  {
+    id: "",
+    label: "General"
+  },
+  {
+    label: "Attributes",
+    subitems: [
+      {
+        id: "access",
+        label: "Access"
+      },
+      {
+        id: "name",
+        label: "Name"
+      },
+      {
+        id: "oneway",
+        label: "Oneway"
+      },
+      {
+        id: "width",
+        label: "Width"
+      },
+    ]
+  },
+  {
+    label: "Waterway Attributes",
+    subitems: [
+      {
+        id: "intermittent",
+        label: "Intermittent"
+      },
+      {
+        id: "open_water",
+        label: "Open Water"
+      },
+      {
+        id: "rapids",
+        label: "Rapids"
+      },
+      {
+        id: "tidal",
+        label: "Tidal"
+      },
+    ]
+  },
+  {
+    label: "Portage Attributes",
+    subitems: [
+      {
+        id: "incline",
+        label: "Incline"
+      },
+      {
+        id: "operator",
+        label: "Operator"
+      },
+      {
+        id: "surface",
+        label: "Surface"
+      },
+      {
+        id: "smoothness",
+        label: "Smoothness"
+      },
+      {
+        id: "trail_visibility",
+        label: "Trail Visibility"
+      },
+    ]
+  },
+  {
+    label: "Metadata",
+    subitems: [
+      {
+        id: "fixme",
+        label: "Fixme Requests"
+      },
+      {
+        id: "check_date",
+        label: "Last Checked Date"
+      },
+      {
+        id: "OSM_TIMESTAMP",
+        label: "Last Edited Date"
+      },
+    ]
+  },
+];
 const landTrailLenses = [
   "",
   "access",
@@ -100,6 +254,24 @@ function selectEntity(entityInfo) {
     updateMembershipsTable(memberships);
   });
 }
+function updateLensControl() {
+  var html = "";
+  var items = travelMode === 'canoe' ? canoeLabels : landLabels;
+  items.forEach(function(item) {
+    if (item.subitems) {
+      html += '<optgroup label="' + item.label + '">';
+      item.subitems.forEach(function(item) {
+        html += '<option value="' + item.id + '">' + item.label + '</option>';
+      })
+      html += '</optgroup>';
+    } else {
+      html += '<option value="' + item.id + '">' + item.label + '</option>';
+    }
+  });
+  var lensElement =  document.getElementById("lens");
+  lensElement.innerHTML = html;
+  lensElement.value = lens;
+}
 function setTravelMode(value) {
   if (value === null) value = defaultTravelMode;
   if (travelMode === value) return;
@@ -107,6 +279,7 @@ function setTravelMode(value) {
 
   document.getElementById("travel-mode").value = travelMode;
 
+  updateLensControl();
   updateTrailLayers();
   setHashParameters({ mode: travelMode === defaultTravelMode ? null : value });
 }
