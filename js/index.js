@@ -22,6 +22,10 @@ const landLabels = [
         label: "Access"
       },
       {
+        id: "dog",
+        label: "Dog Access"
+      },
+      {
         id: "incline",
         label: "Incline"
       },
@@ -84,6 +88,10 @@ const canoeLabels = [
       {
         id: "access",
         label: "Access"
+      },
+      {
+        id: "dog",
+        label: "Dog Access"
       },
       {
         id: "name",
@@ -166,21 +174,6 @@ const canoeLabels = [
       },
     ]
   },
-];
-const landTrailLenses = [
-  "",
-  "access",
-  "name",
-  "operator",
-  "surface",
-  "smoothness",
-  "trail_visibility",
-  "incline",
-  "width",
-  "fixme",
-  "check_date",
-  "OSM_TIMESTAMP",
-  "oneway",
 ];
 const highwayOnlyLenses = [
   "operator",
@@ -290,7 +283,7 @@ function setTravelMode(value) {
 }
 function setLens(value) {
   if (value === null) value = defaultLens;
-  if (travelMode !== 'canoe' && !landTrailLenses.includes(value)) value = landTrailLenses[0];
+  if (travelMode !== 'canoe' && waterwayOnlyLenses.includes(value)) value = "";
 
   if (lens === value) return;
   lens = value;
