@@ -21,7 +21,8 @@ const landTrailLenses = [
   "width",
   "fixme",
   "check_date",
-  "OSM_TIMESTAMP"
+  "OSM_TIMESTAMP",
+  "oneway",
 ];
 const highwayOnlyLenses = [
   "operator",
@@ -35,7 +36,6 @@ const waterwayOnlyLenses = [
   "intermittent",
   "rapids",
   "open_water",
-  "oneway",
 ];
 const defaultTravelMode = "foot";
 const defaultLens= "";

@@ -685,17 +685,43 @@ function updateTrailLayers() {
     
     if (lens === 'check_date' || lens === 'OSM_TIMESTAMP') waterwaysColors = pathsColors;
 
-    var keys = [lens];
-
-    var keysForStyle = {
+    var keysByLens = {
       name: ['name', 'noname'],
-      'canoe-name': ['name', 'noname', 'waterbody:name'],
-      'canoe-oneway': ['oneway:canoe', 'oneway:boat'],
       fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
-      check_date: ['check_date', 'survey:date']
+      check_date: ['check_date', 'survey:date'],
     };
-    var style = isWaterTrails ? 'canoe-' + lens : lens;
-    if (keysForStyle[style]) keys = keysForStyle[style];
+    var keysByLensByMode = {
+      atv: {
+        oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:atv'],
+      },
+      bicycle: {
+        oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle'],
+      },
+      canoe: {
+        name: ['name', 'noname', 'waterbody:name'],
+        oneway: ['oneway:boat', 'oneway:canoe'],
+      },
+      foot: {
+        oneway: ['oneway', 'oneway:foot'],
+      },
+      horse: {
+        oneway: ['oneway', 'oneway:horse'],
+      },
+      mtb: {
+        name: ['name', 'noname', 'mtb:name'],
+        oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle', 'oneway:mtb'],
+      },
+      snowmobile: {
+        oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:snowmobile'],
+      },
+      wheelchair: {
+        oneway: ['oneway', 'oneway:foot', 'oneway:wheelchair'],
+      },
+    };
+
+    var keys = [lens];
+    if (keysByLensByMode[travelMode] && keysByLensByMode[travelMode][lens]) keys = keysByLensByMode[travelMode][lens];
+    else if (keysByLens[lens]) keys = keysByLens[lens];
   
     // for most keys we're looking for missing values, but for fixmes we're looking for extant values
     var hasKeyMeansSpecified = lens !== "fixme";
