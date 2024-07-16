@@ -425,6 +425,10 @@ function loadTrailLayers(name) {
     "source": name + 's',
     "source-layer": name,
     "type": "symbol",
+    "transition": {
+      "duration": 0,
+      "delay": 0
+    },
     "minzoom": 12,
     "layout": {
       "icon-image": [
