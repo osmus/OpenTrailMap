@@ -124,6 +124,10 @@ const canoeLabels = [
     label: "Portage Attributes",
     subitems: [
       {
+        id: "hand_cart",
+        label: "Hand Cart"
+      },
+      {
         id: "incline",
         label: "Incline"
       },
@@ -184,6 +188,7 @@ const highwayOnlyLenses = [
   "smoothness",
   "trail_visibility",
   "incline",
+  "hand_cart",
 ];
 const waterwayOnlyLenses = [
   "tidal",
