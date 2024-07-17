@@ -61,12 +61,7 @@ var impliedYesExpressions = {
   horse: [
     ["==", "highway", "bridleway"]
   ],
-  wheelchair: [
-    ["==", "smoothness", "excellent"],
-    ["==", "smoothness", "very_good"],
-    ["==", "smoothness", "good"],
-    ["==", "smoothness", "intermediate"],
-  ],
+  wheelchair: [],
   canoe: [],
   portage: [],
   snowmobile: [],
