@@ -305,6 +305,8 @@ window.onload = (event) => {
     setLens(e.target.value);
   });
 
+  updateLensControl();
+
   map = new maplibregl.Map({
     container: 'map',
     hash: "map",
