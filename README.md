@@ -40,11 +40,14 @@ The following styles highlight the presence and values of trail attribute tags. 
 - [`incline`](https://wiki.openstreetmap.org/wiki/Key:incline)
 - [`fixme`](https://wiki.openstreetmap.org/wiki/Key:fixme)/[`todo`](https://wiki.openstreetmap.org/wiki/Key:todo)
 - [`check_date`](https://wiki.openstreetmap.org/wiki/Key:check_date)/[`survey:date`](https://wiki.openstreetmap.org/wiki/Key:survey:date)
+- Last Edited Date: the timestamp of the latest version of the feature
 
 In all the land and snow styles, some trail-related points of interest are included on the map:
 
 - [`amenity=ranger_station`](https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dranger_station): ranger stations are generally public visitor centers where trail users can get info or seek help
 - [`highway=trailhead`](https://wiki.openstreetmap.org/wiki/Tag:highway%3Dtrailhead): trailheads are access points to trail networks, often with various amenities
+- [`information=guidepost`](https://wiki.openstreetmap.org/wiki/Tag:information%3Dguidepost): signage marking the direction of one or more trails, typically at a trailhead or junction
+- [`information=route_marker`](https://wiki.openstreetmap.org/wiki/Tag:information%3Droute_marker): signage marking the route of a trail
 
 #### Water trails
 
@@ -63,6 +66,7 @@ The following water trail attribute styles are supported:
 - [`width`](https://wiki.openstreetmap.org/wiki/Key:width)
 - [`fixme`](https://wiki.openstreetmap.org/wiki/Key:fixme)/[`todo`](https://wiki.openstreetmap.org/wiki/Key:todo)
 - [`check_date`](https://wiki.openstreetmap.org/wiki/Key:check_date)/[`survey:date`](https://wiki.openstreetmap.org/wiki/Key:survey:date)
+- Last Edited Date: the timestamp of the latest version of the feature
 
 ### Map tiles
 Trail vector tiles are rendered and hosted by OpenStreetMap US using the schema files [here](https://github.com/osmus/tileservice/blob/main/renderer/layers). Thank you to [@zelonewolf](https://github.com/zelonewolf) for setting up the vector tile pipeline. Render time is currently about 4 hours, so any changes you make will take 4 to 8 hours to appear on the map. Map tiles are not available for public use at this time.
