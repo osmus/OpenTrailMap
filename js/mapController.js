@@ -524,6 +524,15 @@ function loadTrailLayers(name) {
         22, 1
       ],
       "symbol-placement": "point",
+      "symbol-sort-key": [
+        "case",
+        ['==', ["get", "amenity"], "ranger_station"], 1,
+        ['==', ["get", "highway"], "trailhead"], 3,
+        ['==', ["get", "man_made"], "monitoring_station"], 2,
+        ['==', ["get", "information"], "guidepost"], 19,
+        ['==', ["get", "information"], "route_marker"], 20,
+        10,
+      ],
       "text-field": [
         "step", ["zoom"], "",
         poiLabelZoom, [
