@@ -513,6 +513,11 @@ function loadTrailLayers(name) {
         ['==', ["get", "lock"], "yes"], ["image", "lock"],
         ""
       ],
+      "icon-anchor": [
+        "case",
+        ['in', ["get", "information"], ["literal", ["guidepost", "route_marker"]]], "bottom",
+        "center",
+      ],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
         12, 0.5,
