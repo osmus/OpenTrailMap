@@ -1000,7 +1000,7 @@ function updateMapForHover() {
 }
 
 function entityForEvent(e) {
-  let layers = ['trail-pois', 'trails-pointer-targets'];
+  let layers = ['trails-qa', 'trail-pois', 'trails-pointer-targets'];
   
   // we need to add focus as a target or else you can click hidden stuff
   if (isFocusing) layers.unshift('focus');
