@@ -311,7 +311,7 @@ function loadTrailLayers(name) {
     },
     "paint": {
       "line-width": lineWidth,
-      "line-color": colors.public,
+      "line-color": colors.trail,
       "line-dasharray": [2, 2],
     }
   });
@@ -326,7 +326,7 @@ function loadTrailLayers(name) {
     },
     "paint": {
       "line-width": lineWidth,
-      "line-color": colors.noaccess,
+      "line-color": colors.noaccessTrail,
       "line-dasharray": [2, 2],
     }
   });
@@ -412,7 +412,7 @@ function loadTrailLayers(name) {
     },
     "paint": {
       "line-width": lineWidth,
-      "line-color": colors.public,
+      "line-color": colors.trail,
     }
   });
   addTrailLayer({
@@ -490,7 +490,7 @@ function loadTrailLayers(name) {
     "layout": {
       "icon-image": [
         "case",
-        ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger-station"],
+        ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
         ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
         ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
@@ -557,8 +557,9 @@ function loadTrailLayers(name) {
     "paint": {
       "text-color":  [
         "case",
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall", "river", "canal", "stream"]]], colors.label,
-        colors.poiLabel
+        ['==', ["get", "highway"], 'trailhead'], colors.trail,
+        ['==', ["get", "amenity"], 'ranger_station'], colors.trail,
+        colors.label
       ],
       "text-halo-width": 2,
       "text-halo-blur": 1,

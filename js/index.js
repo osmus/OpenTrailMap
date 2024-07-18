@@ -196,14 +196,14 @@ var lens = defaultLens;
 var lastLens = defaultLens;
 
 const colors = {
-  public: "#005908",
-  noaccess: "#A2D61D",
+  trail: "#51362D",
+  noaccessTrail: "#cc9e7e",//"#A2D61D",
+  natural: "#005908",
   specified: "#007f79",
   unspecified: "#8e00cc",
   bgwater: "#a6b2c4",
   water: "#003b93",
   label: "#000",
-  poiLabel: "#4A282A",
   labelHalo: "rgba(255, 255, 255, 1)",
   selection: "yellow",
 };
@@ -342,7 +342,7 @@ window.onload = (event) => {
     'oneway-arrow-right',
     'oneway-arrow-left',
     'question',
-    'ranger-station',
+    'ranger_station',
     'route_marker',
     'slipway-canoe-trailer',
     'slipway-canoe',
