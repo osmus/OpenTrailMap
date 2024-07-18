@@ -614,7 +614,7 @@ function updateTrailLayers() {
   var showDisallowedPathsExpression = [lens === "access" ? "!=" : '==', "true", "false"];
   var showUnspecifiedPathsExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
-  var pathsColors = colors.public;
+  var pathsColors = colors.trail;
   var waterwaysColors = colors.water;
 
   var onewayArrowsFilter = [
