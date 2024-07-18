@@ -61,7 +61,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   height: 30px;
-  background: #4A282A;
+  background: #51362D;
   padding: 0 10px 0 6px;
   /*background: linear-gradient(90deg, #4A282A, #66373a);*/
   overflow-x: auto;
