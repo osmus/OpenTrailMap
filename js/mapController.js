@@ -578,6 +578,46 @@ function loadTrailLayers(name) {
     ]
   });
   addTrailLayer({
+    "id": "peaks",
+    "source": "openmaptiles",
+    "source-layer": "mountain_peak",
+    "type": "symbol",
+    "layout": {
+      "icon-image": ["image", "peak"],
+      "icon-size": [
+        "interpolate", ["linear"], ["zoom"],
+        12, 0.5,
+        22, 1
+      ],
+      "symbol-placement": "point",
+      "text-field": [
+        "step", ["zoom"], "",
+        poiLabelZoom, ["get", "name"]
+      ],
+      "text-optional": true,
+      "text-size": 11,
+      "text-line-height": 1.1,
+      "text-font": ["Americana-Bold"],
+      "text-variable-anchor": ["left", "right", "top", "bottom"],
+      "text-padding": 5,
+      "text-offset": [
+        "interpolate", ["linear"], ["zoom"],
+        12, ["literal", [0.4, 0.4]],
+        22, ["literal", [1.5, 1.5]]
+      ],
+      "text-justify": "auto",
+    },
+    "paint": {
+      "text-color":  colors.natural,
+      "text-halo-width": 2,
+      "text-halo-blur": 1,
+      "text-halo-color": colors.labelHalo,
+    },
+    "filter": [
+      "has", "name",
+    ]
+  });
+  addTrailLayer({
     "id": "trails-qa",
     "source": name + 's',
     "source-layer": name + '_qa',

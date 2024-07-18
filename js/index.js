@@ -342,6 +342,7 @@ window.onload = (event) => {
     'oneway-arrow-right',
     'oneway-arrow-left',
     'question',
+    'peak',
     'ranger_station',
     'route_marker',
     'slipway-canoe-trailer',
