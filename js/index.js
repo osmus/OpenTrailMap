@@ -1,5 +1,65 @@
 var map;
 
+var lensStrings = {
+  access: {
+    label: "Access"
+  },
+  dog: {
+    label: "Dog Access"
+  },
+  incline: {
+    label: "Incline"
+  },
+  name: {
+    label: "Name"
+  },
+  oneway: {
+    label: "Oneway"
+  },
+  operator: {
+    label: "Operator"
+  },
+  sac_scale: {
+    label: "SAC Hiking Scale"
+  },
+  smoothness: {
+    label: "Smoothness"
+  },
+  surface: {
+    label: "Surface"
+  },
+  trail_visibility: {
+    label: "Trail Visibility"
+  },
+  width: {
+    label: "Width"
+  },
+  fixme: {
+    label: "Fixme Requests"
+  },
+  check_date: {
+    label: "Last Checked Date"
+  },
+  OSM_TIMESTAMP: {
+    label: "Last Edited Date"
+  },
+  intermittent: {
+    label: "Intermittent"
+  },
+  open_water: {
+    label: "Open Water"
+  },
+  rapids: {
+    label: "Rapids"
+  },
+  tidal: {
+    label: "Tidal"
+  },
+  hand_cart: {
+    label: "Hand Cart"
+  },
+}
+
 const travelModes = [
   "foot",
   "wheelchair",
@@ -9,179 +69,107 @@ const travelModes = [
   "canoe",
   "snowmobile",
 ];
-const landLabels = [
-  {
-    id: "",
-    label: "General"
-  },
+const metadataLenses = {
+  label: "Metadata",
+  subitems: [
+    "fixme",
+    "check_date",
+    "OSM_TIMESTAMP",
+  ]
+};
+const landLensOptions = [
   {
     label: "Attributes",
     subitems: [
-      {
-        id: "access",
-        label: "Access"
-      },
-      {
-        id: "dog",
-        label: "Dog Access"
-      },
-      {
-        id: "incline",
-        label: "Incline"
-      },
-      {
-        id: "name",
-        label: "Name"
-      },
-      {
-        id: "oneway",
-        label: "Oneway"
-      },
-      {
-        id: "operator",
-        label: "Operator"
-      },
-      {
-        id: "surface",
-        label: "Surface"
-      },
-      {
-        id: "smoothness",
-        label: "Smoothness"
-      },
-      {
-        id: "trail_visibility",
-        label: "Trail Visibility"
-      },
-      {
-        id: "width",
-        label: "Width"
-      },
+      "access",
+      "dog",
+      "incline",
+      "name",
+      "oneway",
+      "operator",
+      "smoothness",
+      "surface",
+      "trail_visibility",
+       "width",
     ]
   },
-  {
-    label: "Metadata",
-    subitems: [
-      {
-        id: "fixme",
-        label: "Fixme Requests"
-      },
-      {
-        id: "check_date",
-        label: "Last Checked Date"
-      },
-      {
-        id: "OSM_TIMESTAMP",
-        label: "Last Edited Date"
-      },
-    ]
-  },
+  metadataLenses,
 ];
-const canoeLabels = [
-  {
-    id: "",
-    label: "General"
-  },
+const hikingLensOptions = [
   {
     label: "Attributes",
     subitems: [
-      {
-        id: "access",
-        label: "Access"
-      },
-      {
-        id: "dog",
-        label: "Dog Access"
-      },
-      {
-        id: "name",
-        label: "Name"
-      },
-      {
-        id: "oneway",
-        label: "Oneway"
-      },
-      {
-        id: "width",
-        label: "Width"
-      },
+      "access",
+      "dog",
+      "incline",
+      "name",
+      "oneway",
+      "operator",
+      "sac_scale",
+      "smoothness",
+      "surface",
+      "trail_visibility",
+      "width",
+    ]
+  },
+  metadataLenses,
+];
+const canoeLensOptions = [
+  {
+    label: "Attributes",
+    subitems: [
+      "access",
+      "dog",
+      "name",
+      "oneway",
+      "width",
     ]
   },
   {
     label: "Waterway Attributes",
     subitems: [
-      {
-        id: "intermittent",
-        label: "Intermittent"
-      },
-      {
-        id: "open_water",
-        label: "Open Water"
-      },
-      {
-        id: "rapids",
-        label: "Rapids"
-      },
-      {
-        id: "tidal",
-        label: "Tidal"
-      },
+      "intermittent",
+      "open_water",
+      "rapids",
+      "tidal",
     ]
   },
   {
     label: "Portage Attributes",
     subitems: [
-      {
-        id: "hand_cart",
-        label: "Hand Cart"
-      },
-      {
-        id: "incline",
-        label: "Incline"
-      },
-      {
-        id: "operator",
-        label: "Operator"
-      },
-      {
-        id: "surface",
-        label: "Surface"
-      },
-      {
-        id: "smoothness",
-        label: "Smoothness"
-      },
-      {
-        id: "trail_visibility",
-        label: "Trail Visibility"
-      },
+      "hand_cart",
+      "incline",
+      "operator",
+      "surface",
+      "smoothness",
+      "trail_visibility",
     ]
   },
-  {
-    label: "Metadata",
-    subitems: [
-      {
-        id: "fixme",
-        label: "Fixme Requests"
-      },
-      {
-        id: "check_date",
-        label: "Last Checked Date"
-      },
-      {
-        id: "OSM_TIMESTAMP",
-        label: "Last Edited Date"
-      },
-    ]
-  },
+  metadataLenses,
 ];
+const lensOptionsByMode = {
+  "all": landLensOptions,
+  "atv": landLensOptions,
+  "bicycle": landLensOptions,
+  "canoe": canoeLensOptions,
+  "foot": hikingLensOptions,
+  "horse": landLensOptions,
+  "snowmobile": landLensOptions,
+  "wheelchair": landLensOptions,
+};
+function lensesForMode(mode) {
+  return lensOptionsByMode[mode].flatMap(function(item) {
+    return item.subitems;
+  });
+}
 const highwayOnlyLenses = [
-  "operator",
-  "surface",
-  "smoothness",
-  "trail_visibility",
-  "incline",
   "hand_cart",
+  "incline",
+  "operator",
+  "sac_scale",
+  "smoothness",
+  "surface",
+  "trail_visibility",
 ];
 const waterwayOnlyLenses = [
   "tidal",
@@ -254,16 +242,17 @@ function selectEntity(entityInfo) {
 }
 function updateLensControl() {
   var html = "";
-  var items = travelMode === 'canoe' ? canoeLabels : landLabels;
+  var items = lensOptionsByMode[travelMode];
+  
+  html += '<option value="">General</option>';
   items.forEach(function(item) {
     if (item.subitems) {
       html += '<optgroup label="' + item.label + '">';
       item.subitems.forEach(function(item) {
-        html += '<option value="' + item.id + '">' + item.label + '</option>';
+        var label = item.label ? item.label : lensStrings[item].label;
+        html += '<option value="' + item + '">' + label + '</option>';
       })
       html += '</optgroup>';
-    } else {
-      html += '<option value="' + item.id + '">' + item.label + '</option>';
     }
   });
   var lensElement =  document.getElementById("lens");
@@ -275,22 +264,24 @@ function setTravelMode(value) {
   if (travelMode === value) return;
   travelMode = value;
 
+  if (!lensesForMode(travelMode).includes(lens)) setLens("", true);
+
   document.getElementById("travel-mode").value = travelMode;
 
   updateLensControl();
   updateTrailLayers();
   setHashParameters({ mode: travelMode === defaultTravelMode ? null : value });
 }
-function setLens(value) {
+function setLens(value, skipMapUpdate) {
   if (value === null) value = defaultLens;
-  if (travelMode !== 'canoe' && waterwayOnlyLenses.includes(value)) value = "";
+  if (!lensesForMode(travelMode).includes(value)) value = "";
 
   if (lens === value) return;
   lens = value;
 
   document.getElementById("lens").value = lens;
 
-  updateTrailLayers();
+  if (!skipMapUpdate) updateTrailLayers();
   setHashParameters({ lens: lens === defaultLens ? null : value });
 }
 

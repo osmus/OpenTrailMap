@@ -638,16 +638,115 @@ function loadTrailLayers(name) {
   });
 }
 
+function isSpecifiedExpressionForLens(lens) {
+
+  var keysByLens = {
+    name: ['name', 'noname'],
+    fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
+    check_date: ['check_date', 'survey:date'],
+  };
+  var keysByLensByMode = {
+    atv: {
+      oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:atv'],
+    },
+    bicycle: {
+      oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle'],
+    },
+    canoe: {
+      name: ['name', 'noname', 'waterbody:name'],
+      oneway: ['oneway:boat', 'oneway:canoe'],
+    },
+    foot: {
+      oneway: ['oneway', 'oneway:foot'],
+    },
+    horse: {
+      oneway: ['oneway', 'oneway:horse'],
+    },
+    mtb: {
+      name: ['name', 'noname', 'mtb:name'],
+      oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle', 'oneway:mtb'],
+    },
+    snowmobile: {
+      oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:snowmobile'],
+    },
+    wheelchair: {
+      oneway: ['oneway', 'oneway:foot', 'oneway:wheelchair'],
+    },
+  };
+
+  var keys = [lens];
+  if (keysByLensByMode[travelMode] && keysByLensByMode[travelMode][lens]) keys = keysByLensByMode[travelMode][lens];
+  else if (keysByLens[lens]) keys = keysByLens[lens];
+
+  // for most keys we're looking for missing values, but for fixmes we're looking for extant values
+  var hasKeyMeansSpecified = lens !== "fixme";
+
+  var specifiedAttributeExpression = [
+    hasKeyMeansSpecified ? "any" : "all",
+    ...keys.map(key => [
+      hasKeyMeansSpecified ? "has" : "!has",
+      key
+    ]),
+  ];
+  if (travelMode === 'canoe') {
+    if (waterwayOnlyLenses.includes(lens)) {
+      // don't expect waterway-only attributes on highways
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["has", "highway"],
+      ];
+    } else if (highwayOnlyLenses.includes(lens)) {
+      // don't expect highway-only attributes on waterways
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["!has", "highway"],
+      ];
+    }
+  }
+  if (lens === 'tidal') {
+    // assume tidal channels are always tidal=yes
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["==", "waterway", "tidal_channel"],
+    ];
+  }
+  if (lens === 'open_water') {
+    // only expect open_water tag on certain features
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["!in", "waterway", "fairway", "flowline"],
+    ];
+  }
+  if (lens === 'operator') {
+    // if a path is `informal=yes` then there's probably no operator, always style as complete
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["==", "informal", "yes"],
+    ];
+  }
+  if (lens === 'sac_scale') {
+    // if a path is `informal=yes` then there's probably no operator, always style as complete
+    specifiedAttributeExpression = [
+      "all",
+      specifiedAttributeExpression,
+      ["in", "sac_scale", 'no', 'hiking', 'mountain_hiking', 'demanding_mountain_hiking', 'alpine_hiking', 'demanding_alpine_hiking', 'difficult_alpine_hiking'],
+    ];
+  }
+  return specifiedAttributeExpression;
+}
+
 function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
-
-  var isWaterTrails = travelMode === 'canoe';
 
   // ["!=", "true", "false"] always evalutes to true because "true" actually refers to the name of a
   // data attribute key, which is always undefined, while "false" is the string it's compared to.
   var allowedAccessExpression = ["!=", "true", "false"];
   var specifiedAccessExpression = ["!=", "true", "false"];
-  var specifiedAttributeExpression = ["!=", "true", "false"];
   var specifiedExpression;
 
   var showFixmesExpression = [lens === "fixme" ? "!=" : '==', "true", "false"];
@@ -731,97 +830,8 @@ function updateTrailLayers() {
       colors.specified;
     
     if (lens === 'check_date' || lens === 'OSM_TIMESTAMP') waterwaysColors = pathsColors;
-
-    var keysByLens = {
-      name: ['name', 'noname'],
-      fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
-      check_date: ['check_date', 'survey:date'],
-    };
-    var keysByLensByMode = {
-      atv: {
-        oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:atv'],
-      },
-      bicycle: {
-        oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle'],
-      },
-      canoe: {
-        name: ['name', 'noname', 'waterbody:name'],
-        oneway: ['oneway:boat', 'oneway:canoe'],
-      },
-      foot: {
-        oneway: ['oneway', 'oneway:foot'],
-      },
-      horse: {
-        oneway: ['oneway', 'oneway:horse'],
-      },
-      mtb: {
-        name: ['name', 'noname', 'mtb:name'],
-        oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle', 'oneway:mtb'],
-      },
-      snowmobile: {
-        oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:snowmobile'],
-      },
-      wheelchair: {
-        oneway: ['oneway', 'oneway:foot', 'oneway:wheelchair'],
-      },
-    };
-
-    var keys = [lens];
-    if (keysByLensByMode[travelMode] && keysByLensByMode[travelMode][lens]) keys = keysByLensByMode[travelMode][lens];
-    else if (keysByLens[lens]) keys = keysByLens[lens];
   
-    // for most keys we're looking for missing values, but for fixmes we're looking for extant values
-    var hasKeyMeansSpecified = lens !== "fixme";
-  
-    specifiedAttributeExpression = [
-      hasKeyMeansSpecified ? "any" : "all",
-      ...keys.map(key => [
-        hasKeyMeansSpecified ? "has" : "!has",
-        key
-      ]),
-    ];
-    if (isWaterTrails) {
-      if (waterwayOnlyLenses.includes(lens)) {
-        // don't expect waterway-only attributes on highways
-        specifiedAttributeExpression = [
-          "any",
-          specifiedAttributeExpression,
-          ["has", "highway"],
-        ];
-      } else if (highwayOnlyLenses.includes(lens)) {
-        // don't expect highway-only attributes on waterways
-        specifiedAttributeExpression = [
-          "any",
-          specifiedAttributeExpression,
-          ["!has", "highway"],
-        ];
-      }
-    }
-    if (lens === 'tidal') {
-      // assume tidal channels are always tidal=yes
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["==", "waterway", "tidal_channel"],
-      ];
-    }
-    if (lens === 'open_water') {
-      // only expect open_water tag on certain features
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["!in", "waterway", "fairway", "flowline"],
-      ];
-    }
-    if (lens === 'operator') {
-      // if a path is `informal=yes` then there's probably no operator, always style as complete
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["==", "informal", "yes"],
-      ];
-    }
-    specifiedExpression = specifiedAttributeExpression;
+    specifiedExpression = isSpecifiedExpressionForLens(lens);
     allowedAccessExpression = [
       "all",
       allowedAccessExpression,
