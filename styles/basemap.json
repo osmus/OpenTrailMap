@@ -15,7 +15,7 @@
       "url": "https://tile.ourmap.us/data/v3.json"
     }
   },
-  "glyphs": "https://osm-americana.github.io/fontstack66/{fontstack}/{range}.pbf",
+  "glyphs": "https://font.americanamap.org/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
