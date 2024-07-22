@@ -310,6 +310,7 @@ window.onload = (event) => {
   const imageToLoad = [
     'cairn',
     'canoe',
+    'canoe-noaccess',
     'dam',
     'dam-canoeable',
     'disallowed-stripes',
@@ -323,7 +324,9 @@ window.onload = (event) => {
     'ranger_station',
     'route_marker',
     'slipway-canoe-trailer',
+    'slipway-canoe-trailer-noaccess',
     'slipway-canoe',
+    'slipway-canoe-noaccess',
     'streamgage',
     'trailhead',
     'waterfall',

@@ -510,21 +510,48 @@ function loadTrailLayers(name) {
         ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
         ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
         [
-          'all',
-          ['==', ["get", "leisure"], "slipway"],
-          ['==', ["get", "trailer"], "no"],
-        ], ["image", "slipway-canoe"],
-        ['==', ["get", "leisure"], "slipway"], ["image", "slipway-canoe-trailer"],
-        ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
-        ["all", ["has", "canoe"], ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]], ["case",
-          ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
-          ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
-          ['==', ["get", "lock"], "yes"], ["image", "lock-canoeable"],
+          "any",
+          ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
+          ['==', ["get", "lock"], "yes"],
+        ], [
+          "case",
+          [
+            "all",
+            ["has", "canoe"],
+            ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]
+          ], [
+            "case",
+            ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
+            ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
+            ["image", "lock-canoeable"],
+          ],
+          ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
+          ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
+          ["image", "lock"],
+        ],
+        [
+          "any",
+          ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
+          [
+            "all",
+            ["!", ["has", "canoe"]],
+            ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
+          ]
+        ], [
+          "case",
+          ['==', ["get", "leisure"], "slipway"], ["case",
+            ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
+            ["image", "slipway-canoe-trailer-noaccess"],
+          ],
+          ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe-noaccess"],
           ""
         ],
-        ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
-        ['==', ["get", "lock"], "yes"], ["image", "lock"],
+        ['==', ["get", "leisure"], "slipway"], [
+          "case",
+          ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe"],
+          ["image", "slipway-canoe-trailer"],
+        ],
+        ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
         ""
       ],
       "icon-anchor": [
@@ -544,7 +571,17 @@ function loadTrailLayers(name) {
         ['==', ["get", "amenity"], "ranger_station"], 1,
         ['==', ["get", "highway"], "trailhead"], 3,
         ['==', ["get", "man_made"], "monitoring_station"], 2,
+        [
+          "any",
+          ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
+          [
+            "all",
+            ["!", ["has", "canoe"]],
+            ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
+          ]
+        ], 15,
         ['==', ["get", "information"], "guidepost"], 19,
+        ['==', ["get", "man_made"], "cairn"], 20,
         ['==', ["get", "information"], "route_marker"], 20,
         10,
       ],
@@ -579,18 +616,7 @@ function loadTrailLayers(name) {
       "text-halo-width": 2,
       "text-halo-blur": 1,
       "text-halo-color": colors.labelHalo,
-    },
-    "filter": [
-      "any",
-      ["!=", "leisure", "slipway"],
-      [
-        "all",
-        ["==", "leisure", "slipway"],
-        ["!=", "canoe", "no"],
-        ["!=", "canoe", "private"],
-        ["!=", "canoe", "discouraged"],
-      ],
-    ]
+    }
   });
   addTrailLayer({
     "id": "peaks",
