@@ -6,7 +6,7 @@ const colors = {
   natural: "#005908",
   specified: "#007f79",
   unspecified: "#8e00cc",
-  bgwater: "#a6b2c4",
+  disallowedWater: "#a6b2c4",
   water: "#003b93",
   label: "#000",
   labelHalo: "rgba(255, 255, 255, 1)",
@@ -310,7 +310,7 @@ function loadTrailLayers(name) {
     },
     "paint": {
       "line-width": lineWidth,
-      "line-color": colors.bgwater,
+      "line-color": colors.disallowedWater,
     }
   });
   addTrailLayer({
