@@ -618,7 +618,7 @@ function loadTrailLayers(name) {
       "text-halo-color": colors.labelHalo,
     }
   });
-  addTrailLayer({
+  if (name === "trail") addTrailLayer({
     "id": "peaks",
     "source": "openmaptiles",
     "source-layer": "mountain_peak",
