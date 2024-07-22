@@ -1,5 +1,18 @@
-var thisYear = new Date().getFullYear();
-var checkDateColors = [
+const poiLabelZoom = 14;
+const thisYear = new Date().getFullYear();
+const colors = {
+  trail: "#4f2e28",
+  noaccessTrail: "#cc9e7e",//"#A2D61D",
+  natural: "#005908",
+  specified: "#007f79",
+  unspecified: "#8e00cc",
+  bgwater: "#a6b2c4",
+  water: "#003b93",
+  label: "#000",
+  labelHalo: "rgba(255, 255, 255, 1)",
+  selection: "yellow",
+};
+const checkDateColors = [
   "interpolate", ["linear"], [
     "to-number",
     ["slice", ["get", "check_date"], 0, 4],
@@ -14,7 +27,7 @@ var checkDateColors = [
   2022, '#980043',
   thisYear, '#67001f',
 ];
-var editedDateColors = [
+const editedDateColors = [
   "interpolate", ["linear"], [
     // convert unix timestamp to year
     "floor", ["+", ["/", ["get", "OSM_TIMESTAMP"], 31536000], 1970],
@@ -28,7 +41,7 @@ var editedDateColors = [
   2022, '#980043',
   thisYear, '#380010',
 ];
-var impliedYesExpressions = {
+const impliedYesExpressions = {
   atv: [],
   bicycle: [
     ["==", "highway", "cycleway"],
@@ -67,7 +80,7 @@ var impliedYesExpressions = {
   snowmobile: [],
 };
 
-var impliedNoExpressions = {
+const impliedNoExpressions = {
   atv: [
     [
       "any",

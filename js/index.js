@@ -183,21 +183,6 @@ var travelMode = defaultTravelMode;
 var lens = defaultLens;
 var lastLens = defaultLens;
 
-const colors = {
-  trail: "#51362D",
-  noaccessTrail: "#cc9e7e",//"#A2D61D",
-  natural: "#005908",
-  specified: "#007f79",
-  unspecified: "#8e00cc",
-  bgwater: "#a6b2c4",
-  water: "#003b93",
-  label: "#000",
-  labelHalo: "rgba(255, 255, 255, 1)",
-  selection: "yellow",
-};
-
-const poiLabelZoom = 14;
-
 var selectedEntityInfo;
 var hoveredEntityInfo;
 
