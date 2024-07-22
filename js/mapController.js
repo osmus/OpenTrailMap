@@ -762,6 +762,14 @@ function isSpecifiedExpressionForLens(lens) {
       ["!in", "waterway", "fairway", "flowline"],
     ];
   }
+  if (lens === 'width') {
+    // don't expect width tag on links
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["==", "waterway", "link"],
+    ];
+  }
   if (lens === 'operator') {
     // if a path is `informal=yes` then there's probably no operator, always style as complete
     specifiedAttributeExpression = [
