@@ -493,6 +493,7 @@ function loadTrailLayers(name) {
         ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
         ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
+        ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
         ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
         ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
         [
@@ -516,6 +517,7 @@ function loadTrailLayers(name) {
       "icon-anchor": [
         "case",
         ['in', ["get", "information"], ["literal", ["guidepost", "route_marker"]]], "bottom",
+        ['==', ["get", "man_made"], "cairn"], "bottom",
         "center",
       ],
       "icon-size": [

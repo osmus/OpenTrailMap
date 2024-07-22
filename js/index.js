@@ -323,6 +323,7 @@ window.onload = (event) => {
     }), "bottom-left");
 
   const imageToLoad = [
+    'cairn',
     'canoe',
     'dam',
     'dam-canoeable',
