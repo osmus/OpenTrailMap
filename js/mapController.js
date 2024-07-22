@@ -878,7 +878,7 @@ function updateTrailLayers() {
       lens === 'OSM_TIMESTAMP' ? editedDateColors :
       colors.specified;
     
-    if (lens === 'check_date' || lens === 'OSM_TIMESTAMP') waterwaysColors = pathsColors;
+    waterwaysColors = pathsColors;
   
     specifiedExpression = isSpecifiedExpressionForLens(lens);
     allowedAccessExpression = [
