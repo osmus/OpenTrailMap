@@ -481,6 +481,22 @@ function loadTrailLayers(name) {
     }
   });
   addTrailLayer({
+    "id": "bridge-casings",
+    "source": name + 's',
+    "source-layer": name,
+    "type": "line",
+    "minzoom": 14,
+    "layout": {
+     "line-cap": "butt",
+     "line-join": "round",
+    },
+    "paint": {
+      "line-gap-width": lineWidth, 
+      "line-width": lineWidth,
+      "line-color": "#bbb",
+    }
+  });
+  addTrailLayer({
     "id": "oneway-arrows",
     "source": name + 's',
     "source-layer": name,
@@ -1103,6 +1119,7 @@ function updateTrailLayers() {
     .setPaintProperty('paths', 'line-color', pathsColors)
     .setPaintProperty('informal-paths', 'line-color', pathsColors)
     .setPaintProperty('waterways', 'line-color', waterwaysColors)
+    .setFilter('bridge-casings', ["all", ["has", "bridge"], ["!in", "bridge", "no", "abandoned", "raised", "proposed", "dismantled"], combinedFilterExpression])
     .setFilter('oneway-arrows', ["all", onewayArrowsFilter, combinedFilterExpression])
     .setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
