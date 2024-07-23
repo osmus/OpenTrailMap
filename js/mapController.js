@@ -789,6 +789,35 @@ function isSpecifiedExpressionForLens(lens) {
   return specifiedAttributeExpression;
 }
 
+function trailPoisFilter(travelMode) {
+  if (travelMode === 'all') return null;
+  var poiKeys = [travelMode];
+  var poiKeysByTravelMode = {
+    "foot": ["hiking"],
+    "canoe": ["canoe", "portage"],
+  };
+  if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
+  return [
+    'any',
+    [
+      "none",
+      ["==", "highway", "trailhead"],
+      ["in", "information", "guidepost", "route_marker"],
+      ["==", "man_made", "cairn"],
+    ],
+    [
+      "all",
+      ...poiKeys.map(function(key) {
+        return [
+          "any",
+          ["!has", key],
+          ["==", key, "yes"],
+        ];
+      })
+    ]
+  ];
+}
+
 function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
 
@@ -969,7 +998,8 @@ function updateTrailLayers() {
     .setFilter('oneway-arrows', ["all", onewayArrowsFilter, combinedFilterExpression])
     .setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
-    .setFilter('trails-pointer-targets', combinedFilterExpression);
+    .setFilter('trails-pointer-targets', combinedFilterExpression)
+    .setFilter('trail-pois', trailPoisFilter(travelMode));
 }
 
 function notNoAccessExpressions(mode) {
