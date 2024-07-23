@@ -163,10 +163,17 @@ const impliedNoExpressions = {
 
 function toggleWaterTrailsIfNeeded() {
 
+  if (!map.getSource('trails_poi')) {
+    map.addSource("trails_poi", {
+      type: "vector",
+      url: "https://dwuxtsziek7cf.cloudfront.net/trails_poi.json",
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    });
+  }
+
   if (travelMode === 'canoe' && !map.getSource('water_trails')) {
     clearTrailLayers();
     if (map.getSource('trails')) map.removeSource('trails');
-    if (map.getSource('trails_poi')) map.removeSource('trails_poi');
     map.addSource("water_trails", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/water_trails.json",
@@ -188,18 +195,15 @@ function toggleWaterTrailsIfNeeded() {
       url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
-    map.addSource("trails_poi", {
-      type: "vector",
-      url: "https://dwuxtsziek7cf.cloudfront.net/trails_poi.json",
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
-    });
     loadTrailLayers('trail');
   }  
 }
 
+var layerIdsByCategory;
 let trailLayerIds = [];
-function addTrailLayer(def) {
+function addTrailLayer(def, type) {
   trailLayerIds.push(def.id);
+  if (type) layerIdsByCategory[type].push(def.id);
   map.addLayer(def);
 }
 function clearTrailLayers() {
@@ -207,6 +211,11 @@ function clearTrailLayers() {
     map.removeLayer(id);
   });
   trailLayerIds = [];
+  layerIdsByCategory = {
+    clickable: [],
+    hovered: [],
+    selected: [],
+  };
 }
 
 function loadTrailLayers(name) {
@@ -217,15 +226,33 @@ function loadTrailLayers(name) {
     22, 5
   ];
   var selectedLineWidth = [
+    "interpolate", ["linear"], ["zoom"],
+    12, 9,
+    22, 13
+  ];
+  var hoverLineWidth = [
+    "interpolate", ["linear"], ["zoom"],
+    12, 5,
+    22, 7
+  ];
+  var hoveredPoiPaint = {
+    "circle-radius": [
       "interpolate", ["linear"], ["zoom"],
       12, 9,
-      22, 13
-    ];
-  var hoverLineWidth = [
+      22, 18
+    ],
+    "circle-opacity": 0.25,
+    "circle-color": colors.selection,
+  };
+  var selectedPoiPaint = {
+    "circle-radius": [
       "interpolate", ["linear"], ["zoom"],
-      12, 5,
-      22, 7
-    ];
+      12, 10,
+      22, 20
+    ],
+    "circle-opacity": 0.4,
+    "circle-color": colors.selection,
+  };
 
   addTrailLayer({
     "id": "hovered-paths",
@@ -243,26 +270,38 @@ function loadTrailLayers(name) {
     },
     "filter": [
       "==", "OSM_ID", -1 
-    ]
-  });
+    ],
+  }, 'hovered');
   addTrailLayer({
-    "id": "hovered-pois",
-    "source": name + 's_poi',
-    "source-layer": name + '_poi',
+    "id": "hovered-trails-qa",
+    "source": name + 's',
+    "source-layer": name + '_qa',
     "type": "circle",
-    "paint": {
-      "circle-radius": [
-        "interpolate", ["linear"], ["zoom"],
-        12, 9,
-        22, 18
-      ],
-      "circle-opacity": 0.25,
-      "circle-color": colors.selection,
-    },
+    "paint": hoveredPoiPaint,
     "filter": [
       "==", "OSM_ID", -1 
-    ]
-  });
+    ],
+  }, 'hovered');
+  addTrailLayer({
+    "id": "hovered-pois",
+    "source": 'trails_poi',
+    "source-layer": 'trail_poi',
+    "type": "circle",
+    "paint": hoveredPoiPaint,
+    "filter": [
+      "==", "OSM_ID", -1 
+    ],
+  }, 'hovered');
+  if (name === "water_trail") addTrailLayer({
+    "id": "hovered-water-trail-pois",
+    "source": 'water_trails_poi',
+    "source-layer": 'water_trail_poi',
+    "type": "circle",
+    "paint": hoveredPoiPaint,
+    "filter": [
+      "==", "OSM_ID", -1 
+    ],
+  }, 'hovered');
   addTrailLayer({
     "id": "selected-paths",
     "source": name + 's',
@@ -279,26 +318,38 @@ function loadTrailLayers(name) {
     },
     "filter": [
       "==", "OSM_ID", -1 
-    ]
-  });
+    ],
+  }, 'selected');
   addTrailLayer({
-    "id": "selected-pois",
-    "source": name + 's_poi',
-    "source-layer": name + '_poi',
+    "id": "selected-trails-qa",
+    "source": name + 's',
+    "source-layer": name + '_qa',
     "type": "circle",
-    "paint": {
-      "circle-radius": [
-        "interpolate", ["linear"], ["zoom"],
-        12, 10,
-        22, 20
-      ],
-      "circle-opacity": 0.4,
-      "circle-color": colors.selection,
-    },
+    "paint": selectedPoiPaint,
     "filter": [
       "==", "OSM_ID", -1 
-    ]
-  });
+    ],
+  }, 'selected');
+  addTrailLayer({
+    "id": "selected-pois",
+    "source": 'trails_poi',
+    "source-layer": 'trail_poi',
+    "type": "circle",
+    "paint": selectedPoiPaint,
+    "filter": [
+      "==", "OSM_ID", -1 
+    ],
+  }, 'selected');
+  if (name === "water_trail") addTrailLayer({
+    "id": "selected-water-trail-pois",
+    "source": 'water_trails_poi',
+    "source-layer": 'water_trail_poi',
+    "type": "circle",
+    "paint": selectedPoiPaint,
+    "filter": [
+      "==", "OSM_ID", -1 
+    ],
+  }, 'selected');
   addTrailLayer({
     "id": "disallowed-waterways",
     "source": name + 's',
@@ -490,11 +541,11 @@ function loadTrailLayers(name) {
         "line-color": "transparent",
         "line-width": 16
     }
-  });
+  }, 'clickable');
   addTrailLayer({
     "id": "trail-pois",
-    "source": name + 's_poi',
-    "source-layer": name + '_poi',
+    "source": 'trails_poi',
+    "source-layer": 'trail_poi',
     "type": "symbol",
     "transition": {
       "duration": 0,
@@ -505,10 +556,74 @@ function loadTrailLayers(name) {
         "case",
         ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
-        ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
         ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
         ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
         ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
+        ""
+      ],
+      "icon-anchor": [
+        "case",
+        ['in', ["get", "information"], ["literal", ["guidepost", "route_marker"]]], "bottom",
+        ['==', ["get", "man_made"], "cairn"], "bottom",
+        "center",
+      ],
+      "icon-size": [
+        "interpolate", ["linear"], ["zoom"],
+        12, 0.5,
+        22, 1
+      ],
+      "symbol-placement": "point",
+      "symbol-sort-key": [
+        "case",
+        ['==', ["get", "amenity"], "ranger_station"], 1,
+        ['==', ["get", "highway"], "trailhead"], 3,
+        ['==', ["get", "information"], "guidepost"], 19,
+        ['==', ["get", "man_made"], "cairn"], 20,
+        ['==', ["get", "information"], "route_marker"], 20,
+        10,
+      ],
+      "text-field": [
+        "step", ["zoom"], "",
+        poiLabelZoom, ["get", "name"]
+      ],
+      "text-optional": true,
+      "text-size": 11,
+      "text-line-height": 1.1,
+      "text-font": ["Americana-Bold"],
+      "text-variable-anchor": ["left", "right", "top", "bottom"],
+      "text-padding": 5,
+      "text-offset": [
+        "interpolate", ["linear"], ["zoom"],
+        12, ["literal", [0.4, 0.4]],
+        22, ["literal", [1.5, 1.5]]
+      ],
+      "text-justify": "auto",
+    },
+    "paint": {
+      "text-color":  [
+        "case",
+        ['==', ["get", "highway"], 'trailhead'], colors.trail,
+        ['==', ["get", "amenity"], 'ranger_station'], colors.trail,
+        colors.label
+      ],
+      "text-halo-width": 2,
+      "text-halo-blur": 1,
+      "text-halo-color": colors.labelHalo,
+    }
+  }, 'clickable');
+  if (name === "water_trail") addTrailLayer({
+    "id": "water-trail-pois",
+    "source": 'water_trails_poi',
+    "source-layer": 'water_trail_poi',
+    "type": "symbol",
+    "transition": {
+      "duration": 0,
+      "delay": 0
+    },
+    "layout": {
+      "icon-image": [
+        "case",
+        ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
         [
           "any",
           ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
@@ -554,12 +669,6 @@ function loadTrailLayers(name) {
         ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
         ""
       ],
-      "icon-anchor": [
-        "case",
-        ['in', ["get", "information"], ["literal", ["guidepost", "route_marker"]]], "bottom",
-        ['==', ["get", "man_made"], "cairn"], "bottom",
-        "center",
-      ],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
         12, 0.5,
@@ -568,8 +677,6 @@ function loadTrailLayers(name) {
       "symbol-placement": "point",
       "symbol-sort-key": [
         "case",
-        ['==', ["get", "amenity"], "ranger_station"], 1,
-        ['==', ["get", "highway"], "trailhead"], 3,
         ['==', ["get", "man_made"], "monitoring_station"], 2,
         [
           "any",
@@ -580,9 +687,6 @@ function loadTrailLayers(name) {
             ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
           ]
         ], 15,
-        ['==', ["get", "information"], "guidepost"], 19,
-        ['==', ["get", "man_made"], "cairn"], 20,
-        ['==', ["get", "information"], "route_marker"], 20,
         10,
       ],
       "text-field": [
@@ -607,17 +711,12 @@ function loadTrailLayers(name) {
       "text-justify": "auto",
     },
     "paint": {
-      "text-color":  [
-        "case",
-        ['==', ["get", "highway"], 'trailhead'], colors.trail,
-        ['==', ["get", "amenity"], 'ranger_station'], colors.trail,
-        colors.label
-      ],
+      "text-color": colors.label,
       "text-halo-width": 2,
       "text-halo-blur": 1,
       "text-halo-color": colors.labelHalo,
     }
-  });
+  }, 'clickable');
   if (name === "trail") addTrailLayer({
     "id": "peaks",
     "source": "openmaptiles",
@@ -676,7 +775,7 @@ function loadTrailLayers(name) {
       ],
       "symbol-placement": "point"
     }
-  });
+  }, 'clickable');
 }
 
 function isSpecifiedExpressionForLens(lens) {
@@ -805,6 +904,12 @@ function trailPoisFilter(travelMode) {
       ["in", "information", "guidepost", "route_marker"],
       ["==", "man_made", "cairn"],
     ],
+    travelMode === 'canoe' ? [
+      "any",
+      ...poiKeys.map(function(key) {
+        return ["==", key, "yes"];
+      })
+    ] :
     [
       "all",
       ...poiKeys.map(function(key) {
@@ -992,6 +1097,8 @@ function updateTrailLayers() {
   ]);
 
   map
+    .setLayoutProperty('hovered-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
+    .setLayoutProperty('selected-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
     .setPaintProperty('paths', 'line-color', pathsColors)
     .setPaintProperty('informal-paths', 'line-color', pathsColors)
     .setPaintProperty('waterways', 'line-color', waterwaysColors)
@@ -1110,9 +1217,10 @@ function updateMapForSelection() {
     });
   }
 
-  // this will fail in cases where two features of different types but the same ID are both onscreen
-  map.setFilter('selected-paths', ["in", "OSM_ID", ...idsToHighlight]);
-  map.setFilter('selected-pois', ["in", "OSM_ID", ...idsToHighlight]);
+  layerIdsByCategory.selected.forEach(function(layerId) {
+    // this will fail in rare cases where two features of different types but the same ID are both onscreen
+    map.setFilter(layerId, ["in", "OSM_ID", ...idsToHighlight]);
+  });
 }
 
 function updateMapForHover() {
@@ -1124,13 +1232,14 @@ function updateMapForHover() {
     entityId = -1;
   }
 
-  // this will fail in cases where two features of different types but the same ID are both onscreen
-  map.setFilter('hovered-paths', ["==", "OSM_ID", entityId]);
-  map.setFilter('hovered-pois', ["==", "OSM_ID", entityId]);
+  layerIdsByCategory.hovered.forEach(function(layerId) {
+    // this will fail in rare cases where two features of different types but the same ID are both onscreen
+    map.setFilter(layerId, ["==", "OSM_ID", entityId]);
+  });
 }
 
 function entityForEvent(e) {
-  let layers = ['trails-qa', 'trail-pois', 'trails-pointer-targets'];
+  let layers = layerIdsByCategory.clickable.slice(); // copy array
   
   // we need to add focus as a target or else you can click hidden stuff
   if (isFocusing) layers.unshift('focus');
