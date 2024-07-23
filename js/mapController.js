@@ -199,7 +199,7 @@ function toggleWaterTrailsIfNeeded() {
   }  
 }
 
-var layerIdsByCategory;
+var layerIdsByCategory = {};
 let trailLayerIds = [];
 function addTrailLayer(def, type) {
   trailLayerIds.push(def.id);
@@ -211,14 +211,15 @@ function clearTrailLayers() {
     map.removeLayer(id);
   });
   trailLayerIds = [];
+}
+
+function loadTrailLayers(name) {
+
   layerIdsByCategory = {
     clickable: [],
     hovered: [],
     selected: [],
   };
-}
-
-function loadTrailLayers(name) {
 
   var lineWidth = [
     "interpolate", ["linear"], ["zoom"],
@@ -1217,7 +1218,7 @@ function updateMapForSelection() {
     });
   }
 
-  layerIdsByCategory.selected.forEach(function(layerId) {
+  layerIdsByCategory.selected?.forEach(function(layerId) {
     // this will fail in rare cases where two features of different types but the same ID are both onscreen
     map.setFilter(layerId, ["in", "OSM_ID", ...idsToHighlight]);
   });
@@ -1232,7 +1233,7 @@ function updateMapForHover() {
     entityId = -1;
   }
 
-  layerIdsByCategory.hovered.forEach(function(layerId) {
+  layerIdsByCategory.hovered?.forEach(function(layerId) {
     // this will fail in rare cases where two features of different types but the same ID are both onscreen
     map.setFilter(layerId, ["==", "OSM_ID", entityId]);
   });
