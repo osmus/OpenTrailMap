@@ -796,56 +796,58 @@ function loadTrailLayers(name) {
   }, 'clickable');
 }
 
-function isSpecifiedExpressionForLens(lens) {
+var accessHierarchy = {
+  atv: ['vehicle', 'motor_vehicle', 'atv'],
+  bicycle:  ['vehicle', 'bicycle'],
+  canoe: ['boat', 'canoe'],
+  portage: ['foot', 'portage'],
+  foot: ['foot'],
+  horse: ['horse'],
+  mtb: ['vehicle', 'bicycle', 'mtb'],
+  snowmobile: ['vehicle', 'motor_vehicle', 'snowmobile'],
+  wheelchair: ['foot', 'wheelchair'],
+};
 
-  var keysByLens = {
-    name: ['name', 'noname'],
-    fixme: ['fixme', 'FIXME', 'todo', 'TODO'],
-    check_date: ['check_date', 'survey:date'],
-  };
-  var keysByLensByMode = {
-    atv: {
-      oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:atv'],
-    },
-    bicycle: {
-      oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle'],
-    },
-    canoe: {
-      name: ['name', 'noname', 'waterbody:name'],
-      oneway: ['oneway:boat', 'oneway:canoe'],
-    },
-    foot: {
-      oneway: ['oneway', 'oneway:foot'],
-    },
-    horse: {
-      oneway: ['oneway', 'oneway:horse'],
-    },
-    mtb: {
-      name: ['name', 'noname', 'mtb:name'],
-      oneway: ['oneway', 'oneway:vehicle', 'oneway:bicycle', 'oneway:mtb'],
-    },
-    snowmobile: {
-      oneway: ['oneway', 'oneway:vehicle', 'oneway:motor_vehicle', 'oneway:snowmobile'],
-    },
-    wheelchair: {
-      oneway: ['oneway', 'oneway:foot', 'oneway:wheelchair'],
-    },
-  };
+function onewayKeysForTravelMode(mode) {
+  var keys = [];
+  // oneway tag is irrelevant on waterways
+  if (mode !== 'canoe') keys.push('oneway');
+  return keys.concat(accessHierarchy[mode].map(function(val) {
+    return 'oneway:' + val;
+  }));
+}
 
-  var keys = [lens];
-  if (keysByLensByMode[travelMode] && keysByLensByMode[travelMode][lens]) keys = keysByLensByMode[travelMode][lens];
-  else if (keysByLens[lens]) keys = keysByLens[lens];
-
-  // for most keys we're looking for missing values, but for fixmes we're looking for extant values
-  var hasKeyMeansSpecified = lens !== "fixme";
-
-  var specifiedAttributeExpression = [
-    hasKeyMeansSpecified ? "any" : "all",
+function specifyingKeysForLens(lens, travelMode) {
+  switch (lens) {
+    case 'name': 
+      switch (travelMode) {
+        case 'canoe': return ['name', 'noname', 'waterbody:name'];
+        case 'mtb': return ['name', 'noname', 'mtb:name'];
+      }
+      return ['name', 'noname'];
+    case 'oneway': return onewayKeysForTravelMode(travelMode);
+    case 'check_date': return ['check_date', 'survey:date'];
+    case 'fixme': return ['fixme', 'FIXME', 'todo', 'TODO'];
+  }
+  return [lens];
+}
+function attributeIsSpecifiedExpression(keys, hasKeyMeansUnspecified) {
+  return [
+    hasKeyMeansUnspecified ? "all" : "any",
     ...keys.map(key => [
-      hasKeyMeansSpecified ? "has" : "!has",
+      hasKeyMeansUnspecified ? "!has" : "has",
       key
     ]),
   ];
+}
+function isSpecifiedExpressionForLens(lens) {
+
+  var specifiedAttributeExpression = attributeIsSpecifiedExpression(
+    specifyingKeysForLens(lens, travelMode),
+    // for most keys we're looking for missing values, but for fixmes we're looking for extant values
+    lens === "fixme"
+  );
+
   if (travelMode === 'canoe') {
     if (waterwayOnlyLenses.includes(lens)) {
       // don't expect waterway-only attributes on highways
@@ -860,6 +862,20 @@ function isSpecifiedExpressionForLens(lens) {
         "any",
         specifiedAttributeExpression,
         ["!has", "highway"],
+      ];
+    } else if (lens === 'oneway') {
+      specifiedAttributeExpression = [
+        "any",
+        [
+          "all",
+          specifiedAttributeExpression,
+          ["has", "waterway"],
+        ],
+        [
+          "all",
+          attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
+          ["has", "portage"],
+        ],
       ];
     }
   }
