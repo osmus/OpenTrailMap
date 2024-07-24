@@ -800,10 +800,10 @@ var accessHierarchy = {
   atv: ['vehicle', 'motor_vehicle', 'atv'],
   bicycle:  ['vehicle', 'bicycle'],
   canoe: ['boat', 'canoe'],
-  portage: ['foot', 'portage'],
   foot: ['foot'],
   horse: ['horse'],
   mtb: ['vehicle', 'bicycle', 'mtb'],
+  portage: ['foot', 'portage'],
   snowmobile: ['vehicle', 'motor_vehicle', 'snowmobile'],
   wheelchair: ['foot', 'wheelchair'],
 };
