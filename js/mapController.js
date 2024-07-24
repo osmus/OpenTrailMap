@@ -831,24 +831,69 @@ function specifyingKeysForLens(lens, travelMode) {
   }
   return [lens];
 }
-function attributeIsSpecifiedExpression(keys, hasKeyMeansUnspecified) {
+function attributeIsSpecifiedExpression(keys) {
   return [
-    hasKeyMeansUnspecified ? "all" : "any",
-    ...keys.map(key => [
-      hasKeyMeansUnspecified ? "!has" : "has",
-      key
-    ]),
+    "any",
+    ...keys.map(function(key) {
+      return ["has", key]
+    }),
   ];
 }
-function isSpecifiedExpressionForLens(lens) {
+function isSpecifiedExpressionForLens(lens, travelMode) {
 
   var specifiedAttributeExpression = attributeIsSpecifiedExpression(
-    specifyingKeysForLens(lens, travelMode),
-    // for most keys we're looking for missing values, but for fixmes we're looking for extant values
-    lens === "fixme"
+    specifyingKeysForLens(lens, travelMode)
   );
+  // for fixmes we're looking for extant values instead of missing values
+  if (lens === 'fixme') {
+    specifiedAttributeExpression = [
+      "none",
+      specifiedAttributeExpression,
+    ];
+  }
+  if (lens === 'operator') {
+    // if a path is `informal=yes` then there's probably no operator, always style as complete
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["==", "informal", "yes"],
+    ];
+  }
+  if (lens === 'sac_scale') {
+    // if a path is `informal=yes` then there's probably no operator, always style as complete
+    specifiedAttributeExpression = [
+      "all",
+      specifiedAttributeExpression,
+      ["in", "sac_scale", 'no', 'hiking', 'mountain_hiking', 'demanding_mountain_hiking', 'alpine_hiking', 'demanding_alpine_hiking', 'difficult_alpine_hiking'],
+    ];
+  }
 
   if (travelMode === 'canoe') {
+    if (lens === 'tidal') {
+      // assume tidal channels are always tidal=yes
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["==", "waterway", "tidal_channel"],
+      ];
+    }
+    if (lens === 'open_water') {
+      // only expect open_water tag on certain features
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["!in", "waterway", "fairway", "flowline"],
+      ];
+    }
+    if (lens === 'width') {
+      // don't expect width tag on links
+      specifiedAttributeExpression = [
+        "any",
+        specifiedAttributeExpression,
+        ["==", "waterway", "link"],
+      ];
+    }
+
     if (waterwayOnlyLenses.includes(lens)) {
       // don't expect waterway-only attributes on highways
       specifiedAttributeExpression = [
@@ -879,46 +924,7 @@ function isSpecifiedExpressionForLens(lens) {
       ];
     }
   }
-  if (lens === 'tidal') {
-    // assume tidal channels are always tidal=yes
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["==", "waterway", "tidal_channel"],
-    ];
-  }
-  if (lens === 'open_water') {
-    // only expect open_water tag on certain features
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["!in", "waterway", "fairway", "flowline"],
-    ];
-  }
-  if (lens === 'width') {
-    // don't expect width tag on links
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["==", "waterway", "link"],
-    ];
-  }
-  if (lens === 'operator') {
-    // if a path is `informal=yes` then there's probably no operator, always style as complete
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["==", "informal", "yes"],
-    ];
-  }
-  if (lens === 'sac_scale') {
-    // if a path is `informal=yes` then there's probably no operator, always style as complete
-    specifiedAttributeExpression = [
-      "all",
-      specifiedAttributeExpression,
-      ["in", "sac_scale", 'no', 'hiking', 'mountain_hiking', 'demanding_mountain_hiking', 'alpine_hiking', 'demanding_alpine_hiking', 'difficult_alpine_hiking'],
-    ];
-  }
+  
   return specifiedAttributeExpression;
 }
 
@@ -1048,7 +1054,7 @@ function updateTrailLayers() {
     
     waterwaysColors = pathsColors;
   
-    specifiedExpression = isSpecifiedExpressionForLens(lens);
+    specifiedExpression = isSpecifiedExpressionForLens(lens, travelMode);
     allowedAccessExpression = [
       "all",
       allowedAccessExpression,
