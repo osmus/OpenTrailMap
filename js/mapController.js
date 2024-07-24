@@ -830,7 +830,11 @@ function attributeIsSpecifiedExpression(keys) {
   return [
     "any",
     ...keys.map(function(key) {
-      return ["has", key]
+      return [
+        "all",
+        ["has", key],
+        ["!=", key, "unknown"],
+      ];
     }),
   ];
 }
