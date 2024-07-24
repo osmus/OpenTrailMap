@@ -510,6 +510,7 @@ function loadTrailLayers(name) {
       "icon-image": [
         "case",
         ["==", ["get", "oneway"], "-1"], ["image", "oneway-arrow-left"],
+        ["in", ["get", "oneway"], ["literal", ["alternating", "reversible"]]], ["image", "bothways-arrows"],
         ["image", "oneway-arrow-right"]
       ],
       "icon-padding": 2,
@@ -957,7 +958,7 @@ function updateTrailLayers() {
   var waterwaysColors = colors.water;
 
   var onewayArrowsFilter = [
-    "==", "oneway", "yes" 
+    "in", "oneway", "yes", "-1", "alternating", "reversible" 
   ];
 
   if (travelMode !== 'all') {

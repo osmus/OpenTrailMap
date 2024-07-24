@@ -308,6 +308,7 @@ window.onload = (event) => {
     }), "bottom-left");
 
   const imageToLoad = [
+    'bothways-arrows',
     'cairn',
     'canoe',
     'canoe-noaccess',
