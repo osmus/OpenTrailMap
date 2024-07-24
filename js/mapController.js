@@ -913,7 +913,7 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
         [
           "all",
           specifiedAttributeExpression,
-          ["!has", "highway"],
+          ["has", "waterway"],
         ],
         [
           "all",
@@ -983,7 +983,7 @@ function onewayArrowsFilter(travelMode) {
       [
         "all",
         filter,
-        ["!has", "highway"],
+        ["has", "waterway"],
       ],
       [
         "all",
@@ -1162,19 +1162,19 @@ function updateTrailLayers() {
     showDisallowedPathsExpression,
     ["none", allowedAccessExpression],
     specifiedExpression,
-    ["!has", "highway"],
+    ["has", "waterway"],
   ]);
   setTrailsLayerFilter('unspecified-waterways', [
     "all",
     allowedAccessExpression,
     ["none", specifiedExpression],
-    ["!has", "highway"],
+    ["has", "waterway"],
   ]);
   setTrailsLayerFilter('waterways', [
     "all",
     allowedAccessExpression,
     specifiedExpression,
-    ["!has", "highway"],
+    ["has", "waterway"],
   ]);
 
   map
