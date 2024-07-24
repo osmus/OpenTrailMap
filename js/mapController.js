@@ -507,12 +507,6 @@ function loadTrailLayers(name) {
     },
     "minzoom": 12,
     "layout": {
-      "icon-image": [
-        "case",
-        ["==", ["get", "oneway"], "-1"], ["image", "oneway-arrow-left"],
-        ["in", ["get", "oneway"], ["literal", ["alternating", "reversible"]]], ["image", "bothways-arrows"],
-        ["image", "oneway-arrow-right"]
-      ],
       "icon-padding": 2,
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
@@ -996,6 +990,30 @@ function onewayArrowsFilter(travelMode) {
   }
   return filter;
 }
+function onewayArrowsIconImageExpression(travelMode) {
+  var expression = ['case'];
+  onewayKeysForTravelMode(travelMode).reverse().forEach(function(key) {
+    expression = expression.concat([
+      ["has", key],
+      [
+        "case",
+        ["==", ["get", key], "yes"], ["image", "oneway-arrow-right"],
+        ["==", ["get", key], "-1"], ["image", "oneway-arrow-left"],
+        ["in", ["get", key], ["literal", ["alternating", "reversible"]]], ["image", "bothways-arrows"],
+        ""
+      ]
+    ]);
+  });
+  expression.push("");
+  if (travelMode === 'canoe') {
+    expression = [
+      "case",
+      ["has", "waterway"], expression,
+      onewayArrowsIconImageExpression('portage'),
+    ];
+  }
+  return expression;
+}
 
 function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
@@ -1162,6 +1180,10 @@ function updateTrailLayers() {
     .setPaintProperty('informal-paths', 'line-color', pathsColors)
     .setPaintProperty('waterways', 'line-color', waterwaysColors)
     .setFilter('bridge-casings', ["all", ["has", "bridge"], ["!in", "bridge", "no", "abandoned", "raised", "proposed", "dismantled"], combinedFilterExpression])
+    .setLayoutProperty('oneway-arrows', "icon-image", onewayArrowsIconImageExpression(travelMode))
+    // oneway-arrows filter technically isn't needed since the icon-image doesn't display anything
+    // if there isn't a relevant oneway value, but we might as well leave it for now in case we want
+    // to add some other kind of styling in the future
     .setFilter('oneway-arrows', ["all", onewayArrowsFilter(travelMode), combinedFilterExpression])
     .setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
