@@ -47,7 +47,6 @@ const impliedYesExpressions = {
     [
       "in", "highway",
       "cycleway",
-      "bridleway",
       "service",
       "unclassified",
       "residential",
@@ -65,7 +64,6 @@ const impliedYesExpressions = {
       "path",
       "footway",
       "steps",
-      "bridleway",
       "service",
       "unclassified",
       "residential",
