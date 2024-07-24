@@ -270,7 +270,7 @@ function setLens(value, skipMapUpdate) {
   setHashParameters({ lens: lens === defaultLens ? null : value });
 }
 
-window.onload = (event) => {
+window.onload = function(event) {
 
   window.addEventListener("hashchange", updateForHash);
 
@@ -336,8 +336,8 @@ window.onload = (event) => {
 
   for (let i in imageToLoad) {
     let img = imageToLoad[i];
-    map.loadImage('img/map/' + img + '.png').then(resp => {
-      map.addImage(img, resp.data, { pixelRatio: 2 });
+    map.loadImage('img/map/' + img + '.png').then(function(resp) {
+      return map.addImage(img, resp.data, { pixelRatio: 2 });
     });
   }
 

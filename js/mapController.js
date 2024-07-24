@@ -994,15 +994,19 @@ function updateTrailLayers() {
       "any",
       [
         "all",
-        ...modes.map(mode => ["!has", "oneway:" + mode]),
+        ...modes.map(function(mode) {
+          return ["!has", "oneway:" + mode];
+        }),
         ["==", "oneway", "yes"],
       ],
-      ...modes.map(mode => ["==", "oneway:" + mode, "yes"]),
+      ...modes.map(function(mode) {
+        return ["==", "oneway:" + mode, "yes"];
+      }),
     ];
     
     specifiedAccessExpression = ["any"];
   
-    modes.forEach(mode => {
+    modes.forEach(function(mode) {
       specifiedAccessExpression.push([
           "none",
           ["any",
@@ -1207,7 +1211,7 @@ async function loadInitialMap() {
       'data': focusJson
     });
     const focusCoords = focusJson.features[0].geometry.coordinates[0][1];
-    const focusBounds = focusCoords.reduce((bounds, coord) => {
+    const focusBounds = focusCoords.reduce(function(bounds, coord) {
       return bounds.extend(coord);
     }, new maplibregl.LngLatBounds(focusCoords[0], focusCoords[0]));
   
