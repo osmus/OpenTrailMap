@@ -797,6 +797,7 @@ function loadTrailLayers(name) {
 }
 
 var accessHierarchy = {
+  all: [],
   atv: ['vehicle', 'motor_vehicle', 'atv'],
   bicycle:  ['vehicle', 'bicycle'],
   canoe: ['boat', 'canoe'],
@@ -914,12 +915,12 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
         [
           "all",
           specifiedAttributeExpression,
-          ["has", "waterway"],
+          ["!has", "highway"],
         ],
         [
           "all",
           attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
-          ["has", "portage"],
+          ["!has", "waterway"],
         ],
       ];
     }
@@ -963,6 +964,39 @@ function trailPoisFilter(travelMode) {
   ];
 }
 
+function onewayArrowsFilter(travelMode) {
+  var filter = ['any'];
+  var onewayKeys = onewayKeysForTravelMode(travelMode);
+  while (onewayKeys.length) {
+    var leastSpecificKey = onewayKeys.shift();
+    filter.push([
+      "all",
+      // if there isn't a more specific key (e.g. 'oneway:foot')
+      ...onewayKeys.map(function(key) {
+        return ["!has", key];
+      }),
+      // then pay attention to the most specific key we have (e.g. 'oneway')
+      ["in", leastSpecificKey, "yes", "-1", "alternating", "reversible"],
+    ]);
+  }
+  if (travelMode === 'canoe') {
+    filter = [
+      "any",
+      [
+        "all",
+        filter,
+        ["!has", "highway"],
+      ],
+      [
+        "all",
+        onewayArrowsFilter('portage'),
+        ["!has", "waterway"],
+      ],
+    ];
+  }
+  return filter;
+}
+
 function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
 
@@ -979,31 +1013,12 @@ function updateTrailLayers() {
   var pathsColors = colors.trail;
   var waterwaysColors = colors.water;
 
-  var onewayArrowsFilter = [
-    "in", "oneway", "yes", "-1", "alternating", "reversible" 
-  ];
-
   if (travelMode !== 'all') {
 
     var modes = [travelMode];
     if (travelMode == 'canoe') modes.push('portage');
   
     allowedAccessExpression = ["any"];
-  
-    onewayArrowsFilter = [
-      "any",
-      [
-        "all",
-        ...modes.map(function(mode) {
-          return ["!has", "oneway:" + mode];
-        }),
-        ["==", "oneway", "yes"],
-      ],
-      ...modes.map(function(mode) {
-        return ["==", "oneway:" + mode, "yes"];
-      }),
-    ];
-    
     specifiedAccessExpression = ["any"];
   
     modes.forEach(function(mode) {
@@ -1147,7 +1162,7 @@ function updateTrailLayers() {
     .setPaintProperty('informal-paths', 'line-color', pathsColors)
     .setPaintProperty('waterways', 'line-color', waterwaysColors)
     .setFilter('bridge-casings', ["all", ["has", "bridge"], ["!in", "bridge", "no", "abandoned", "raised", "proposed", "dismantled"], combinedFilterExpression])
-    .setFilter('oneway-arrows', ["all", onewayArrowsFilter, combinedFilterExpression])
+    .setFilter('oneway-arrows', ["all", onewayArrowsFilter(travelMode), combinedFilterExpression])
     .setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
     .setFilter('trails-pointer-targets', combinedFilterExpression)
