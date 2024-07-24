@@ -157,8 +157,8 @@ const lensOptionsByMode = {
   "snowmobile": landLensOptions,
   "wheelchair": landLensOptions,
 };
-function lensesForMode(mode) {
-  return lensOptionsByMode[mode].flatMap(function(item) {
+function lensesForMode(travelMode) {
+  return lensOptionsByMode[travelMode].flatMap(function(item) {
     return item.subitems;
   });
 }

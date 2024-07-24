@@ -808,11 +808,11 @@ var accessHierarchy = {
   wheelchair: ['foot', 'wheelchair'],
 };
 
-function onewayKeysForTravelMode(mode) {
+function onewayKeysForTravelMode(travelMode) {
   var keys = [];
   // oneway tag is irrelevant on waterways
-  if (mode !== 'canoe') keys.push('oneway');
-  return keys.concat(accessHierarchy[mode].map(function(val) {
+  if (travelMode !== 'canoe') keys.push('oneway');
+  return keys.concat(accessHierarchy[travelMode].map(function(val) {
     return 'oneway:' + val;
   }));
 }
