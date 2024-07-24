@@ -811,6 +811,7 @@ function specifyingKeysForLens(lens, travelMode) {
       return ['name', 'noname'];
     case 'oneway': return onewayKeysForTravelMode(travelMode);
     case 'check_date': return ['check_date', 'survey:date'];
+    case 'covered': return ['covered', 'tunnel', 'indoor'];
     case 'fixme': return ['fixme', 'FIXME', 'todo', 'TODO'];
   }
   return [lens];

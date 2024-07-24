@@ -4,6 +4,9 @@ var lensStrings = {
   access: {
     label: "Access"
   },
+  covered: {
+    label: "Covered"
+  },
   dog: {
     label: "Dog Access"
   },
@@ -82,6 +85,7 @@ const landLensOptions = [
     label: "Attributes",
     subitems: [
       "access",
+      "covered",
       "dog",
       "incline",
       "name",
@@ -100,6 +104,7 @@ const hikingLensOptions = [
     label: "Attributes",
     subitems: [
       "access",
+      "covered",
       "dog",
       "incline",
       "name",
@@ -119,6 +124,7 @@ const canoeLensOptions = [
     label: "Attributes",
     subitems: [
       "access",
+      "covered",
       "dog",
       "name",
       "oneway",
