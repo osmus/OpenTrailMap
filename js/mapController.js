@@ -1018,6 +1018,44 @@ function onewayArrowsIconImageExpression(travelMode) {
   }
   return expression;
 }
+// returns a filter that evaluates to true for features with enough tags to positively
+// determine whether access is allowed or not allowed
+function accessIsSpecifiedExpression(travelMode) {
+  var filter = [
+    "none",
+    [
+      "any",
+      [
+        "all",
+        ["!has", travelMode],
+        ...notNoAccessExpressions("access"),
+        [
+          "none",
+          ...impliedYesExpressions[travelMode],
+          ...impliedNoExpressions[travelMode]
+        ]
+      ],
+      // access if always unspecified if mode is explicitly set to `unknown`
+      ["==", travelMode, "unknown"],
+    ]
+  ];
+  if (travelMode === 'canoe') {
+    filter = [
+      "any",
+      [
+        "all",
+        filter,
+        ["has", "waterway"],
+      ],
+      [
+        "all",
+        accessIsSpecifiedExpression('portage'),
+        ["!has", "waterway"],
+      ],
+    ];
+  }
+  return filter;
+}
 
 function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
@@ -1029,41 +1067,24 @@ function updateTrailLayers() {
   var specifiedExpression;
 
   var showFixmesExpression = [lens === "fixme" ? "!=" : '==', "true", "false"];
-  var showDisallowedPathsExpression = [lens === "access" ? "!=" : '==', "true", "false"];
-  var showUnspecifiedPathsExpression = [lens !== "" ? "!=" : '==', "true", "false"];
+  var showDisallowedExpression = [lens === "access" ? "!=" : '==', "true", "false"];
+  var showUnspecifiedExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
   var pathsColors = colors.trail;
   var waterwaysColors = colors.water;
 
   if (travelMode !== 'all') {
 
+    specifiedAccessExpression = accessIsSpecifiedExpression(travelMode);
+
     var modes = [travelMode];
     if (travelMode == 'canoe') modes.push('portage');
-  
-    allowedAccessExpression = ["any"];
-    specifiedAccessExpression = ["any"];
-  
-    modes.forEach(function(mode) {
-      specifiedAccessExpression.push([
-          "none",
-          ["any",
-            [
-              "all",
-              ["!has", mode],
-              ...notNoAccessExpressions("access"),
-              [
-                "none",
-                ...impliedYesExpressions[mode],
-                ...impliedNoExpressions[mode]
-              ]
-            ],
-            // access if always unspecified if mode is explicitly set to `unknown`
-            ["==", mode, "unknown"],
-          ]
-        ]);
-  
-      allowedAccessExpression.push(modeIsAllowedExpression(mode));
-    });
+    allowedAccessExpression = [
+      "any",
+      ...modes.map(function(mode) {  
+        return modeIsAllowedExpression(mode);
+      })
+    ];
   } else if (lens === 'access') {
 
     specifiedAccessExpression = [
@@ -1127,7 +1148,7 @@ function updateTrailLayers() {
   ]);
   setTrailsLayerFilter('disallowed-paths', [
     "all",
-    showDisallowedPathsExpression,
+    showDisallowedExpression,
     ["none", allowedAccessExpression],
     specifiedExpression,
     ["!=", "informal", "yes"],
@@ -1135,7 +1156,7 @@ function updateTrailLayers() {
   ]);
   setTrailsLayerFilter('disallowed-informal-paths', [
     "all",
-    showDisallowedPathsExpression,
+    showDisallowedExpression,
     ["none", allowedAccessExpression],
     specifiedExpression,
     ["==", "informal", "yes"],
@@ -1143,7 +1164,7 @@ function updateTrailLayers() {
   ]);
   setTrailsLayerFilter('unspecified-paths', [
     "all",
-    showUnspecifiedPathsExpression,
+    showUnspecifiedExpression,
     allowedAccessExpression,
     ["none", specifiedExpression],
     ["!=", "informal", "yes"],
@@ -1151,7 +1172,7 @@ function updateTrailLayers() {
   ]);
   setTrailsLayerFilter('unspecified-informal-paths', [
     "all",
-    showUnspecifiedPathsExpression,
+    showUnspecifiedExpression,
     allowedAccessExpression,
     ["none", specifiedExpression],
     ["==", "informal", "yes"],
@@ -1159,13 +1180,14 @@ function updateTrailLayers() {
   ]);
   setTrailsLayerFilter('disallowed-waterways', [
     "all",
-    showDisallowedPathsExpression,
+    showDisallowedExpression,
     ["none", allowedAccessExpression],
     specifiedExpression,
     ["has", "waterway"],
   ]);
   setTrailsLayerFilter('unspecified-waterways', [
     "all",
+    showUnspecifiedExpression,
     allowedAccessExpression,
     ["none", specifiedExpression],
     ["has", "waterway"],
