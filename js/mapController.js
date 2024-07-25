@@ -8,7 +8,7 @@ const colors = {
   unspecified: "#8e00cc",
   disallowedWater: "#a6b2c4",
   water: "#003b93",
-  label: "#000",
+  label: "#333",
   labelHalo: "rgba(255, 255, 255, 1)",
   selection: "yellow",
 };
@@ -601,12 +601,7 @@ function loadTrailLayers(name) {
       "text-justify": "auto",
     },
     "paint": {
-      "text-color":  [
-        "case",
-        ['==', ["get", "highway"], 'trailhead'], colors.trail,
-        ['==', ["get", "amenity"], 'ranger_station'], colors.trail,
-        colors.label
-      ],
+      "text-color": colors.label,
       "text-halo-width": 2,
       "text-halo-blur": 1,
       "text-halo-color": colors.labelHalo,
