@@ -627,6 +627,7 @@ function loadTrailLayers(name) {
         ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
         [
           "any",
+          ['==', ["get", "natural"], "beaver_dam"],
           ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
           ['==', ["get", "lock"], "yes"],
         ], [
@@ -637,10 +638,12 @@ function loadTrailLayers(name) {
             ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]
           ], [
             "case",
+            ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam-canoeable"],
             ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
             ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
             ["image", "lock-canoeable"],
           ],
+          ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam"],
           ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
           ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
           ["image", "lock"],

@@ -314,6 +314,8 @@ window.onload = function(event) {
     }), "bottom-left");
 
   const imageToLoad = [
+    'beaver_dam',
+    'beaver_dam-canoeable',
     'bothways-arrows',
     'cairn',
     'canoe',
