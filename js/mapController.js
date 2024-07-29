@@ -771,7 +771,7 @@ function loadTrailLayers(name) {
       ["has", "name"],
       ["has", "ele_ft"],
     ]
-  });
+  }, 'clickable');
   addTrailLayer({
     "id": "trails-qa",
     "source": name + 's',
@@ -1365,12 +1365,17 @@ function entityForEvent(e) {
 
   var features = map.queryRenderedFeatures(e.point, {layers: layers});
   var feature = features.length && features[0];
-  if (feature && feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
+  if (feature) {
+    if (feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
+      return {
+        id: feature.properties.OSM_ID,
+        type: feature.properties.OSM_TYPE,
+        focusLngLat: e.lngLat,
+      };
+    }
     return {
-      id: feature.properties.OSM_ID,
-      type: feature.properties.OSM_TYPE,
-      version: feature.properties.OSM_VERSION,
-      changeset: feature.properties.OSM_CHANGESET,
+      id: feature.id.toString().slice(0, -1),
+      type: 'node',
       focusLngLat: e.lngLat,
     };
   }
