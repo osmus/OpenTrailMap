@@ -263,6 +263,16 @@ function loadTrailLayers(name) {
     ],
   }, 'hovered');
   addTrailLayer({
+    "id": "hovered-peaks",
+    "source": "openmaptiles",
+    "source-layer": "mountain_peak",
+    "type": "circle",
+    "paint": hoveredPoiPaint,
+    "filter": [
+      "==", "OSM_ID", -1 
+    ],
+  }, 'hovered');
+  addTrailLayer({
     "id": "hovered-trails-qa",
     "source": name + 's',
     "source-layer": name + '_qa',
@@ -306,6 +316,16 @@ function loadTrailLayers(name) {
       "line-color": colors.selection,
       "line-width": selectedLineWidth,
     },
+    "filter": [
+      "==", "OSM_ID", -1 
+    ],
+  }, 'selected');
+  addTrailLayer({
+    "id": "selected-peaks",
+    "source": "openmaptiles",
+    "source-layer": "mountain_peak",
+    "type": "circle",
+    "paint": selectedPoiPaint,
     "filter": [
       "==", "OSM_ID", -1 
     ],
@@ -1338,7 +1358,13 @@ function updateMapForSelection() {
 
   layerIdsByCategory.selected?.forEach(function(layerId) {
     // this will fail in rare cases where two features of different types but the same ID are both onscreen
-    map.setFilter(layerId, ["in", "OSM_ID", ...idsToHighlight]);
+    map.setFilter(layerId, [
+      "any",
+      ["in", ["id"], ["literal", idsToHighlight.map(function(id) {
+        return parseInt(id.toString() + "1");
+      })]],
+      ["in", ["get", "OSM_ID"], ["literal", idsToHighlight]]
+    ]);
   });
 }
 
@@ -1353,7 +1379,11 @@ function updateMapForHover() {
 
   layerIdsByCategory.hovered?.forEach(function(layerId) {
     // this will fail in rare cases where two features of different types but the same ID are both onscreen
-    map.setFilter(layerId, ["==", "OSM_ID", entityId]);
+    map.setFilter(layerId, [
+      "any",
+      ["==", ["get", "OSM_ID"], entityId],
+      ["==", ["id"], parseInt(entityId.toString() + "1")],
+    ]);
   });
 }
 
