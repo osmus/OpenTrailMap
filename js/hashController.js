@@ -19,26 +19,35 @@ function hashValue(key) {
   return null;
 }
 
-function entityInfoFromHash() {
-  var value = hashValue("selected");
-  if (value) {
-    var components = value.split("/");
-    if (components.length == 2) {
-      var type = components[0];
-      var id = parseInt(components[1]);
-      if (["node", "way", "relation"].includes(type)) {
-        return {
-          type: type,
-          id: id,
-        };
-      }
+function parseEntityInfoFromString(string) {
+  var components = string.split("/");
+  if (components.length == 2) {
+    var type = components[0];
+    var id = parseInt(components[1]);
+    if (["node", "way", "relation"].includes(type)) {
+      return {
+        type: type,
+        id: id,
+      };
     }
   }
+}
+
+function focusedEntityInfoFromHash() {
+  var value = hashValue("focus");
+  if (value) return parseEntityInfoFromString(value);
+  return null;
+}
+
+function selectedEntityInfoFromHash() {
+  var value = hashValue("selected");
+  if (value) return parseEntityInfoFromString(value);
   return null;
 }
 
 function updateForHash() { 
   setTravelMode(hashValue("mode"));
   setLens(hashValue("lens"));
-  selectEntity(entityInfoFromHash());
+  selectEntity(selectedEntityInfoFromHash());
+  focusEntity(focusedEntityInfoFromHash());
 }

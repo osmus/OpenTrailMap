@@ -124,21 +124,6 @@
       "paint": {"fill-color": "#eae0d0"}
     },
     {
-      "id": "park-outline",
-      "type": "line",
-      "source": "openmaptiles",
-      "source-layer": "park",
-      "minzoom": 10,
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-color": "#b5cc99",
-        "line-opacity": 0.4
-      }
-    },
-    {
       "id": "waterway-tunnel",
       "type": "line",
       "source": "openmaptiles",
@@ -592,6 +577,19 @@
       "paint": {
         "line-color": "#fff",
         "line-width": {"base": 1.4, "stops": [[6, 0.5], [20, 30]]}
+      }
+    },
+    {
+      "id": "park-outline",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "park",
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-opacity": 0
       }
     },
     {

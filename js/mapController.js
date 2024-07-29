@@ -1293,6 +1293,8 @@ function updateTrailLayers() {
     .setFilter('trails-labels', combinedFilterExpression)
     .setFilter('trails-pointer-targets', combinedFilterExpression)
     .setFilter('trail-pois', trailPoisFilter(travelMode));
+
+  updateMapForFocus();
 }
 
 function notNoAccessExpressions(mode) {
@@ -1336,49 +1338,46 @@ function modeIsAllowedExpression(mode) {
   return allowedAccessExpression;
 }
 
-let isFocusing;
-
 async function loadInitialMap() {
-
-  isFocusing = false;//hashValue('focus') !== 'no';
-
-  if (isFocusing) {
-    const response = await fetch('json/focus.json');
-    const focusJson = await response.json();
-  
-    // Add as source to the map
-    map.addSource('focus-source', {
-      'type': 'geojson',
-      'data': focusJson
-    });
-    const focusCoords = focusJson.features[0].geometry.coordinates[0][1];
-    const focusBounds = focusCoords.reduce(function(bounds, coord) {
-      return bounds.extend(coord);
-    }, new maplibregl.LngLatBounds(focusCoords[0], focusCoords[0]));
-  
-    map.setMaxBounds(new maplibregl.LngLatBounds([focusBounds.getWest()-1.5,focusBounds.getSouth()-1], [focusBounds.getEast()+1.5,focusBounds.getNorth()+1]));
-  }
-
   updateForHash();
   updateTrailLayers();
 
-  if (isFocusing) {
-    map.addLayer({
-      'id': 'focus',
-      'type': 'fill',
-      'source': 'focus-source',
-      'paint': {
-          'fill-color': '#f9f5ed',
-          'fill-outline-color': '#E2C6C8',
-      },
-    });
-  }
-
   // only add UI handlers after we've loaded the layers
   map.on('mousemove', didMouseMoveMap)
-    .on('click', didClickMap);
+    .on('click', didClickMap)
+    .on('dblclick', didDoubleClickMap);
 }
 
+function omtId(id, type) {
+  var codes = {
+    "node": "1",
+    "way": "2",
+    "relation": "3",
+  };
+  return parseInt(id.toString() + codes[type]);
+}
+
+function updateMapForFocus() {
+  var focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
+  map.setFilter('park-fill', focusedId ? [
+    "==", ["id"], focusedId
+  ] : null)
+  .setFilter('park-outline', focusedId ? [
+    "any",
+    ["==", ["id"], focusedId],
+    [">=", ["zoom"], 10],
+  ] : [">=", ["zoom"], 10])
+  .setPaintProperty('park-outline', "line-opacity", [
+    "case",
+    ["==", ["id"], focusedId], 1,
+    0.4
+  ])
+  .setPaintProperty('park-outline', "line-color", [
+    "case",
+    ["==", ["id"], focusedId], colors.natural,
+    "#b5cc99"
+  ]);
+}
 
 function updateMapForSelection() {
 
@@ -1408,7 +1407,7 @@ function updateMapForSelection() {
     map.setFilter(layerId, [
       "any",
       ["in", ["id"], ["literal", idsToHighlight.map(function(id) {
-        return parseInt(id.toString() + "1");
+        return omtId(id, "node");
       })]],
       ["in", ["get", "OSM_ID"], ["literal", idsToHighlight]]
     ]);
@@ -1429,18 +1428,13 @@ function updateMapForHover() {
     map.setFilter(layerId, [
       "any",
       ["==", ["get", "OSM_ID"], entityId],
-      ["==", ["id"], parseInt(entityId.toString() + "1")],
+      ["==", ["id"], omtId(entityId, hoveredEntityInfo?.type)],
     ]);
   });
 }
 
-function entityForEvent(e) {
-  let layers = layerIdsByCategory.clickable.slice(); // copy array
-  
-  // we need to add focus as a target or else you can click hidden stuff
-  if (isFocusing) layers.unshift('focus');
-
-  var features = map.queryRenderedFeatures(e.point, {layers: layers});
+function entityForEvent(e, layerIds) {
+  var features = map.queryRenderedFeatures(e.point, { layers: layerIds });
   var feature = features.length && features[0];
   if (feature) {
     if (feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
@@ -1460,11 +1454,14 @@ function entityForEvent(e) {
 }
 
 function didClickMap(e) {
-  selectEntity(entityForEvent(e));
+  selectEntity(entityForEvent(e, layerIdsByCategory.clickable));
+}
+function didDoubleClickMap(e) {
+  focusEntity(entityForEvent(e, ['trail-major-pois']));
 }
 
 function didMouseMoveMap(e) {
-  var newHoveredEntityInfo = entityForEvent(e);
+  var newHoveredEntityInfo = entityForEvent(e, layerIdsByCategory.clickable);
 
   if (hoveredEntityInfo?.id != newHoveredEntityInfo?.id ||
     hoveredEntityInfo?.type != newHoveredEntityInfo?.type) {

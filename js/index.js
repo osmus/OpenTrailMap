@@ -212,8 +212,33 @@ var travelMode = defaultTravelMode;
 var lens = defaultLens;
 var lastLens = defaultLens;
 
+var focusedEntityInfo;
 var selectedEntityInfo;
 var hoveredEntityInfo;
+
+function isValidEntityInfo(entityInfo) {
+  return ["node", "way", "relation"].includes(entityInfo?.type) &&
+    entityInfo?.id > 0;
+}
+
+function focusEntity(entityInfo) {
+  if (!isValidEntityInfo(entityInfo)) entityInfo = null;
+
+  if (focusedEntityInfo?.id === entityInfo?.id &&
+    focusedEntityInfo?.type === entityInfo?.type
+  ) return;
+
+  focusedEntityInfo = entityInfo;
+
+  var type = focusedEntityInfo?.type;
+  var entityId = focusedEntityInfo?.id;
+
+  setHashParameters({
+    focus: focusedEntityInfo ? type + "/" + entityId : null
+  });
+
+  updateMapForFocus();
+}
 
 function selectEntity(entityInfo) {
 
@@ -223,8 +248,8 @@ function selectEntity(entityInfo) {
 
   selectedEntityInfo = entityInfo;
 
-  var type = selectedEntityInfo && selectedEntityInfo.type;
-  var entityId = selectedEntityInfo && selectedEntityInfo.id;
+  var type = selectedEntityInfo?.type;
+  var entityId = selectedEntityInfo?.id;
 
   setHashParameters({
     selected: selectedEntityInfo ? type + "/" + entityId : null
