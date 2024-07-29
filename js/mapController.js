@@ -798,6 +798,12 @@ function onewayKeysForTravelMode(travelMode) {
     return 'oneway:' + val;
   }));
 }
+function maxspeedKeysForTravelMode(travelMode) {
+  var keys = ["maxspeed"];
+  return keys.concat(accessHierarchy[travelMode].map(function(val) {
+    return 'maxspeed:' + val;
+  }));
+}
 
 function specifyingKeysForLens(lens, travelMode) {
   switch (lens) {
@@ -808,6 +814,7 @@ function specifyingKeysForLens(lens, travelMode) {
       }
       return ['name', 'noname'];
     case 'oneway': return onewayKeysForTravelMode(travelMode);
+    case 'maxspeed': return maxspeedKeysForTravelMode(travelMode);
     case 'check_date': return ['check_date', 'survey:date'];
     case 'covered': return ['covered', 'tunnel', 'indoor'];
     case 'fixme': return ['fixme', 'FIXME', 'todo', 'TODO'];

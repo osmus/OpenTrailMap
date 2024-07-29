@@ -13,6 +13,9 @@ var lensStrings = {
   incline: {
     label: "Incline"
   },
+  maxspeed: {
+    label: "Speed Limit"
+  },
   name: {
     label: "Name"
   },
@@ -99,6 +102,26 @@ const landLensOptions = [
   },
   metadataLenses,
 ];
+const vehicleLensOptions = [
+  {
+    label: "Attributes",
+    subitems: [
+      "access",
+      "covered",
+      "dog",
+      "incline",
+      "name",
+      "oneway",
+      "operator",
+      "smoothness",
+      "maxspeed",
+      "surface",
+      "trail_visibility",
+       "width",
+    ]
+  },
+  metadataLenses,
+];
 const hikingLensOptions = [
   {
     label: "Attributes",
@@ -155,12 +178,12 @@ const canoeLensOptions = [
 ];
 const lensOptionsByMode = {
   "all": landLensOptions,
-  "atv": landLensOptions,
-  "bicycle": landLensOptions,
+  "atv": vehicleLensOptions,
+  "bicycle": vehicleLensOptions,
   "canoe": canoeLensOptions,
   "foot": hikingLensOptions,
-  "horse": landLensOptions,
-  "snowmobile": landLensOptions,
+  "horse": vehicleLensOptions,
+  "snowmobile": vehicleLensOptions,
   "wheelchair": landLensOptions,
 };
 function lensesForMode(travelMode) {
