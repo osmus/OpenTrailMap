@@ -731,12 +731,26 @@ function loadTrailLayers(name) {
       "symbol-placement": "point",
       "text-field": [
         "step", ["zoom"], "",
-        poiLabelZoom, ["get", "name"]
+        poiLabelZoom, [
+          'format',
+          ["get", "name"],
+          {"text-font": ['literal', ["Americana-Bold"]]},
+          '\n',
+          {},
+          [
+            "number-format",
+            ['get', 'ele_ft'],
+            {}
+          ],
+          {},
+          " ft",
+          {},
+        ]
       ],
       "text-optional": true,
       "text-size": 11,
       "text-line-height": 1.1,
-      "text-font": ["Americana-Bold"],
+      "text-font": ["Americana-Regular"],
       "text-variable-anchor": ["left", "right", "top", "bottom"],
       "text-padding": 5,
       "text-offset": [
@@ -753,7 +767,9 @@ function loadTrailLayers(name) {
       "text-halo-color": colors.labelHalo,
     },
     "filter": [
-      "has", "name",
+      "all",
+      ["has", "name"],
+      ["has", "ele_ft"],
     ]
   });
   addTrailLayer({
