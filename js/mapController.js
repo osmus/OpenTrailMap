@@ -563,6 +563,62 @@ function loadTrailLayers(name) {
         "line-width": 16
     }
   }, 'clickable');
+  if (name === "trail") addTrailLayer({
+    "id": "peaks",
+    "source": "openmaptiles",
+    "source-layer": "mountain_peak",
+    "type": "symbol",
+    "layout": {
+      "icon-image": ["image", "peak"],
+      "icon-size": [
+        "interpolate", ["linear"], ["zoom"],
+        12, 0.5,
+        22, 1
+      ],
+      "symbol-placement": "point",
+      "text-field": [
+        "step", ["zoom"], "",
+        poiLabelZoom, [
+          'format',
+          ["get", "name"],
+          {"text-font": ['literal', ["Americana-Bold"]]},
+          '\n',
+          {},
+          [
+            "number-format",
+            ['get', 'ele_ft'],
+            {}
+          ],
+          {},
+          " ft",
+          {},
+        ]
+      ],
+      "text-optional": true,
+      "text-size": 11,
+      "text-line-height": 1.1,
+      "text-font": ["Americana-Regular"],
+      "text-variable-anchor": ["left", "right", "top", "bottom"],
+      "text-padding": 5,
+      "text-offset": [
+        "interpolate", ["linear"], ["zoom"],
+        12, ["literal", [0.4, 0.4]],
+        22, ["literal", [1.5, 1.5]]
+      ],
+      "text-justify": "auto",
+    },
+    "paint": {
+      "text-color":  colors.natural,
+      "text-halo-width": 2,
+      "text-halo-blur": 1,
+      "text-halo-color": colors.labelHalo,
+    },
+    "filter": [
+      "all",
+      ["has", "name"],
+      ["has", "ele_ft"],
+    ]
+  }, 'clickable');
   addTrailLayer({
     "id": "trail-pois",
     "source": 'trails_poi',
@@ -575,6 +631,7 @@ function loadTrailLayers(name) {
     "layout": {
       "icon-image": [
         "case",
+        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]], ["image", "park"],
         ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
         ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
@@ -596,7 +653,8 @@ function loadTrailLayers(name) {
       "symbol-placement": "point",
       "symbol-sort-key": [
         "case",
-        ['==', ["get", "amenity"], "ranger_station"], 1,
+        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]], 1,
+        ['==', ["get", "amenity"], "ranger_station"], 2,
         ['==', ["get", "highway"], "trailhead"], 3,
         ['==', ["get", "information"], "guidepost"], 19,
         ['==', ["get", "man_made"], "cairn"], 20,
@@ -736,60 +794,45 @@ function loadTrailLayers(name) {
       "text-halo-color": colors.labelHalo,
     }
   }, 'clickable');
-  if (name === "trail") addTrailLayer({
-    "id": "peaks",
-    "source": "openmaptiles",
-    "source-layer": "mountain_peak",
+  addTrailLayer({
+    "id": "trail-major-pois",
+    "source": 'trails_poi',
+    "source-layer": 'trail_poi',
     "type": "symbol",
+    "transition": {
+      "duration": 0,
+      "delay": 0
+    },
     "layout": {
-      "icon-image": ["image", "peak"],
+      "icon-image": ["image", "protected_area"],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
         12, 0.5,
         22, 1
       ],
       "symbol-placement": "point",
-      "text-field": [
-        "step", ["zoom"], "",
-        poiLabelZoom, [
-          'format',
-          ["get", "name"],
-          {"text-font": ['literal', ["Americana-Bold"]]},
-          '\n',
-          {},
-          [
-            "number-format",
-            ['get', 'ele_ft'],
-            {}
-          ],
-          {},
-          " ft",
-          {},
-        ]
-      ],
+      "text-field": ["get", "name"],
       "text-optional": true,
       "text-size": 11,
       "text-line-height": 1.1,
-      "text-font": ["Americana-Regular"],
-      "text-variable-anchor": ["left", "right", "top", "bottom"],
+      "text-font": ["Americana-Bold"],
+      "text-variable-anchor": ["top", "bottom", "left", "right"],
       "text-padding": 5,
       "text-offset": [
         "interpolate", ["linear"], ["zoom"],
-        12, ["literal", [0.4, 0.4]],
-        22, ["literal", [1.5, 1.5]]
+        12, ["literal", [0.9, 0.9]],
+        22, ["literal", [2, 2]]
       ],
       "text-justify": "auto",
     },
     "paint": {
-      "text-color":  colors.natural,
+      "text-color": colors.natural,
       "text-halo-width": 2,
       "text-halo-blur": 1,
       "text-halo-color": colors.labelHalo,
     },
     "filter": [
-      "all",
-      ["has", "name"],
-      ["has", "ele_ft"],
+      'in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]
     ]
   }, 'clickable');
   addTrailLayer({
@@ -967,28 +1010,32 @@ function trailPoisFilter(travelMode) {
   };
   if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
   return [
-    'any',
+    "all",
+    ['!in', "boundary", "protected_area", "national_park"],
     [
-      "none",
-      ["==", "highway", "trailhead"],
-      ["in", "information", "guidepost", "route_marker"],
-      ["==", "man_made", "cairn"],
-    ],
-    travelMode === 'canoe' ? [
-      "any",
-      ...poiKeys.map(function(key) {
-        return ["==", key, "yes"];
-      })
-    ] :
-    [
-      "all",
-      ...poiKeys.map(function(key) {
-        return [
-          "any",
-          ["!has", key],
-          ["==", key, "yes"],
-        ];
-      })
+      'any',
+      [
+        "none",
+        ["==", "highway", "trailhead"],
+        ["in", "information", "guidepost", "route_marker"],
+        ["==", "man_made", "cairn"],
+      ],
+      travelMode === 'canoe' ? [
+        "any",
+        ...poiKeys.map(function(key) {
+          return ["==", key, "yes"];
+        })
+      ] :
+      [
+        "all",
+        ...poiKeys.map(function(key) {
+          return [
+            "any",
+            ["!has", key],
+            ["==", key, "yes"],
+          ];
+        })
+      ]
     ]
   ];
 }
