@@ -374,6 +374,7 @@ window.onload = function(event) {
     'guidepost',
     'lock',
     'lock-canoeable',
+    'nature_reserve',
     'oneway-arrow-right',
     'oneway-arrow-left',
     'question',

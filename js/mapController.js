@@ -805,6 +805,7 @@ function loadTrailLayers(name) {
       "icon-image": [
         "case",
         ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]], ["image", "protected_area"],
+        ['==', ["get", "leisure"], "nature_reserve"], ["image", "nature_reserve"],
         ["image", "park"],
       ],
       "icon-size": [
