@@ -206,7 +206,7 @@ const waterwayOnlyLenses = [
   "rapids",
   "open_water",
 ];
-const defaultTravelMode = "foot";
+const defaultTravelMode = "all";
 const defaultLens= "";
 var travelMode = defaultTravelMode;
 var lens = defaultLens;
@@ -238,6 +238,19 @@ function focusEntity(entityInfo) {
   });
 
   updateMapForFocus();
+
+  document.getElementById("map-title").innerText = '';
+
+  if (focusedEntityInfo) {
+    document.getElementById("focus-meta").style.display = 'flex';
+    fetchOsmEntity(type, entityId).then(function(entity) {
+      if (entity?.tags?.name) {
+        document.getElementById("map-title").innerText = entity.tags.name;
+      }
+    });
+  } else  {
+    document.getElementById("focus-meta").style.display = 'none';
+  }
 }
 
 function selectEntity(entityInfo) {
@@ -258,26 +271,16 @@ function selectEntity(entityInfo) {
   updateMapForSelection();
   updateMapForHover();
 
-  updateSidebar(selectedEntityInfo);
+  if (isSidebarOpen()) updateSidebar();
 
   if (!selectedEntityInfo) return;
 
-  fetchOsmEntity(type, entityId).then(function(entity) {
-    if (entity) {
-      fetchOsmChangeset(entity.changeset).then(function(changeset) {
-        updateMetaTable(entity, changeset);
-      });
-    }
-    var tags = entity && entity.tags;
-    if (tags) updateTagsTable(tags);
-
-    // update map again in case we selected a relation and want to highlight members
-    updateMapForSelection();
-  });
-
-  fetchOsmEntityMemberships(type, entityId).then(function(memberships) {
-    updateMembershipsTable(memberships);
-  });
+  if (type === "relation") {
+    fetchOsmEntity(type, entityId).then(function(entity) {
+      // update map again to add highlighting to any relation members
+      updateMapForSelection();
+    });
+  }
 }
 function updateLensControl() {
   var html = "";
@@ -333,6 +336,14 @@ window.onload = function(event) {
   });
   document.getElementById("lens").addEventListener('change', function(e) {
     setLens(e.target.value);
+  });
+  document.getElementById("inspect-toggle").addEventListener('click', function(e) {
+    e.preventDefault();
+    toggleSidebar();
+  });
+  document.getElementById("clear-focus").addEventListener('click', function(e) {
+    e.preventDefault();
+    focusEntity();
   });
 
   updateLensControl();

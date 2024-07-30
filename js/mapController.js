@@ -156,14 +156,12 @@ function toggleWaterTrailsIfNeeded() {
     map.addSource("trails_poi", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/trails_poi.json",
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
   }
   if (!map.getSource('water_trails_poi')) {
     map.addSource("water_trails_poi", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/water_trails_poi.json",
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
   }
 
@@ -173,7 +171,6 @@ function toggleWaterTrailsIfNeeded() {
     map.addSource("water_trails", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/water_trails.json",
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
     loadTrailLayers('water_trail');
 
@@ -183,7 +180,6 @@ function toggleWaterTrailsIfNeeded() {
     map.addSource("trails", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
     loadTrailLayers('trail');
   }  
@@ -780,7 +776,7 @@ function loadTrailLayers(name) {
     }
   }, 'clickable');
   addTrailLayer({
-    "id": "trail-major-pois",
+    "id": "major-trail-pois",
     "source": 'trails_poi',
     "source-layer": 'trail_poi',
     "type": "symbol",
@@ -821,11 +817,6 @@ function loadTrailLayers(name) {
       "text-halo-blur": 1,
       "text-halo-color": colors.labelHalo,
     },
-    "filter": [
-      "any",
-      ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
-      ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
-    ]
   }, 'clickable');
   addTrailLayer({
     "id": "trails-qa",
@@ -1486,6 +1477,15 @@ function updateMapForFocus() {
     ["==", ["id"], focusedId], "#738C40",
     "#ACC47A"
   ]);
+  map.setFilter('major-trail-pois', [
+    "all",
+    [
+      "any",
+      ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
+      ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
+    ],
+    ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null]
+  ]);
 }
 
 function updateMapForSelection() {
@@ -1546,27 +1546,69 @@ function entityForEvent(e, layerIds) {
   var features = map.queryRenderedFeatures(e.point, { layers: layerIds });
   var feature = features.length && features[0];
   if (feature) {
+    var focusLngLat = feature.geometry.type === 'Point' ? feature.geometry.coordinates : e.lngLat;
     if (feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
       return {
         id: feature.properties.OSM_ID,
         type: feature.properties.OSM_TYPE,
-        focusLngLat: e.lngLat,
+        focusLngLat: focusLngLat,
+        rawFeature: feature,
       };
     }
     return {
       id: feature.id.toString().slice(0, -1),
       type: 'node',
-      focusLngLat: e.lngLat,
+      focusLngLat: focusLngLat,
+      rawFeature: feature,
     };
   }
   return null;
 }
 
+var activePopup;
+
 function didClickMap(e) {
-  selectEntity(entityForEvent(e, layerIdsByCategory.clickable));
+
+  var entity = entityForEvent(e, layerIdsByCategory.clickable);
+  selectEntity(entity);
+
+  if (!entity || isSidebarOpen()) return;
+  
+  var coordinates = entity.focusLngLat;
+
+  // Ensure that if the map is zoomed out such that multiple
+  // copies of the feature are visible, the popup appears
+  // over the copy being pointed to.
+  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+  }
+
+  var tags = entity.rawFeature.properties;
+
+  var html = "";
+
+  if (tags.name) html += "<b>" + tags.name + "</b><br/>"
+  html += '<a id="view-feature-details" href="" class="button">View Details</a>';
+
+  activePopup = new maplibregl.Popup({
+      className: 'quickinfo',
+      closeButton: false,
+    })
+    .setLngLat(coordinates)
+    .setHTML(html)
+    .addTo(map);
+  
+  document.getElementById("view-feature-details").addEventListener('click', function(e) {
+    e.preventDefault();
+    openSidebar();
+  });
+}
+function didClickViewDetails(e) {
+  e.preventDefault();
 }
 function didDoubleClickMap(e) {
-  focusEntity(entityForEvent(e, ['trail-major-pois']));
+  var entity = entityForEvent(e, ['major-trail-pois']);
+  if (entity) focusEntity(entity);
 }
 
 function didMouseMoveMap(e) {

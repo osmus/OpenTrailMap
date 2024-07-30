@@ -50,4 +50,5 @@ function updateForHash() {
   setLens(hashValue("lens"));
   selectEntity(selectedEntityInfoFromHash());
   focusEntity(focusedEntityInfoFromHash());
+  hashValue("inspect") ? openSidebar() : closeSidebar();
 }

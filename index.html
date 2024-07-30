@@ -23,24 +23,25 @@
       })(window, document, 'dataLayer', '0245a355-96b9-47f5-997e-8cafd843c18a');
     </script>
     <div id="header">
-      <div class="main-title">
+      <div class="site-title">
         <a href="/"><img src="img/opentrailmap-logo.svg" alt="Stick figure hiker with walking stick and backpack above a dashed line surrounded by a map outline"/> <h1>OpenTrailMap</h1></a> <p class="tagline">by <a href="https://openstreetmap.us" target="_blank">OpenStreetMap US</a></p>
       </div>
       <ul class="main-menu">
         <li><a href="https://openstreetmap.us/our-work/trails/" target="_blank">About</a></li>
         <li><a href="https://github.com/osmus/OpenTrailMap" target="_blank">GitHub</a></li>
         <li><a href="https://openstreetmap.app.neoncrm.com/forms/trails-stewardship-initiative" target="_blank">Donate</a></li>
+        <li><a href="" id="inspect-toggle">Inspect</a></li>
       </ul>
     </div>
     <div id="body">
-      <div id="sidebar"></div>
       <div id="map-wrap">
-        <div id="map"></div>
-        <div id="controls">
+        <!--<div id="controls"></div>-->
+        <div id="nameplate">
+          <h1 id="focus-meta" style="display: none;"><span style="flex-basis: 100%;"><span class="swatch"></span><span id="map-title"></span></span><a href="" title="Clear focus area" id="clear-focus">⨯</a></h1>
           <select id="travel-mode">
             <optgroup label="Trails">
-              <option value="all">All Trails</option>
-              <option value="foot" selected>Hiking & Walking Trails</option>
+              <option value="all" selected>All Trails</option>
+              <option value="foot">Hiking & Walking Trails</option>
               <option value="wheelchair">Wheelchair Trails</option>
               <option value="bicycle">Biking Trails</option>
               <option value="horse">Horseback Riding Trails</option>
@@ -53,7 +54,9 @@
           </select>
           <select id="lens"></select>
         </div>
+        <div id="map"></div>
       </div>
+      <div id="sidebar"></div>
     </div>
     <script type="application/javascript" src="js/mapController.js"></script>
     <script type="application/javascript" src="js/sidebarController.js"></script>

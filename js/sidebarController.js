@@ -1,5 +1,34 @@
+function isSidebarOpen() {
+  return document.getElementsByTagName('body')[0].classList.contains('sidebar-open');
+}
+function toggleSidebar(toOpen) {
+  if (isSidebarOpen()) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+function openSidebar() {
+  if (!isSidebarOpen()) {
+    if (activePopup) {
+      activePopup.remove();
+      activePopup = null;
+    }
+    document.getElementsByTagName('body')[0].classList.add('sidebar-open');
+    setHashParameters({ inspect: 1 });
+    updateSidebar();
+  }
+}
+function closeSidebar() {
+  if (isSidebarOpen()) {
+    document.getElementsByTagName('body')[0].classList.remove('sidebar-open');
+    setHashParameters({ inspect: null });
+  }
+}
 
-function updateSidebar(entity) {
+function updateSidebar() {
+
+  var entity = selectedEntityInfo;
 
   if (!entity) {
     document.getElementById('sidebar').innerHTML = "";
@@ -53,6 +82,20 @@ function updateSidebar(entity) {
   html += "</div>";
 
   document.getElementById('sidebar').innerHTML = html;
+
+  fetchOsmEntity(type, entityId).then(function(entity) {
+    if (entity) {
+      fetchOsmChangeset(entity.changeset).then(function(changeset) {
+        updateMetaTable(entity, changeset);
+      });
+    }
+    var tags = entity && entity.tags;
+    if (tags) updateTagsTable(tags);
+  });
+
+  fetchOsmEntityMemberships(type, entityId).then(function(memberships) {
+    updateMembershipsTable(memberships);
+  });
 }
 
 function updateMetaTable(entity, changeset) {
