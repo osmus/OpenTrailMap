@@ -23,19 +23,6 @@
       "paint": {"background-color": "#f9f5ed"}
     },
     {
-      "id": "landuse-developed",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "landuse",
-      "filter": [
-        "all",
-        ["==", "$type", "Polygon"],
-        ["in", "class", "residential", "commercial", "industrial", "garages", "retail", "stadium", "dam", "quarry", "railway"]
-      ],
-      "layout": {"visibility": "visible"},
-      "paint": {"fill-color": "hsl(47, 13%, 86%)", "fill-opacity": 0.4}
-    },
-    {
       "id": "park-fill-landcover",
       "type": "fill",
       "source": "openmaptiles",
@@ -56,19 +43,7 @@
         "fill-opacity": 0.3
       }
     },
-    {
-      "id": "landuse-exclusion",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "landuse",
-      "filter": [
-        "all",
-        ["==", "$type", "Polygon"],
-        ["in", "class", "military"]
-      ],
-      "layout": {"visibility": "visible"},
-      "paint": {"fill-color": "hsl(0, 20%, 88%)", "fill-opacity": 0.75}
-    },
+    
     {
       "id": "water",
       "type": "fill",
@@ -133,6 +108,19 @@
       "filter": ["==", "class", "agriculture"],
       "layout": {"visibility": "visible"},
       "paint": {"fill-color": "#eae0d0"}
+    },
+    {
+      "id": "landuse-exclusion",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "all",
+        ["==", "$type", "Polygon"],
+        ["in", "class", "military"]
+      ],
+      "layout": {"visibility": "visible"},
+      "paint": {"fill-color": "hsl(0, 20%, 88%)", "fill-opacity": 1}
     },
     {
       "id": "waterway-tunnel",

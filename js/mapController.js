@@ -1351,6 +1351,8 @@ async function loadInitialMap() {
   updateForHash();
   updateTrailLayers();
 
+  map.setPaintProperty("landuse-exclusion", "fill-pattern", ["image", "restricted-zone"])
+
   // only add UI handlers after we've loaded the layers
   map.on('mousemove', didMouseMoveMap)
     .on('click', didClickMap)

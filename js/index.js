@@ -382,6 +382,7 @@ window.onload = function(event) {
     'peak',
     'protected_area',
     'ranger_station',
+    'restricted-zone',
     'route_marker',
     'slipway-canoe-trailer',
     'slipway-canoe-trailer-noaccess',
