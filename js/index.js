@@ -392,6 +392,7 @@ window.onload = function(event) {
     'trailhead',
     'waterfall',
     'waterfall-canoeable',
+    'waterfall-landmark',
   ];
 
   for (let i in imageToLoad) {

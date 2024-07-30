@@ -159,6 +159,13 @@ function toggleWaterTrailsIfNeeded() {
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
   }
+  if (!map.getSource('water_trails_poi')) {
+    map.addSource("water_trails_poi", {
+      type: "vector",
+      url: "https://dwuxtsziek7cf.cloudfront.net/water_trails_poi.json",
+      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
+    });
+  }
 
   if (travelMode === 'canoe' && !map.getSource('water_trails')) {
     clearTrailLayers();
@@ -168,17 +175,11 @@ function toggleWaterTrailsIfNeeded() {
       url: "https://dwuxtsziek7cf.cloudfront.net/water_trails.json",
       attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
     });
-    map.addSource("water_trails_poi", {
-      type: "vector",
-      url: "https://dwuxtsziek7cf.cloudfront.net/water_trails_poi.json",
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>'
-    });
     loadTrailLayers('water_trail');
 
   } else if (travelMode !== 'canoe' && !map.getSource('trails')) {
     clearTrailLayers();
     if (map.getSource('water_trails')) map.removeSource('water_trails');
-    if (map.getSource('water_trails_poi')) map.removeSource('water_trails_poi');
     map.addSource("trails", {
       type: "vector",
       url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
@@ -292,7 +293,7 @@ function loadTrailLayers(name) {
       "==", "OSM_ID", -1 
     ],
   }, 'hovered');
-  if (name === "water_trail") addTrailLayer({
+  addTrailLayer({
     "id": "hovered-water-trail-pois",
     "source": 'water_trails_poi',
     "source-layer": 'water_trail_poi',
@@ -350,7 +351,7 @@ function loadTrailLayers(name) {
       "==", "OSM_ID", -1 
     ],
   }, 'selected');
-  if (name === "water_trail") addTrailLayer({
+  addTrailLayer({
     "id": "selected-water-trail-pois",
     "source": 'water_trails_poi',
     "source-layer": 'water_trail_poi',
@@ -698,7 +699,7 @@ function loadTrailLayers(name) {
       "text-halo-color": colors.labelHalo,
     }
   }, 'clickable');
-  if (name === "water_trail") addTrailLayer({
+  addTrailLayer({
     "id": "water-trail-pois",
     "source": 'water_trails_poi',
     "source-layer": 'water_trail_poi',
@@ -708,57 +709,6 @@ function loadTrailLayers(name) {
       "delay": 0
     },
     "layout": {
-      "icon-image": [
-        "case",
-        ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
-        [
-          "any",
-          ['==', ["get", "natural"], "beaver_dam"],
-          ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
-          ['==', ["get", "lock"], "yes"],
-        ], [
-          "case",
-          [
-            "all",
-            ["has", "canoe"],
-            ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]
-          ], [
-            "case",
-            ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam-canoeable"],
-            ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
-            ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
-            ["image", "lock-canoeable"],
-          ],
-          ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam"],
-          ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
-          ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
-          ["image", "lock"],
-        ],
-        [
-          "any",
-          ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
-          [
-            "all",
-            ["!", ["has", "canoe"]],
-            ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
-          ]
-        ], [
-          "case",
-          ['==', ["get", "leisure"], "slipway"], ["case",
-            ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
-            ["image", "slipway-canoe-trailer-noaccess"],
-          ],
-          ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe-noaccess"],
-          ""
-        ],
-        ['==', ["get", "leisure"], "slipway"], [
-          "case",
-          ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe"],
-          ["image", "slipway-canoe-trailer"],
-        ],
-        ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
-        ""
-      ],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
         12, 0.5,
@@ -1118,6 +1068,65 @@ function onewayArrowsFilter(travelMode) {
   }
   return filter;
 }
+
+function waterTrailPoiIconImageExpression(travelMode) {
+  if (travelMode !== 'canoe') return [
+    "case",
+    ["==", ["get", "waterway"], "waterfall"], ["image", "waterfall-landmark"],
+    ""
+  ];
+  return [
+    "case",
+    ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
+    [
+      "any",
+      ['==', ["get", "natural"], "beaver_dam"],
+      ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
+      ['==', ["get", "lock"], "yes"],
+    ], [
+      "case",
+      [
+        "all",
+        ["has", "canoe"],
+        ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]
+      ], [
+        "case",
+        ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam-canoeable"],
+        ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
+        ["image", "lock-canoeable"],
+      ],
+      ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam"],
+      ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
+      ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
+      ["image", "lock"],
+    ],
+    [
+      "any",
+      ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
+      [
+        "all",
+        ["!", ["has", "canoe"]],
+        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
+      ]
+    ], [
+      "case",
+      ['==', ["get", "leisure"], "slipway"], ["case",
+        ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
+        ["image", "slipway-canoe-trailer-noaccess"],
+      ],
+      ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe-noaccess"],
+      ""
+    ],
+    ['==', ["get", "leisure"], "slipway"], [
+      "case",
+      ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe"],
+      ["image", "slipway-canoe-trailer"],
+    ],
+    ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
+    ""
+  ];
+}
 function onewayArrowsIconImageExpression(travelMode) {
   var expression = ['case'];
   onewayKeysForTravelMode(travelMode).reverse().forEach(function(key) {
@@ -1331,6 +1340,7 @@ function updateTrailLayers() {
     .setPaintProperty('waterways', 'line-color', waterwaysColors)
     .setFilter('bridge-casings', ["all", ["has", "bridge"], ["!in", "bridge", "no", "abandoned", "raised", "proposed", "dismantled"], combinedFilterExpression])
     .setLayoutProperty('oneway-arrows', "icon-image", onewayArrowsIconImageExpression(travelMode))
+    .setLayoutProperty('water-trail-pois', "icon-image", waterTrailPoiIconImageExpression(travelMode))
     // oneway-arrows filter technically isn't needed since the icon-image doesn't display anything
     // if there isn't a relevant oneway value, but we might as well leave it for now in case we want
     // to add some other kind of styling in the future
@@ -1338,6 +1348,10 @@ function updateTrailLayers() {
     .setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
     .setFilter('trails-pointer-targets', combinedFilterExpression)
+    .setFilter('water-trail-pois', travelMode !== "canoe" ? [
+      "any",
+      ["==", ["get", "waterway"], "waterfall"],
+    ] : null)
     .setFilter('trail-pois', trailPoisFilter(travelMode));
 
   updateMapForFocus();
