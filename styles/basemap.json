@@ -99,18 +99,6 @@
       }
     },
     {
-      "id": "landcover_sand",
-      "type": "fill",
-      "metadata": {},
-      "source": "openmaptiles",
-      "source-layer": "landcover",
-      "filter": ["all", ["in", "class", "sand"]],
-      "paint": {
-        "fill-antialias": false,
-        "fill-color": "hsl(49, 85%, 90%)"
-      }
-    },
-    {
       "id": "landuse",
       "type": "fill",
       "source": "openmaptiles",
