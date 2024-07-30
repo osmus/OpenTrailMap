@@ -1382,7 +1382,7 @@ function updateMapForFocus() {
     });
   }
   function setParksPaintProperty(layer, key, value) {
-    ['', '-2'].forEach(function(suffix) {
+    ['', '-landcover'].forEach(function(suffix) {
       map.setPaintProperty(layer + suffix, key, value);
     });
   }
