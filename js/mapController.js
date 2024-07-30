@@ -580,18 +580,13 @@ function loadTrailLayers(name) {
         "step", ["zoom"], "",
         poiLabelZoom, [
           'format',
-          ["get", "name"],
+          ["concat", ["get", "name"], '\n'],
           {"text-font": ['literal', ["Americana-Bold"]]},
-          '\n',
-          {},
-          [
+          ["concat", [
             "number-format",
             ['get', 'ele_ft'],
             {}
-          ],
-          {},
-          " ft",
-          {},
+          ], " ft"],
         ]
       ],
       "text-optional": true,
@@ -661,12 +656,32 @@ function loadTrailLayers(name) {
       ],
       "text-field": [
         "step", ["zoom"], "",
-        poiLabelZoom, ["get", "name"]
+        poiLabelZoom, [
+          'format',
+          [
+            "case",
+            ["has", "name"], [
+              "concat", ["get", "name"], ["case", ["has", "ele"], '\n', ""]
+            ],
+            ""
+          ],
+          {"text-font": ['literal', ["Americana-Bold"]]},
+          [
+            "case",
+            ["has", "ele"], ["concat", [
+              "number-format",
+              ["/", ["to-number", ['get', 'ele']], 0.3048],
+              { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
+            ], " ft"],
+            ""
+          ],
+          {},
+        ]
       ],
       "text-optional": true,
       "text-size": 11,
       "text-line-height": 1.1,
-      "text-font": ["Americana-Bold"],
+      "text-font": ["Americana-Regular"],
       "text-variable-anchor": ["left", "right", "top", "bottom"],
       "text-padding": 5,
       "text-offset": [
