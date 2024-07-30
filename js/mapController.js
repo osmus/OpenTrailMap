@@ -1374,6 +1374,13 @@ async function loadInitialMap() {
     .on('dblclick', didDoubleClickMap);
 }
 
+// some "park" features aren't really parks
+const conservationDistrictOmtIds = [
+  16953943, // Adirondack Park
+  62654773, // Catskill Park
+  110177633, // Pinelands NR
+];
+
 function omtId(id, type) {
   var codes = {
     "node": "1",
@@ -1404,23 +1411,44 @@ function updateMapForFocus() {
       map.setPaintProperty(layer + suffix, key, value);
     });
   }
-  setParksFilter('park-fill', focusedId ? [
-    "==", ["id"], focusedId
-  ] : null);
-  setParksFilter('park-outline', focusedId ? [
+  function setParksLayoutProperty(layer, key, value) {
+    ['', '-landcover'].forEach(function(suffix) {
+      map.setLayoutProperty(layer + suffix, key, value);
+    });
+  }
+  setParksFilter('park-fill', [
     "any",
     ["==", ["id"], focusedId],
-    [">=", ["zoom"], 10],
-  ] : [">=", ["zoom"], 10]);
-  setParksPaintProperty('park-outline', "line-opacity", [
+    ["!", ["in", ["id"], ["literal", conservationDistrictOmtIds]]]
+  ]);
+  setParksFilter('park-outline', [
+    "any",
+    [
+      "all",
+      ["!=", ["id"], focusedId],
+      [">=", ["zoom"], 10],
+    ],
+    [">=", ["zoom"], 12],
+  ]);
+  setParksLayoutProperty('park-outline', "line-sort-key", [
     "case",
-    ["==", ["id"], focusedId], 1,
-    0.4
+    ["==", ["id"], focusedId], 2,
+    1
+  ]);
+  setParksLayoutProperty('park-fill', "fill-sort-key", [
+    "case",
+    ["==", ["id"], focusedId], 2,
+    1
+  ]);
+  setParksPaintProperty('park-fill', "fill-color", [
+    "case",
+    ["==", ["id"], focusedId], "#D8E8B7",
+    "#EFF5DC"
   ]);
   setParksPaintProperty('park-outline', "line-color", [
     "case",
-    ["==", ["id"], focusedId], colors.natural,
-    "#b5cc99"
+    ["==", ["id"], focusedId], "#738C40",
+    "#ACC47A"
   ]);
 }
 
