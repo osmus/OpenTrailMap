@@ -36,6 +36,17 @@
       "paint": {"fill-color": "hsl(47, 13%, 86%)", "fill-opacity": 0.4}
     },
     {
+      "id": "park-fill-landcover",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "filter": ["==", "subclass", "park"],
+      "paint": {
+        "fill-color": "#d0eaaf",
+        "fill-opacity": 0.3
+      }
+    },
+    {
       "id": "park-fill",
       "type": "fill",
       "source": "openmaptiles",
@@ -577,6 +588,20 @@
       "paint": {
         "line-color": "#fff",
         "line-width": {"base": 1.4, "stops": [[6, 0.5], [20, 30]]}
+      }
+    },
+    {
+      "id": "park-outline-landcover",
+      "type": "line",
+      "source": "openmaptiles",
+      "source-layer": "landcover",
+      "filter": ["==", "subclass", "park"],
+      "layout": {
+        "line-cap": "round",
+        "line-join": "round"
+      },
+      "paint": {
+        "line-opacity": 0
       }
     },
     {

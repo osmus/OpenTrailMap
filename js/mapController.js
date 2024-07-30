@@ -631,7 +631,6 @@ function loadTrailLayers(name) {
     "layout": {
       "icon-image": [
         "case",
-        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]], ["image", "park"],
         ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
         ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
         ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
@@ -653,7 +652,6 @@ function loadTrailLayers(name) {
       "symbol-placement": "point",
       "symbol-sort-key": [
         "case",
-        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]], 1,
         ['==', ["get", "amenity"], "ranger_station"], 2,
         ['==', ["get", "highway"], "trailhead"], 3,
         ['==', ["get", "information"], "guidepost"], 19,
@@ -804,7 +802,11 @@ function loadTrailLayers(name) {
       "delay": 0
     },
     "layout": {
-      "icon-image": ["image", "protected_area"],
+      "icon-image": [
+        "case",
+        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]], ["image", "park"],
+        ["image", "protected_area"],
+      ],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
         12, 0.5,
@@ -832,7 +834,9 @@ function loadTrailLayers(name) {
       "text-halo-color": colors.labelHalo,
     },
     "filter": [
-      'in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]
+      "any",
+      ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
+      ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
     ]
   }, 'clickable');
   addTrailLayer({
@@ -1011,7 +1015,11 @@ function trailPoisFilter(travelMode) {
   if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
   return [
     "all",
-    ['!in', "boundary", "protected_area", "national_park"],
+    [
+      "none",
+      ['in', "leisure", "park", "nature_reserve"],
+      ['in', "boundary", "protected_area", "national_park"],
+    ],
     [
       'any',
       [
@@ -1359,20 +1367,39 @@ function omtId(id, type) {
 
 function updateMapForFocus() {
   var focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
-  map.setFilter('park-fill', focusedId ? [
+
+  function setParksFilter(layer, filter) {
+    ['', '-landcover'].forEach(function(suffix) {
+      if (suffix === '-landcover') {
+        var origFilter = filter;
+        filter = [
+          "all",
+          ["==", ["get", "subclass"], "park"],
+        ];
+        if (origFilter) filter.push(origFilter);
+      }
+      map.setFilter(layer + suffix, filter);
+    });
+  }
+  function setParksPaintProperty(layer, key, value) {
+    ['', '-2'].forEach(function(suffix) {
+      map.setPaintProperty(layer + suffix, key, value);
+    });
+  }
+  setParksFilter('park-fill', focusedId ? [
     "==", ["id"], focusedId
-  ] : null)
-  .setFilter('park-outline', focusedId ? [
+  ] : null);
+  setParksFilter('park-outline', focusedId ? [
     "any",
     ["==", ["id"], focusedId],
     [">=", ["zoom"], 10],
-  ] : [">=", ["zoom"], 10])
-  .setPaintProperty('park-outline', "line-opacity", [
+  ] : [">=", ["zoom"], 10]);
+  setParksPaintProperty('park-outline', "line-opacity", [
     "case",
     ["==", ["id"], focusedId], 1,
     0.4
-  ])
-  .setPaintProperty('park-outline', "line-color", [
+  ]);
+  setParksPaintProperty('park-outline', "line-color", [
     "case",
     ["==", ["id"], focusedId], colors.natural,
     "#b5cc99"
