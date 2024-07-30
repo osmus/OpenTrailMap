@@ -783,7 +783,29 @@ function loadTrailLayers(name) {
         "step", ["zoom"], "",
         poiLabelZoom, [
           "case",
-          ['==', ["get", "lock"], "yes"], ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]],
+          ['==', ["get", "lock"], "yes"], [
+            'format',
+            [
+              "case",
+              ["any", ["has", "lock_name"], ["has", "lock_ref"]], [
+                "concat", ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]], ["case", ["has", "lock:height"], '\n', ""]
+              ],
+              ""
+            ],
+            {},
+            [
+              "case",
+              ["has", "lock:height"], ["concat", [
+                "number-format",
+                ["/", ["to-number", ['get', 'lock:height']], 0.3048],
+                { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
+              ], " ft"],
+              ""
+            ],
+            {"text-font": ['literal', ["Americana-Regular"]]},
+            ["case", ["has", "lock:height"], " ↕︎", ""],
+            {"text-font": ['literal', ["Americana-Bold"]]},
+          ],
           ["get", "name"]
         ]
       ],
