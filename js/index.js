@@ -242,12 +242,10 @@ function compositeGeoJson(features) {
 }
 
 var focusAreaGeoJson;
+var focusAreaBoundingBox;
 
-function loadFocusAreaGeoJson() {
-  if (!focusedEntityInfo) {
-    focusAreaGeoJson = null;
-    return;
-  }
+function buildFocusAreaGeoJson() {
+  if (!focusedEntityInfo) return null
   var id = omtId(focusedEntityInfo.id, focusedEntityInfo.type)
   var results = map.querySourceFeatures('openmaptiles', {
     filter: [
@@ -265,7 +263,21 @@ function loadFocusAreaGeoJson() {
       sourceLayer: "landcover",
     });
   }
-  focusAreaGeoJson = compositeGeoJson(results);
+  return compositeGeoJson(results);
+}
+function loadFocusArea() {
+  focusAreaGeoJson = buildFocusAreaGeoJson();
+  focusAreaBoundingBox = bboxOfGeoJson(focusAreaGeoJson);
+  var maxBbox = focusAreaBoundingBox;
+  var fitBbox = focusAreaBoundingBox;
+  if (focusAreaBoundingBox) {
+    var width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
+    var height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
+    maxBbox = extendBbox(focusAreaBoundingBox, Math.max(width, height));
+    fitBbox = extendBbox(focusAreaBoundingBox, Math.max(width, height) / 10);
+  }
+  map.setMaxBounds(maxBbox);
+  if (fitBbox) map.fitBounds(fitBbox);
 }
 
 function focusEntity(entityInfo) {
@@ -284,7 +296,7 @@ function focusEntity(entityInfo) {
     focus: focusedEntityInfo ? type + "/" + entityId : null
   });
 
-  loadFocusAreaGeoJson();
+  loadFocusArea();
 
   updateTrailLayers();
 

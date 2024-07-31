@@ -1653,7 +1653,10 @@ function didClickViewDetails(e) {
 }
 function didDoubleClickMap(e) {
   var entity = entityForEvent(e, ['major-trail-pois']);
-  if (entity) focusEntity(entity);
+  if (entity) {
+    e.preventDefault();
+    focusEntity(entity);    
+  }
 }
 
 function didMouseMoveMap(e) {
