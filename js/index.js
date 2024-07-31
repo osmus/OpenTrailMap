@@ -221,6 +221,52 @@ function isValidEntityInfo(entityInfo) {
     entityInfo?.id > 0;
 }
 
+function compositeGeoJson(features) {
+  var coordinates = [];
+  features.forEach(function(feature) {
+    if (feature.geometry.type === 'Polygon') {
+      coordinates.push(feature.geometry.coordinates);
+    } else if (feature.geometry.type === 'MultiPolygon') {
+      coordinates = coordinates.concat(feature.geometry.coordinates);
+    }
+  });
+  return {
+    type: "Feature",
+    geometry: {
+      type: "MultiPolygon",
+      coordinates: coordinates,
+    },
+    properties: features.length ? features[0].properties : {}
+  };
+}
+
+var focusAreaGeoJson;
+
+function loadFocusAreaGeoJson() {
+  if (!focusedEntityInfo) {
+    focusAreaGeoJson = null;
+    return;
+  }
+  var id = omtId(focusedEntityInfo.id, focusedEntityInfo.type)
+  var results = map.querySourceFeatures('openmaptiles', {
+    filter: [
+      "==", ["id"], id,
+    ],
+    sourceLayer: "park",
+  });
+  if (!results.length) {
+    results = map.querySourceFeatures('openmaptiles', {
+      filter: [
+        "all",
+        ["==", ["get", "subclass"], "park"],
+        ["==", ["id"], id],
+      ],
+      sourceLayer: "landcover",
+    });
+  }
+  focusAreaGeoJson = compositeGeoJson(results);
+}
+
 function focusEntity(entityInfo) {
   if (!isValidEntityInfo(entityInfo)) entityInfo = null;
 
@@ -237,7 +283,9 @@ function focusEntity(entityInfo) {
     focus: focusedEntityInfo ? type + "/" + entityId : null
   });
 
-  updateMapForFocus();
+  loadFocusAreaGeoJson();
+
+  updateTrailLayers();
 
   document.getElementById("map-title").innerText = '';
 

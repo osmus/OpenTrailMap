@@ -605,11 +605,6 @@ function loadTrailLayers(name) {
       "text-halo-blur": 1,
       "text-halo-color": colors.labelHalo,
     },
-    "filter": [
-      "all",
-      ["has", "name"],
-      ["has", "ele_ft"],
-    ]
   }, 'clickable');
   addTrailLayer({
     "id": "trail-pois",
@@ -985,32 +980,42 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
 }
 
 function trailPoisFilter(travelMode) {
-  if (travelMode === 'all') return null;
-  var poiKeys = [travelMode];
-  var poiKeysByTravelMode = {
-    "foot": ["hiking"],
-    "canoe": ["canoe", "portage"],
-  };
-  if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
-  return [
+  var filter = [
     "all",
     [
-      "none",
-      ['in', "leisure", "park", "nature_reserve"],
-      ['in', "boundary", "protected_area", "national_park"],
+      "!",
+      [
+        "any",
+        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
+        ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]],
+      ]
     ],
-    [
+  ]
+  if (focusAreaGeoJson?.geometry?.coordinates?.length) {
+    filter.push(["within", focusAreaGeoJson]);
+  }
+  if (travelMode !== 'all') {
+    var poiKeys = [travelMode];
+    var poiKeysByTravelMode = {
+      "foot": ["hiking"],
+      "canoe": ["canoe", "portage"],
+    };
+    if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
+    filter.push([
       'any',
       [
-        "none",
-        ["==", "highway", "trailhead"],
-        ["in", "information", "guidepost", "route_marker"],
-        ["==", "man_made", "cairn"],
+        "!",
+        [
+          "any",
+          ["==", ["get", "highway"], "trailhead"],
+          ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
+          ["==", ["get", "man_made"], "cairn"],
+        ]
       ],
       travelMode === 'canoe' ? [
         "any",
         ...poiKeys.map(function(key) {
-          return ["==", key, "yes"];
+          return ["==", ["get", key], "yes"];
         })
       ] :
       [
@@ -1018,13 +1023,14 @@ function trailPoisFilter(travelMode) {
         ...poiKeys.map(function(key) {
           return [
             "any",
-            ["!has", key],
-            ["==", key, "yes"],
+            ["!", ["has", key]],
+            ["==", ["get", key], "yes"],
           ];
         })
       ]
-    ]
-  ];
+    ]);
+  }
+  return filter;
 }
 
 function onewayArrowsFilter(travelMode) {
@@ -1183,6 +1189,8 @@ function accessIsSpecifiedExpression(travelMode) {
 
 function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
+
+  var focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
 
   // ["!=", "true", "false"] always evalutes to true because "true" actually refers to the name of a
   // data attribute key, which is always undefined, while "false" is the string it's compared to.
@@ -1343,9 +1351,83 @@ function updateTrailLayers() {
       "any",
       ["==", ["get", "waterway"], "waterfall"],
     ] : null)
-    .setFilter('trail-pois', trailPoisFilter(travelMode));
+    .setFilter('trail-pois', trailPoisFilter(travelMode))
+    .setFilter('major-trail-pois', [
+      "all",
+      [
+        "any",
+        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
+        ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
+      ],
+      ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null],
+      ...(focusAreaGeoJson?.geometry?.coordinates?.length ?
+        focusAreaFilter = [["within", focusAreaGeoJson]] : []),
+    ])
+    .setFilter('peaks', [
+      "all",
+      ["has", "name"],
+      ["has", "ele_ft"],
+      ...(focusAreaGeoJson?.geometry?.coordinates?.length ?
+        focusAreaFilter = [["within", focusAreaGeoJson]] : []),
+    ]);
 
-  updateMapForFocus();
+  function setParksFilter(layer, filter) {
+    ['', '-landcover'].forEach(function(suffix) {
+      if (suffix === '-landcover') {
+        var origFilter = filter;
+        filter = [
+          "all",
+          ["==", ["get", "subclass"], "park"],
+        ];
+        if (origFilter) filter.push(origFilter);
+      }
+      map.setFilter(layer + suffix, filter);
+    });
+  }
+  function setParksPaintProperty(layer, key, value) {
+    ['', '-landcover'].forEach(function(suffix) {
+      map.setPaintProperty(layer + suffix, key, value);
+    });
+  }
+  function setParksLayoutProperty(layer, key, value) {
+    ['', '-landcover'].forEach(function(suffix) {
+      map.setLayoutProperty(layer + suffix, key, value);
+    });
+  }
+  setParksFilter('park-fill', [
+    "any",
+    ["==", ["id"], focusedId],
+    ["!", ["in", ["id"], ["literal", conservationDistrictOmtIds]]]
+  ]);
+  setParksFilter('park-outline', [
+    "any",
+    [
+      "all",
+      ["!=", ["id"], focusedId],
+      [">=", ["zoom"], 10],
+    ],
+    [">=", ["zoom"], 12],
+  ]);
+  setParksLayoutProperty('park-outline', "line-sort-key", [
+    "case",
+    ["==", ["id"], focusedId], 2,
+    1
+  ]);
+  setParksLayoutProperty('park-fill', "fill-sort-key", [
+    "case",
+    ["==", ["id"], focusedId], 2,
+    1
+  ]);
+  setParksPaintProperty('park-fill', "fill-color", [
+    "case",
+    ["==", ["id"], focusedId], "#D8E8B7",
+    "#EFF5DC"
+  ]);
+  setParksPaintProperty('park-outline', "line-color", [
+    "case",
+    ["==", ["id"], focusedId], "#738C40",
+    "#ACC47A"
+  ]);
 }
 
 function notNoAccessExpressions(mode) {
@@ -1415,77 +1497,6 @@ function omtId(id, type) {
     "relation": "3",
   };
   return parseInt(id.toString() + codes[type]);
-}
-
-function updateMapForFocus() {
-  var focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
-
-  function setParksFilter(layer, filter) {
-    ['', '-landcover'].forEach(function(suffix) {
-      if (suffix === '-landcover') {
-        var origFilter = filter;
-        filter = [
-          "all",
-          ["==", ["get", "subclass"], "park"],
-        ];
-        if (origFilter) filter.push(origFilter);
-      }
-      map.setFilter(layer + suffix, filter);
-    });
-  }
-  function setParksPaintProperty(layer, key, value) {
-    ['', '-landcover'].forEach(function(suffix) {
-      map.setPaintProperty(layer + suffix, key, value);
-    });
-  }
-  function setParksLayoutProperty(layer, key, value) {
-    ['', '-landcover'].forEach(function(suffix) {
-      map.setLayoutProperty(layer + suffix, key, value);
-    });
-  }
-  setParksFilter('park-fill', [
-    "any",
-    ["==", ["id"], focusedId],
-    ["!", ["in", ["id"], ["literal", conservationDistrictOmtIds]]]
-  ]);
-  setParksFilter('park-outline', [
-    "any",
-    [
-      "all",
-      ["!=", ["id"], focusedId],
-      [">=", ["zoom"], 10],
-    ],
-    [">=", ["zoom"], 12],
-  ]);
-  setParksLayoutProperty('park-outline', "line-sort-key", [
-    "case",
-    ["==", ["id"], focusedId], 2,
-    1
-  ]);
-  setParksLayoutProperty('park-fill', "fill-sort-key", [
-    "case",
-    ["==", ["id"], focusedId], 2,
-    1
-  ]);
-  setParksPaintProperty('park-fill', "fill-color", [
-    "case",
-    ["==", ["id"], focusedId], "#D8E8B7",
-    "#EFF5DC"
-  ]);
-  setParksPaintProperty('park-outline', "line-color", [
-    "case",
-    ["==", ["id"], focusedId], "#738C40",
-    "#ACC47A"
-  ]);
-  map.setFilter('major-trail-pois', [
-    "all",
-    [
-      "any",
-      ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
-      ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
-    ],
-    ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null]
-  ]);
 }
 
 function updateMapForSelection() {
