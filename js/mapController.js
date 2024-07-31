@@ -979,6 +979,20 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
   return specifiedAttributeExpression;
 }
 
+function waterTrailPoisFilter(travelMode) {
+  var filter = ["all"];
+  if (focusAreaGeoJson?.geometry?.coordinates?.length) {
+    filter.push(["within", focusAreaGeoJson]);
+  }
+  if (travelMode !== "canoe") {
+    filter.push([
+      "any",
+      ["==", ["get", "waterway"], "waterfall"],
+    ])
+  }
+  return filter.length > 1 ? filter : null;
+}
+
 function trailPoisFilter(travelMode) {
   var filter = [
     "all",
@@ -1347,10 +1361,7 @@ function updateTrailLayers() {
     .setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
     .setFilter('trails-labels', combinedFilterExpression)
     .setFilter('trails-pointer-targets', combinedFilterExpression)
-    .setFilter('water-trail-pois', travelMode !== "canoe" ? [
-      "any",
-      ["==", ["get", "waterway"], "waterfall"],
-    ] : null)
+    .setFilter('water-trail-pois', waterTrailPoisFilter(travelMode))
     .setFilter('trail-pois', trailPoisFilter(travelMode))
     .setFilter('major-trail-pois', [
       "all",
