@@ -87,11 +87,10 @@ We also collaborate via the [#opentrailmap](https://osmus.slack.com/archives/ope
 ### Development setup
 1. [Clone the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 2. Open your terminal and `cd` into the repo's directory
-3. Run `node serve.js` to start the development server
-4. Visit [http://localhost:4001](http://localhost:4001) in your browser
-5. That's it!
-
-OpenTrailMap currently has no package dependencies.
+3. Run `npm install` and `npm run build` (first-time setup only)
+4. Run `node serve.js` to start the development server
+5. Visit [http://localhost:4001](http://localhost:4001) in your browser
+6. That's it!
 
 ## License
 

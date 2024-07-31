@@ -230,7 +230,7 @@ function compositeGeoJson(features) {
       coordinates = coordinates.concat(feature.geometry.coordinates);
     }
   });
-  return {
+  var unbuffered = {
     type: "Feature",
     geometry: {
       type: "MultiPolygon",
@@ -238,6 +238,7 @@ function compositeGeoJson(features) {
     },
     properties: features.length ? features[0].properties : {}
   };
+  return coordinates.length ? turfBuffer.buffer(unbuffered, 0.25, {units: 'kilometers'}) : unbuffered;
 }
 
 var focusAreaGeoJson;
