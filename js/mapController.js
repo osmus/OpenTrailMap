@@ -747,6 +747,29 @@ function loadTrailLayers(name) {
             ["case", ["has", "lock:height"], " ↕︎", ""],
             {"text-font": ['literal', ["Americana-Bold"]]},
           ],
+          ['in', ["get", "waterway"], ["literal", ["waterfall", "dam", "weir"]]], [
+            'format',
+            [
+              "case",
+              ["has", "name"], [
+                "concat", ["get", "name"], ["case", ["has", "height"], '\n', ""]
+              ],
+              ""
+            ],
+            {},
+            [
+              "case",
+              ["has", "height"], ["concat", [
+                "number-format",
+                ["/", ["to-number", ['get', 'height']], 0.3048],
+                { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
+              ], " ft"],
+              ""
+            ],
+            {"text-font": ['literal', ["Americana-Regular"]]},
+            ["case", ["has", "height"], " ↕︎", ""],
+            {"text-font": ['literal', ["Americana-Bold"]]},
+          ],
           ["get", "name"]
         ]
       ],
