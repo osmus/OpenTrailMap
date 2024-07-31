@@ -1004,8 +1004,8 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
 
 function waterTrailPoisFilter(travelMode) {
   var filter = ["all"];
-  if (focusAreaGeoJson?.geometry?.coordinates?.length) {
-    filter.push(["within", focusAreaGeoJson]);
+  if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
+    filter.push(["within", focusAreaGeoJsonBuffered]);
   }
   if (travelMode !== "canoe") {
     filter.push([
@@ -1028,8 +1028,8 @@ function trailPoisFilter(travelMode) {
       ]
     ],
   ]
-  if (focusAreaGeoJson?.geometry?.coordinates?.length) {
-    filter.push(["within", focusAreaGeoJson]);
+  if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
+    filter.push(["within", focusAreaGeoJsonBuffered]);
   }
   if (travelMode !== 'all') {
     var poiKeys = [travelMode];
@@ -1394,15 +1394,15 @@ function updateTrailLayers() {
         ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
       ],
       ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null],
-      ...(focusAreaGeoJson?.geometry?.coordinates?.length ?
-        focusAreaFilter = [["within", focusAreaGeoJson]] : []),
+      ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ?
+        focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
     ])
     .setFilter('peaks', [
       "all",
       ["has", "name"],
       ["has", "ele_ft"],
-      ...(focusAreaGeoJson?.geometry?.coordinates?.length ?
-        focusAreaFilter = [["within", focusAreaGeoJson]] : []),
+      ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ?
+        focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
     ]);
 
   function setParksFilter(layer, filter) {

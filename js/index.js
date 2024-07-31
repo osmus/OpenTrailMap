@@ -222,6 +222,7 @@ function isValidEntityInfo(entityInfo) {
 }
 
 function compositeGeoJson(features) {
+  if (!features.length) return;
   var coordinates = [];
   features.forEach(function(feature) {
     if (feature.geometry.type === 'Polygon') {
@@ -230,18 +231,18 @@ function compositeGeoJson(features) {
       coordinates = coordinates.concat(feature.geometry.coordinates);
     }
   });
-  var unbuffered = {
+  return {
     type: "Feature",
     geometry: {
       type: "MultiPolygon",
       coordinates: coordinates,
     },
-    properties: features.length ? features[0].properties : {}
+    properties: features[0].properties
   };
-  return coordinates.length ? turfBuffer.buffer(unbuffered, 0.25, {units: 'kilometers'}) : unbuffered;
 }
 
 var focusAreaGeoJson;
+var focusAreaGeoJsonBuffered;
 var focusAreaBoundingBox;
 
 function buildFocusAreaGeoJson() {
@@ -267,14 +268,16 @@ function buildFocusAreaGeoJson() {
 }
 function loadFocusArea() {
   focusAreaGeoJson = buildFocusAreaGeoJson();
+  focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
   focusAreaBoundingBox = bboxOfGeoJson(focusAreaGeoJson);
   var maxBbox = focusAreaBoundingBox;
   var fitBbox = focusAreaBoundingBox;
   if (focusAreaBoundingBox) {
     var width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
     var height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
-    maxBbox = extendBbox(focusAreaBoundingBox, Math.max(width, height));
-    fitBbox = extendBbox(focusAreaBoundingBox, Math.max(width, height) / 10);
+    var maxExtent = Math.max(width, height);
+    maxBbox = extendBbox(focusAreaBoundingBox, maxExtent);
+    fitBbox = extendBbox(focusAreaBoundingBox, maxExtent / 16);
   }
   map.setMaxBounds(maxBbox);
   if (fitBbox) map.fitBounds(fitBbox);
@@ -301,16 +304,15 @@ function focusEntity(entityInfo) {
   updateTrailLayers();
 
   document.getElementById("map-title").innerText = '';
+  document.getElementById("focus-meta").style.display = focusedEntityInfo ? 'flex' : 'none'; 
 
   if (focusedEntityInfo) {
-    document.getElementById("focus-meta").style.display = 'flex';
-    fetchOsmEntity(type, entityId).then(function(entity) {
+    if (focusAreaGeoJson) document.getElementById("map-title").innerText = focusAreaGeoJson.properties.name;
+    /*fetchOsmEntity(type, entityId).then(function(entity) {
       if (entity?.tags?.name) {
         document.getElementById("map-title").innerText = entity.tags.name;
       }
-    });
-  } else  {
-    document.getElementById("focus-meta").style.display = 'none';
+    });*/
   }
 }
 
