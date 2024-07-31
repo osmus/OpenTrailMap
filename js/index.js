@@ -83,7 +83,29 @@ const metadataLenses = {
     "OSM_TIMESTAMP",
   ]
 };
-const landLensOptions = [
+const allLensOptions = [
+  {
+    label: "Attributes",
+    subitems: [
+      "access",
+      "covered",
+      "dog",
+      "hand_cart",
+      "incline",
+      "name",
+      "oneway",
+      "operator",
+      "sac_scale",
+      "smoothness",
+      "maxspeed",
+      "surface",
+      "trail_visibility",
+       "width",
+    ]
+  },
+  metadataLenses,
+];
+const wheelchairLensOptions = [
   {
     label: "Attributes",
     subitems: [
@@ -177,14 +199,14 @@ const canoeLensOptions = [
   metadataLenses,
 ];
 const lensOptionsByMode = {
-  "all": landLensOptions,
+  "all": allLensOptions,
   "atv": vehicleLensOptions,
   "bicycle": vehicleLensOptions,
   "canoe": canoeLensOptions,
   "foot": hikingLensOptions,
   "horse": vehicleLensOptions,
   "snowmobile": vehicleLensOptions,
-  "wheelchair": landLensOptions,
+  "wheelchair": wheelchairLensOptions,
 };
 function lensesForMode(travelMode) {
   return lensOptionsByMode[travelMode].flatMap(function(item) {
