@@ -132,7 +132,7 @@
       ],
       "layout": {"visibility": "visible"},
       "paint": {
-        "line-color": "hsl(205, 56%, 87%)",
+        "line-color": "hsl(205, 56%, 80%)",
         "line-dasharray": [3, 3],
         "line-gap-width": {"stops": [[12, 0], [20, 6]]},
         "line-opacity": 1,
@@ -152,7 +152,7 @@
       ],
       "layout": {"visibility": "visible"},
       "paint": {
-        "line-color": "hsl(205, 56%, 87%)",
+        "line-color": "hsl(205, 56%, 80%)",
         "line-opacity": 1,
         "line-width": {"base": 1.4, "stops": [[8, 1], [20, 8]]}
       }
@@ -170,7 +170,7 @@
       ],
       "layout": {"visibility": "visible"},
       "paint": {
-        "line-color": "hsl(205, 56%, 87%)",
+        "line-color": "hsl(205, 56%, 80%)",
         "line-dasharray": [2, 1],
         "line-opacity": 1,
         "line-width": {"base": 1.4, "stops": [[8, 1], [20, 8]]}
