@@ -246,8 +246,8 @@ var focusAreaGeoJsonBuffered;
 var focusAreaBoundingBox;
 
 function buildFocusAreaGeoJson() {
-  if (!focusedEntityInfo) return null
-  var id = omtId(focusedEntityInfo.id, focusedEntityInfo.type)
+  if (!focusedEntityInfo) return null;
+  var id = omtId(focusedEntityInfo.id, focusedEntityInfo.type);
   var results = map.querySourceFeatures('openmaptiles', {
     filter: [
       "==", ["id"], id,
@@ -264,7 +264,16 @@ function buildFocusAreaGeoJson() {
       sourceLayer: "landcover",
     });
   }
-  return compositeGeoJson(results);
+  var geoJson = compositeGeoJson(results);
+  if (!geoJson.properties.name) {
+    // park names are on a different layer for some reason
+    var poiResults = map.querySourceFeatures('openmaptiles', {
+      filter: ["==", ["id"], id],
+      sourceLayer: "poi",
+    });
+    if (poiResults.length) geoJson.properties = poiResults[0].properties;
+  }
+  return geoJson;
 }
 function loadFocusArea() {
   focusAreaGeoJson = buildFocusAreaGeoJson();
