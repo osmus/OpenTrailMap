@@ -225,7 +225,7 @@ function toggleWaterTrailsIfNeeded() {
 }
 
 var layerIdsByCategory = {};
-let trailLayerIds = [];
+var trailLayerIds = [];
 
 function addTrailLayer(def, type) {
   trailLayerIds.push(def.id);

@@ -500,8 +500,8 @@ window.onload = function(event) {
     'waterfall-landmark',
   ];
 
-  for (let i in imageToLoad) {
-    let img = imageToLoad[i];
+  for (var i in imageToLoad) {
+    var img = imageToLoad[i];
     map.loadImage('img/map/' + img + '.png').then(function(resp) {
       return map.addImage(img, resp.data, { pixelRatio: 2 });
     });
