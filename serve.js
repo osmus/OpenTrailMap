@@ -3,24 +3,23 @@ import url from 'url';
 import fs from 'fs';
 import path from 'path';
 
-var baseDirectory = path.dirname(url.fileURLToPath(import.meta.url));
-
-var port = 4001;
+const baseDirectory = path.dirname(url.fileURLToPath(import.meta.url));
+const port = 4001;
 
 http.createServer(function (request, response) {
     try {
      
-        var requestUrl = url.parse(request.url)
+        let requestUrl = url.parse(request.url)
 
         // need to use path.normalize so people can't access directories underneath baseDirectory
-        var fsPath = baseDirectory + path.normalize(requestUrl.pathname)
+        let fsPath = baseDirectory + path.normalize(requestUrl.pathname)
 
         if (fs.statSync(fsPath).isDirectory()) {
           if (!fsPath.endsWith("/")) fsPath += "/";
           fsPath += "index.html";
         }
         
-        var options = {};
+        let options = {};
         if (request.headers.range && request.headers.range.startsWith('bytes=')) {
           let matches = /bytes=(\d*)-(\d*)/g.exec(request.headers.range);
           options.start = parseInt(matches[1]);
@@ -31,7 +30,7 @@ http.createServer(function (request, response) {
           response.setHeader('Content-Type', "image/svg+xml");
         }
 
-        var fileStream = fs.createReadStream(fsPath, options)
+        let fileStream = fs.createReadStream(fsPath, options)
         fileStream.pipe(response)
         fileStream.on('open', function() {
           response.writeHead(200)
