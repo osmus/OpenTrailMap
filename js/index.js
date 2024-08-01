@@ -307,21 +307,38 @@ function buildFocusAreaGeoJson() {
   }
   return geoJson;
 }
+// check the current extent of the map, and if focused area is too far offscreen, put it back onscreen
+function checkMapExtent() {
+  let currentBounds = map.getBounds();
+  let targetBounds = currentBounds.toArray();
+  let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
+  let height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
+  let maxExtent = Math.max(width, height);
+  let margin = maxExtent / 4;
+
+  if (currentBounds.getNorth() < focusAreaBoundingBox[1] - margin) targetBounds[1][1] = focusAreaBoundingBox[1] + margin;
+  if (currentBounds.getSouth() > focusAreaBoundingBox[3] + margin) targetBounds[0][1] = focusAreaBoundingBox[3] - margin;
+  if (currentBounds.getEast() < focusAreaBoundingBox[0] - margin) targetBounds[1][0] = focusAreaBoundingBox[0] + margin;
+  if (currentBounds.getWest() > focusAreaBoundingBox[2] + margin) targetBounds[0][0] = focusAreaBoundingBox[2] - margin;
+  if (currentBounds.toArray().toString() !== targetBounds.toString()) {
+    map.fitBounds(targetBounds);
+  }
+}
 function loadFocusArea() {
   focusAreaGeoJson = buildFocusAreaGeoJson();
   focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
   focusAreaBoundingBox = bboxOfGeoJson(focusAreaGeoJson);
-  let maxBbox = focusAreaBoundingBox;
-  let fitBbox = focusAreaBoundingBox;
+
+  map.off('moveend', checkMapExtent);
+
   if (focusAreaBoundingBox) {
     let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
     let height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
     let maxExtent = Math.max(width, height);
-    maxBbox = extendBbox(focusAreaBoundingBox, maxExtent);
-    fitBbox = extendBbox(focusAreaBoundingBox, maxExtent / 16);
+    let fitBbox = extendBbox(focusAreaBoundingBox, maxExtent / 16);
+    map.fitBounds(fitBbox);
+    map.on('moveend', checkMapExtent);
   }
-  map.setMaxBounds(maxBbox);
-  if (fitBbox) map.fitBounds(fitBbox);
 }
 
 function focusEntity(entityInfo) {
