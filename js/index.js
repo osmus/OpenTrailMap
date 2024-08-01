@@ -100,7 +100,16 @@ const allLensOptions = [
       "maxspeed",
       "surface",
       "trail_visibility",
-       "width",
+      "width",
+    ],
+  },
+  {
+    label: "Waterway Attributes",
+    subitems: [
+      "intermittent",
+      "open_water",
+      "rapids",
+      "tidal",
     ]
   },
   metadataLenses,
@@ -216,6 +225,7 @@ function lensesForMode(travelMode) {
 const highwayOnlyLenses = [
   "hand_cart",
   "incline",
+  "maxspeed",
   "operator",
   "sac_scale",
   "smoothness",

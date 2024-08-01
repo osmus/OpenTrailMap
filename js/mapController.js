@@ -946,61 +946,60 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
     ];
   }
 
-  if (travelMode === "canoe") {
-    if (lens === 'tidal') {
-      // assume tidal channels are always tidal=yes
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["==", "waterway", "tidal_channel"],
-      ];
-    }
-    if (lens === 'open_water') {
-      // only expect open_water tag on certain features
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["!in", "waterway", "fairway", "flowline"],
-      ];
-    }
-    if (lens === 'width') {
-      // don't expect width tag on links
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["==", "waterway", "link"],
-      ];
-    }
+  if (lens === 'tidal') {
+    // assume tidal channels are always tidal=yes
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["==", "waterway", "tidal_channel"],
+    ];
+  }
+  if (lens === 'open_water') {
+    // only expect open_water tag on certain features
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["!in", "waterway", "fairway", "flowline"],
+    ];
+  }
+  if (lens === 'width') {
+    // don't expect width tag on links
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["==", "waterway", "link"],
+    ];
+  }
 
-    if (waterwayOnlyLenses.includes(lens)) {
-      // don't expect waterway-only attributes on highways
-      specifiedAttributeExpression = [
-        "any",
+  if (waterwayOnlyLenses.includes(lens)) {
+    // don't expect waterway-only attributes on highways
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["has", "highway"],
+    ];
+  } else if (highwayOnlyLenses.includes(lens)) {
+    // don't expect highway-only attributes on waterways
+    specifiedAttributeExpression = [
+      "any",
+      specifiedAttributeExpression,
+      ["!has", "highway"],
+    ];
+  }
+  if (lens === 'oneway' && travelMode === "canoe") {
+    specifiedAttributeExpression = [
+      "any",
+      [
+        "all",
         specifiedAttributeExpression,
-        ["has", "highway"],
-      ];
-    } else if (highwayOnlyLenses.includes(lens)) {
-      // don't expect highway-only attributes on waterways
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        ["!has", "highway"],
-      ];
-    } else if (lens === 'oneway') {
-      specifiedAttributeExpression = [
-        "any",
-        [
-          "all",
-          specifiedAttributeExpression,
-          ["has", "waterway"],
-        ],
-        [
-          "all",
-          attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
-          ["!has", "waterway"],
-        ],
-      ];
-    }
+        ["has", "waterway"],
+      ],
+      [
+        "all",
+        attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
+        ["!has", "waterway"],
+      ],
+    ];
   }
   
   return specifiedAttributeExpression;
@@ -1243,31 +1242,7 @@ function updateTrailLayers() {
   let pathsColors = colors.trail;
   let waterwaysColors = colors.water;
 
-  if (travelMode !== "all") {
-
-    specifiedAccessExpression = accessIsSpecifiedExpression(travelMode);
-
-    let modes = [travelMode];
-    if (travelMode == "canoe") modes.push('portage');
-    allowedAccessExpression = [
-      "any",
-      ...modes.map(function(mode) {  
-        return modeIsAllowedExpression(mode);
-      })
-    ];
-  } else if (lens === 'access' || lens === '') {
-
-    specifiedAccessExpression = [
-      "all",
-      // access not fully specified if any access tag is explicitly set to `unknown`
-      ["!=", "access", "unknown"],
-      ["!=", "foot", "unknown"],
-      ["!=", "wheelchair", "unknown"],
-      ["!=", "bicycle", "unknown"],
-      ["!=", "horse", "unknown"],
-      ["!=", "atv", "unknown"],
-    ];
-  
+  if (travelMode === "all") {
     allowedAccessExpression = [
       "any",
       modeIsAllowedExpression("foot"),
@@ -1277,6 +1252,30 @@ function updateTrailLayers() {
       modeIsAllowedExpression("atv"),
       modeIsAllowedExpression("canoe"),
     ];
+  } else {
+    let modes = [travelMode];
+    if (travelMode == "canoe") modes.push('portage');
+    allowedAccessExpression = [
+      "any",
+      ...modes.map(function(mode) {  
+        return modeIsAllowedExpression(mode);
+      })
+    ];
+  }
+
+  if (travelMode !== "all") {
+    specifiedAccessExpression = accessIsSpecifiedExpression(travelMode);
+  } else if (lens === 'access' || lens === '') {
+    specifiedAccessExpression = [
+      "all",
+      // access not fully specified if any access tag is explicitly set to `unknown`
+      ["!=", "access", "unknown"],
+      ["!=", "foot", "unknown"],
+      ["!=", "wheelchair", "unknown"],
+      ["!=", "bicycle", "unknown"],
+      ["!=", "horse", "unknown"],
+      ["!=", "atv", "unknown"],
+    ];  
   }
 
   if (lens !== "" && lens !== "access") {
