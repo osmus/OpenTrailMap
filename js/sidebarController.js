@@ -28,30 +28,30 @@ function closeSidebar() {
 
 function updateSidebar() {
 
-  var entity = selectedEntityInfo;
+  let entity = selectedEntityInfo;
 
   if (!entity) {
     document.getElementById('sidebar').innerHTML = "";
     return;
   }
 
-  var type = entity.type;
-  var entityId = entity.id;
-  var focusLngLat = entity.focusLngLat;
+  let type = entity.type;
+  let entityId = entity.id;
+  let focusLngLat = entity.focusLngLat;
 
-  var bbox = focusLngLat && {
+  let bbox = focusLngLat && {
     left: left = focusLngLat.lng - 0.001,
     right: right = focusLngLat.lng + 0.001,
     bottom: left = focusLngLat.lat - 0.001,
     top: right = focusLngLat.lat + 0.001,
   };
   
-  var opQuery = encodeURIComponent(`${type}(${entityId});\n(._;>;);\nout;`);
+  let opQuery = encodeURIComponent(`${type}(${entityId});\n(._;>;);\nout;`);
 
-  var xmlLink = `https://www.openstreetmap.org/api/0.6/${type}/${entityId}`;
+  let xmlLink = `https://www.openstreetmap.org/api/0.6/${type}/${entityId}`;
   if (type == 'way' || type == 'relation') xmlLink += '/full';
   
-  var html = '';
+  let html = '';
   html += "<div class='body'>";
   html += "<table id='tag-table'>";
   html += `<tr><th>Key</th><th>Value</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
@@ -89,7 +89,7 @@ function updateSidebar() {
         updateMetaTable(entity, changeset);
       });
     }
-    var tags = entity && entity.tags;
+    let tags = entity && entity.tags;
     if (tags) updateTagsTable(tags);
   });
 
@@ -99,9 +99,9 @@ function updateSidebar() {
 }
 
 function updateMetaTable(entity, changeset) {
-  var formattedDate = getFormattedDate(new Date(entity.timestamp));
-  var comment = changeset && changeset.tags && changeset.tags.comment || '';
-  var html = "";
+  let formattedDate = getFormattedDate(new Date(entity.timestamp));
+  let comment = changeset && changeset.tags && changeset.tags.comment || '';
+  let html = "";
   html += `<tr><th colspan='2'>Meta</th></tr>`;
   html += `<tr><td>ID</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}" target="_blank">${entity.type}/${entity.id}</a></td></tr>`;
   html += `<tr><td>Version</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}/history" target="_blank">${entity.version}</a></td></tr>`;
@@ -113,26 +113,26 @@ function updateMetaTable(entity, changeset) {
 }
 
 function updateTagsTable(tags) {
-  var html = "";
+  let html = "";
   html += `<tr><th>Key</th><th>Value</th></tr>`;
-  var keys = Object.keys(tags).sort();
-  for (var i in keys) {
-    var key = keys[i];
+  let keys = Object.keys(tags).sort();
+  for (let i in keys) {
+    let key = keys[i];
     html += `<tr><td>${key}</td><td>${tags[key]}</td></tr>`;
   }
   document.getElementById('tag-table').innerHTML = html;
 }
 
 function updateMembershipsTable(memberships) {
-  var html = "";
+  let html = "";
  
   if (memberships.length) {
     html += `<tr><th>Relation</th><th>Type</th><th>Role</th></tr>`;
-    for (var i in memberships) {
-      var membership = memberships[i];
-      var rel = osmEntityCache[membership.key];
-      var label = rel.tags.name || rel.id;
-      var relType = rel.tags.type || '';
+    for (let i in memberships) {
+      let membership = memberships[i];
+      let rel = osmEntityCache[membership.key];
+      let label = rel.tags.name || rel.id;
+      let relType = rel.tags.type || '';
       if ((relType === "route" || relType === "superroute") && rel.tags.route) {
         relType += " (" + (rel.tags.route || rel.tags.superroute) + ")";
       }
@@ -151,7 +151,7 @@ function didClickEntityLink(e) {
 }
 
 function getFormattedDate(date) {
-  var offsetDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60 * 1000));
-  var components = offsetDate.toISOString().split('T')
+  let offsetDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60 * 1000));
+  let components = offsetDate.toISOString().split('T')
   return components[0] + " " + components[1].split(".")[0];
 }

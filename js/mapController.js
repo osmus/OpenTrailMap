@@ -184,10 +184,10 @@ function toggleWaterTrailsIfNeeded() {
     });
   }
 
-  var showWaterTrails = ["canoe", "all"].includes(travelMode);
-  var showLandTrails = travelMode !== "canoe";
+  let showWaterTrails = ["canoe", "all"].includes(travelMode);
+  let showLandTrails = travelMode !== "canoe";
 
-  var needsReload = showWaterTrails && !map.getSource('water_trails') ||
+  let needsReload = showWaterTrails && !map.getSource('water_trails') ||
     !showWaterTrails && map.getSource('water_trails') ||
     showLandTrails && !map.getSource('trails') ||
     !showLandTrails && map.getSource('trails');
@@ -224,8 +224,8 @@ function toggleWaterTrailsIfNeeded() {
   }
 }
 
-var layerIdsByCategory = {};
-var trailLayerIds = [];
+let layerIdsByCategory = {};
+let trailLayerIds = [];
 
 function addTrailLayer(def, type) {
   trailLayerIds.push(def.id);
@@ -248,8 +248,8 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
   };
 
   function addNamespacedTrailLayers(def, type) {
-    var sourceSuffix = def["source-suffix"] || "";
-    var sourceLayerSuffix = def["source-layer-suffix"] || "";
+    let sourceSuffix = def["source-suffix"] || "";
+    let sourceLayerSuffix = def["source-layer-suffix"] || "";
     if (showLandTrails) {
       addTrailLayer(Object.assign(Object.assign({}, def), { id: "trail:"+ def.id, source: "trails" + sourceSuffix, "source-layer": "trail" + sourceLayerSuffix }), type);
     }
@@ -258,22 +258,22 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
     }
   }
 
-  var lineWidth = [
+  let lineWidth = [
     "interpolate", ["linear"], ["zoom"],
     12, 1,
     22, 5
   ];
-  var selectedLineWidth = [
+  let selectedLineWidth = [
     "interpolate", ["linear"], ["zoom"],
     12, 9,
     22, 13
   ];
-  var hoverLineWidth = [
+  let hoverLineWidth = [
     "interpolate", ["linear"], ["zoom"],
     12, 5,
     22, 7
   ];
-  var hoveredPoiPaint = {
+  let hoveredPoiPaint = {
     "circle-radius": [
       "interpolate", ["linear"], ["zoom"],
       12, 9,
@@ -282,7 +282,7 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
     "circle-opacity": 0.25,
     "circle-color": colors.selection,
   };
-  var selectedPoiPaint = {
+  let selectedPoiPaint = {
     "circle-radius": [
       "interpolate", ["linear"], ["zoom"],
       12, 10,
@@ -861,7 +861,7 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
   }, 'clickable');
 }
 
-var accessHierarchy = {
+let accessHierarchy = {
   all: [],
   atv: ['vehicle', 'motor_vehicle', 'atv'],
   bicycle:  ['vehicle', 'bicycle'],
@@ -875,7 +875,7 @@ var accessHierarchy = {
 };
 
 function onewayKeysForTravelMode(travelMode) {
-  var keys = [];
+  let keys = [];
   // oneway tag is irrelevant on waterways
   if (travelMode !== "canoe") keys.push('oneway');
   return keys.concat(accessHierarchy[travelMode].map(function(val) {
@@ -883,7 +883,7 @@ function onewayKeysForTravelMode(travelMode) {
   }));
 }
 function maxspeedKeysForTravelMode(travelMode) {
-  var keys = ["maxspeed"];
+  let keys = ["maxspeed"];
   return keys.concat(accessHierarchy[travelMode].map(function(val) {
     return 'maxspeed:' + val;
   }));
@@ -919,7 +919,7 @@ function attributeIsSpecifiedExpression(keys) {
 }
 function isSpecifiedExpressionForLens(lens, travelMode) {
 
-  var specifiedAttributeExpression = attributeIsSpecifiedExpression(
+  let specifiedAttributeExpression = attributeIsSpecifiedExpression(
     specifyingKeysForLens(lens, travelMode)
   );
   // for fixmes we're looking for extant values instead of missing values
@@ -1007,7 +1007,7 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
 }
 
 function waterTrailPoisFilter(travelMode) {
-  var filter = ["all"];
+  let filter = ["all"];
   if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
     filter.push(["within", focusAreaGeoJsonBuffered]);
   }
@@ -1018,7 +1018,7 @@ function waterTrailPoisFilter(travelMode) {
 }
 
 function trailPoisFilter(travelMode) {
-  var filter = [
+  let filter = [
     "all",
     [
       "!",
@@ -1033,8 +1033,8 @@ function trailPoisFilter(travelMode) {
     filter.push(["within", focusAreaGeoJsonBuffered]);
   }
   if (travelMode !== "all") {
-    var poiKeys = [travelMode];
-    var poiKeysByTravelMode = {
+    let poiKeys = [travelMode];
+    let poiKeysByTravelMode = {
       "foot": ["hiking"],
       "canoe": ["canoe", "portage"],
     };
@@ -1072,10 +1072,10 @@ function trailPoisFilter(travelMode) {
 }
 
 function onewayArrowsFilter(travelMode) {
-  var filter = ['any'];
-  var onewayKeys = onewayKeysForTravelMode(travelMode);
+  let filter = ['any'];
+  let onewayKeys = onewayKeysForTravelMode(travelMode);
   while (onewayKeys.length) {
-    var leastSpecificKey = onewayKeys.shift();
+    let leastSpecificKey = onewayKeys.shift();
     filter.push([
       "all",
       // if there isn't a more specific key (e.g. 'oneway:foot')
@@ -1163,7 +1163,7 @@ function waterTrailPoiIconImageExpression(travelMode) {
   ];
 }
 function onewayArrowsIconImageExpression(travelMode) {
-  var expression = ['case'];
+  let expression = ['case'];
   onewayKeysForTravelMode(travelMode).reverse().forEach(function(key) {
     expression = expression.concat([
       ["has", key],
@@ -1189,7 +1189,7 @@ function onewayArrowsIconImageExpression(travelMode) {
 // returns a filter that evaluates to true for features with enough tags to positively
 // determine whether access is allowed or not allowed
 function accessIsSpecifiedExpression(travelMode) {
-  var filter = [
+  let filter = [
     "none",
     [
       "any",
@@ -1228,26 +1228,26 @@ function accessIsSpecifiedExpression(travelMode) {
 function updateTrailLayers() {
   toggleWaterTrailsIfNeeded();
 
-  var focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
+  let focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
 
   // ["!=", "true", "false"] always evalutes to true because "true" actually refers to the name of a
   // data attribute key, which is always undefined, while "false" is the string it's compared to.
-  var allowedAccessExpression = ["!=", "true", "false"];
-  var specifiedAccessExpression = ["!=", "true", "false"];
-  var specifiedExpression;
+  let allowedAccessExpression = ["!=", "true", "false"];
+  let specifiedAccessExpression = ["!=", "true", "false"];
+  let specifiedExpression;
 
-  var showFixmesExpression = [lens === "fixme" ? "!=" : '==', "true", "false"];
-  var showDisallowedExpression = [lens === "access" ? "!=" : '==', "true", "false"];
-  var showUnspecifiedExpression = [lens !== "" ? "!=" : '==', "true", "false"];
+  let showFixmesExpression = [lens === "fixme" ? "!=" : '==', "true", "false"];
+  let showDisallowedExpression = [lens === "access" ? "!=" : '==', "true", "false"];
+  let showUnspecifiedExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
-  var pathsColors = colors.trail;
-  var waterwaysColors = colors.water;
+  let pathsColors = colors.trail;
+  let waterwaysColors = colors.water;
 
   if (travelMode !== "all") {
 
     specifiedAccessExpression = accessIsSpecifiedExpression(travelMode);
 
-    var modes = [travelMode];
+    let modes = [travelMode];
     if (travelMode == "canoe") modes.push('portage');
     allowedAccessExpression = [
       "any",
@@ -1297,7 +1297,7 @@ function updateTrailLayers() {
     specifiedExpression = specifiedAccessExpression;
   }
 
-  var combinedFilterExpression = ["any"];
+  let combinedFilterExpression = ["any"];
   function setTrailsLayerFilter(layerId, filter) {
     setNamespacedFilter(layerId, filter);
     combinedFilterExpression.push(filter);
@@ -1411,7 +1411,7 @@ function updateTrailLayers() {
   function setParksFilter(layer, filter) {
     ['', '-landcover'].forEach(function(suffix) {
       if (suffix === '-landcover') {
-        var origFilter = filter;
+        let origFilter = filter;
         filter = [
           "all",
           ["==", ["get", "subclass"], "park"],
@@ -1478,7 +1478,7 @@ function notNoAccessExpressions(mode) {
 }
 
 function modeIsAllowedExpression(mode) {
-  var allowedAccessExpression = [
+  let allowedAccessExpression = [
     "all",
     [
       "any",
@@ -1528,7 +1528,7 @@ const conservationDistrictOmtIds = [
 ];
 
 function omtId(id, type) {
-  var codes = {
+  let codes = {
     "node": "1",
     "way": "2",
     "relation": "3",
@@ -1538,19 +1538,19 @@ function omtId(id, type) {
 
 function updateMapForSelection() {
 
-  var id = selectedEntityInfo && selectedEntityInfo.id;
-  var type = selectedEntityInfo && selectedEntityInfo.type;
+  let id = selectedEntityInfo && selectedEntityInfo.id;
+  let type = selectedEntityInfo && selectedEntityInfo.type;
 
-  var idsToHighlight = [id ? id : -1];
+  let idsToHighlight = [id ? id : -1];
 
   if (type === "relation") {
-    var members = osmEntityCache[type[0] + id]?.members || [];
+    let members = osmEntityCache[type[0] + id]?.members || [];
     members.forEach(function(member) {
       idsToHighlight.push(member.ref);
       
       if (member.type === "relation") {
         // only recurse down if we have the entity cached
-        var childRelationMembers = osmEntityCache[member.type[0] + member.ref]?.members || [];
+        let childRelationMembers = osmEntityCache[member.type[0] + member.ref]?.members || [];
         childRelationMembers.forEach(function(member) {
           idsToHighlight.push(member.ref);
           // don't recurse relations again in case of self-references
@@ -1572,7 +1572,7 @@ function updateMapForSelection() {
 }
 
 function updateMapForHover() {
-  var entityId = hoveredEntityInfo?.id || -1;
+  let entityId = hoveredEntityInfo?.id || -1;
 
   if (hoveredEntityInfo?.id == selectedEntityInfo?.id &&
     hoveredEntityInfo?.type == selectedEntityInfo?.type) {
@@ -1591,10 +1591,10 @@ function updateMapForHover() {
 }
 
 function entityForEvent(e, layerIds) {
-  var features = map.queryRenderedFeatures(e.point, { layers: layerIds });
-  var feature = features.length && features[0];
+  let features = map.queryRenderedFeatures(e.point, { layers: layerIds });
+  let feature = features.length && features[0];
   if (feature) {
-    var focusLngLat = feature.geometry.type === 'Point' ? feature.geometry.coordinates : e.lngLat;
+    let focusLngLat = feature.geometry.type === 'Point' ? feature.geometry.coordinates : e.lngLat;
     if (feature.properties.OSM_ID && feature.properties.OSM_TYPE) {
       return {
         id: feature.properties.OSM_ID,
@@ -1613,16 +1613,16 @@ function entityForEvent(e, layerIds) {
   return null;
 }
 
-var activePopup;
+let activePopup;
 
 function didClickMap(e) {
 
-  var entity = entityForEvent(e, layerIdsByCategory.clickable);
+  let entity = entityForEvent(e, layerIdsByCategory.clickable);
   selectEntity(entity);
 
   if (!entity || isSidebarOpen()) return;
   
-  var coordinates = entity.focusLngLat;
+  let coordinates = entity.focusLngLat;
 
   // Ensure that if the map is zoomed out such that multiple
   // copies of the feature are visible, the popup appears
@@ -1631,9 +1631,9 @@ function didClickMap(e) {
     coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
   }
 
-  var tags = entity.rawFeature.properties;
+  let tags = entity.rawFeature.properties;
 
-  var html = "";
+  let html = "";
 
   if (tags.name) html += "<b>" + tags.name + "</b><br/>"
   html += '<a id="view-feature-details" href="" class="button">View Details</a>';
@@ -1655,7 +1655,7 @@ function didClickViewDetails(e) {
   e.preventDefault();
 }
 function didDoubleClickMap(e) {
-  var entity = entityForEvent(e, ['major-trail-pois']);
+  let entity = entityForEvent(e, ['major-trail-pois']);
   if (entity) {
     e.preventDefault();
     focusEntity(entity);    
@@ -1663,7 +1663,7 @@ function didDoubleClickMap(e) {
 }
 
 function didMouseMoveMap(e) {
-  var newHoveredEntityInfo = entityForEvent(e, layerIdsByCategory.clickable);
+  let newHoveredEntityInfo = entityForEvent(e, layerIdsByCategory.clickable);
 
   if (hoveredEntityInfo?.id != newHoveredEntityInfo?.id ||
     hoveredEntityInfo?.type != newHoveredEntityInfo?.type) {

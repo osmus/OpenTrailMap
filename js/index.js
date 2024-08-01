@@ -1,6 +1,6 @@
-var map;
+let map;
 
-var lensStrings = {
+let lensStrings = {
   access: {
     label: "Access"
   },
@@ -230,13 +230,13 @@ const waterwayOnlyLenses = [
 ];
 const defaultTravelMode = "all";
 const defaultLens= "";
-var travelMode = defaultTravelMode;
-var lens = defaultLens;
-var lastLens = defaultLens;
+let travelMode = defaultTravelMode;
+let lens = defaultLens;
+let lastLens = defaultLens;
 
-var focusedEntityInfo;
-var selectedEntityInfo;
-var hoveredEntityInfo;
+let focusedEntityInfo;
+let selectedEntityInfo;
+let hoveredEntityInfo;
 
 function isValidEntityInfo(entityInfo) {
   return ["node", "way", "relation"].includes(entityInfo?.type) &&
@@ -245,7 +245,7 @@ function isValidEntityInfo(entityInfo) {
 
 function compositeGeoJson(features) {
   if (!features.length) return;
-  var coordinates = [];
+  let coordinates = [];
   features.forEach(function(feature) {
     if (feature.geometry.type === 'Polygon') {
       coordinates.push(feature.geometry.coordinates);
@@ -263,14 +263,14 @@ function compositeGeoJson(features) {
   };
 }
 
-var focusAreaGeoJson;
-var focusAreaGeoJsonBuffered;
-var focusAreaBoundingBox;
+let focusAreaGeoJson;
+let focusAreaGeoJsonBuffered;
+let focusAreaBoundingBox;
 
 function buildFocusAreaGeoJson() {
   if (!focusedEntityInfo) return null;
-  var id = omtId(focusedEntityInfo.id, focusedEntityInfo.type);
-  var results = map.querySourceFeatures('openmaptiles', {
+  let id = omtId(focusedEntityInfo.id, focusedEntityInfo.type);
+  let results = map.querySourceFeatures('openmaptiles', {
     filter: [
       "==", ["id"], id,
     ],
@@ -286,10 +286,10 @@ function buildFocusAreaGeoJson() {
       sourceLayer: "landcover",
     });
   }
-  var geoJson = compositeGeoJson(results);
+  let geoJson = compositeGeoJson(results);
   if (!geoJson.properties.name) {
     // park names are on a different layer for some reason
-    var poiResults = map.querySourceFeatures('openmaptiles', {
+    let poiResults = map.querySourceFeatures('openmaptiles', {
       filter: ["==", ["id"], id],
       sourceLayer: "poi",
     });
@@ -301,12 +301,12 @@ function loadFocusArea() {
   focusAreaGeoJson = buildFocusAreaGeoJson();
   focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
   focusAreaBoundingBox = bboxOfGeoJson(focusAreaGeoJson);
-  var maxBbox = focusAreaBoundingBox;
-  var fitBbox = focusAreaBoundingBox;
+  let maxBbox = focusAreaBoundingBox;
+  let fitBbox = focusAreaBoundingBox;
   if (focusAreaBoundingBox) {
-    var width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
-    var height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
-    var maxExtent = Math.max(width, height);
+    let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
+    let height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
+    let maxExtent = Math.max(width, height);
     maxBbox = extendBbox(focusAreaBoundingBox, maxExtent);
     fitBbox = extendBbox(focusAreaBoundingBox, maxExtent / 16);
   }
@@ -323,8 +323,8 @@ function focusEntity(entityInfo) {
 
   focusedEntityInfo = entityInfo;
 
-  var type = focusedEntityInfo?.type;
-  var entityId = focusedEntityInfo?.id;
+  let type = focusedEntityInfo?.type;
+  let entityId = focusedEntityInfo?.id;
 
   setHashParameters({
     focus: focusedEntityInfo ? type + "/" + entityId : null
@@ -355,8 +355,8 @@ function selectEntity(entityInfo) {
 
   selectedEntityInfo = entityInfo;
 
-  var type = selectedEntityInfo?.type;
-  var entityId = selectedEntityInfo?.id;
+  let type = selectedEntityInfo?.type;
+  let entityId = selectedEntityInfo?.id;
 
   setHashParameters({
     selected: selectedEntityInfo ? type + "/" + entityId : null
@@ -377,21 +377,21 @@ function selectEntity(entityInfo) {
   }
 }
 function updateLensControl() {
-  var html = "";
-  var items = lensOptionsByMode[travelMode];
+  let html = "";
+  let items = lensOptionsByMode[travelMode];
   
   html += '<option value="">General</option>';
   items.forEach(function(item) {
     if (item.subitems) {
       html += '<optgroup label="' + item.label + '">';
       item.subitems.forEach(function(item) {
-        var label = item.label ? item.label : lensStrings[item].label;
+        let label = item.label ? item.label : lensStrings[item].label;
         html += '<option value="' + item + '">' + label + '</option>';
       })
       html += '</optgroup>';
     }
   });
-  var lensElement =  document.getElementById("lens");
+  let lensElement =  document.getElementById("lens");
   lensElement.innerHTML = html;
   lensElement.value = lens;
 }
@@ -500,8 +500,8 @@ window.onload = function(event) {
     'waterfall-landmark',
   ];
 
-  for (var i in imageToLoad) {
-    var img = imageToLoad[i];
+  for (let i in imageToLoad) {
+    let img = imageToLoad[i];
     map.loadImage('img/map/' + img + '.png').then(function(resp) {
       return map.addImage(img, resp.data, { pixelRatio: 2 });
     });

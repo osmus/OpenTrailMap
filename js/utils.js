@@ -8,9 +8,9 @@ function bboxOfGeoJson(geojson) {
 
     if (!geojson?.geometry?.coordinates?.length) return;
   
-    var depth = getMaxArrayDepth(geojson.geometry.coordinates);
-    var coords = geojson.geometry.coordinates.flat(depth - 2);
-    var bbox = [ Infinity, Infinity, -Infinity, -Infinity];
+    let depth = getMaxArrayDepth(geojson.geometry.coordinates);
+    let coords = geojson.geometry.coordinates.flat(depth - 2);
+    let bbox = [ Infinity, Infinity, -Infinity, -Infinity];
   
     bbox = coords.reduce(function(prev, coord) {
       return [
