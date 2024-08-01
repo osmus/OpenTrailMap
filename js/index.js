@@ -303,7 +303,19 @@ function buildFocusAreaGeoJson() {
       filter: ["==", ["id"], id],
       sourceLayer: "poi",
     });
-    if (poiResults.length) geoJson.properties = poiResults[0].properties;
+    if (poiResults.length && poiResults[0].properties?.name) {
+      geoJson.properties = poiResults[0].properties;
+    } else {
+      poiResults = map.querySourceFeatures('trails_poi', {
+        filter: [
+          "all",
+          ["==", ["get", "OSM_ID"], focusedEntityInfo.id],
+          ["==", ["get", "OSM_TYPE"], focusedEntityInfo.type],
+        ],
+        sourceLayer: "trail_poi",
+      });
+      if (poiResults.length) geoJson.properties = poiResults[0].properties;
+    }
   }
   return geoJson;
 }
