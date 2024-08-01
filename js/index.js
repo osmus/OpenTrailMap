@@ -508,16 +508,19 @@ window.onload = function(event) {
   const imageToLoad = [
     'beaver_dam',
     'beaver_dam-canoeable',
+    'beaver_dam-hazard',
     'bothways-arrows',
     'cairn',
     'canoe',
     'canoe-noaccess',
     'dam',
     'dam-canoeable',
+    'dam-hazard',
     'disallowed-stripes',
     'guidepost',
     'lock',
     'lock-canoeable',
+    'lock-hazard',
     'nature_reserve',
     'oneway-arrow-right',
     'oneway-arrow-left',
@@ -536,7 +539,7 @@ window.onload = function(event) {
     'trailhead',
     'waterfall',
     'waterfall-canoeable',
-    'waterfall-landmark',
+    'waterfall-hazard',
   ];
 
   for (let i in imageToLoad) {

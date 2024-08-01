@@ -1010,7 +1010,7 @@ function waterTrailPoisFilter(travelMode) {
   if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
     filter.push(["within", focusAreaGeoJsonBuffered]);
   }
-  if (travelMode !== "canoe") {
+  if (travelMode !== "canoe" && travelMode !== "all") {
     filter.push(["==", ["get", "waterway"], "waterfall"]);
   }
   return filter.length > 1 ? filter : null;
@@ -1104,11 +1104,7 @@ function onewayArrowsFilter(travelMode) {
 }
 
 function waterTrailPoiIconImageExpression(travelMode) {
-  if (travelMode !== "canoe") return [
-    "case",
-    ["==", ["get", "waterway"], "waterfall"], ["image", "waterfall-landmark"],
-    ""
-  ];
+  var showHazards = travelMode === "canoe";
   return [
     "case",
     ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
@@ -1125,15 +1121,15 @@ function waterTrailPoiIconImageExpression(travelMode) {
         ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]
       ], [
         "case",
-        ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam-canoeable"],
-        ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall-canoeable"],
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam-canoeable"],
-        ["image", "lock-canoeable"],
+        ['==', ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-canoeable" : "beaver_dam"],
+        ['==', ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-canoeable" : "waterfall"],
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-canoeable" : "dam"],
+        ["image", showHazards ? "lock-canoeable" : "lock"],
       ],
-      ['==', ["get", "natural"], "beaver_dam"], ["image", "beaver_dam"],
-      ['==', ["get", "waterway"], "waterfall"], ["image", "waterfall"],
-      ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", "dam"],
-      ["image", "lock"],
+      ['==', ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-hazard" : "beaver_dam"],
+      ['==', ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-hazard" : "waterfall"],
+      ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-hazard" : "dam"],
+      ["image", showHazards ? "lock-hazard" : "lock"],
     ],
     [
       "any",
