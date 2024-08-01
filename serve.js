@@ -1,8 +1,9 @@
-var http = require('http')
-var url = require('url')
-var fs = require('fs')
-var path = require('path')
-var baseDirectory = __dirname   // or whatever base directory you want
+import http from 'http';
+import url from 'url';
+import fs from 'fs';
+import path from 'path';
+
+var baseDirectory = path.dirname(url.fileURLToPath(import.meta.url));
 
 var port = 4001;
 
