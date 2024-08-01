@@ -362,6 +362,10 @@ function focusEntity(entityInfo) {
 
   focusedEntityInfo = entityInfo;
 
+  let bodyElement = document.getElementsByTagName('body')[0];
+
+  focusedEntityInfo ? bodyElement.classList.add('area-focused') : bodyElement.classList.remove('area-focused');
+
   let type = focusedEntityInfo?.type;
   let entityId = focusedEntityInfo?.id;
 
@@ -374,7 +378,7 @@ function focusEntity(entityInfo) {
   updateTrailLayers();
 
   document.getElementById("map-title").innerText = '';
-  document.getElementById("focus-meta").style.display = focusedEntityInfo ? 'flex' : 'none'; 
+  document.getElementById("nameplate").style.display = focusedEntityInfo ? 'flex' : 'none'; 
 
   if (focusedEntityInfo) {
     if (focusAreaGeoJson) document.getElementById("map-title").innerText = focusAreaGeoJson.properties.name;

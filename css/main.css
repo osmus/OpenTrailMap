@@ -145,6 +145,13 @@ body.sidebar-open #map-wrap {
 #map .quickinfo {
   font-family: "National Park", "Source Sans", "Helvetica", sans-serif;
 }
+#top-left {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  max-width: 100%;
+}
 #nameplate {
   color: #000;/*#331d1a;*/
   line-height: 1.4;
@@ -152,12 +159,7 @@ body.sidebar-open #map-wrap {
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   background: #fff;
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 2;
   text-align: left;
-  max-width: 100%;
 }
 #nameplate select {
   font-size: 16px;
@@ -190,16 +192,20 @@ body.sidebar-open #map-wrap {
 }
 #controls {
   position: absolute;
-  right: 50px;
-  top: 20px;
-  width: 100%;
-  max-width: 200px;
-  z-index: 2;
-  border-radius: 5px;
+  left: 10px;
+  top: 10px;
+  z-index: 3;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.area-focused #controls {
+  top: 49px;
 }
 #controls select {
   font-size: 15px;
-  width: 100%;
+  width: 200px;
+  max-width: 100%;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
   margin-bottom: 8px;
 }
@@ -265,11 +271,14 @@ body.sidebar-open #sidebar {
   #body {
     flex-direction: column;
   }
-  #nameplate {
+  #top-left {
     position: relative;
     left: 0;
     top: 0;
+  }
+  #nameplate {
     padding: 10px;
+    border-right: 0;
   }
   #header .tagline {
     display: none;
@@ -289,6 +298,7 @@ body.sidebar-open #sidebar {
     border-width: 0 0 1px 0;
   }
   #controls {
-    top: 10px;
+    top: 0 !important;
+    left: 0;
   }
 }
