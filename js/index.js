@@ -306,7 +306,7 @@ function buildFocusAreaGeoJson() {
     if (poiResults.length && poiResults[0].properties?.name) {
       geoJson.properties = poiResults[0].properties;
     } else {
-      poiResults = map.querySourceFeatures('trails_poi', {
+      poiResults = map.querySourceFeatures('trails', {
         filter: [
           "all",
           ["==", ["get", "OSM_ID"], focusedEntityInfo.id],

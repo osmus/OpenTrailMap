@@ -150,113 +150,19 @@ const impliedNoExpressions = {
   ],
 };
 
-function setNamespacedFilter(id, filter) {
-  if (map.getLayer(id)) map.setFilter(id, filter);
-  ['trail:', 'water_trail:'].forEach(function(prefix) {
-    if (map.getLayer(prefix + id)) map.setFilter(prefix + id, filter);
-  });
-}
-function setNamespacedLayoutProperty(id, prop, value) {
-  if (map.getLayer(id)) map.setLayoutProperty(id, prop, value);
-  ['trail:', 'water_trail:'].forEach(function(prefix) {
-    if (map.getLayer(prefix + id)) map.setLayoutProperty(prefix + id, prop, value);
-  });
-}
-function setNamespacedPaintProperty(id, prop, value) {
-  if (map.getLayer(id)) map.setPaintProperty(id, prop, value);
-  ['trail:', 'water_trail:'].forEach(function(prefix) {
-    if (map.getLayer(prefix + id)) map.setPaintProperty(prefix + id, prop, value);
-  });
-}
-
-function toggleWaterTrailsIfNeeded() {
-
-  if (!map.getSource('trails_poi')) {
-    map.addSource("trails_poi", {
-      type: "vector",
-      url: "https://dwuxtsziek7cf.cloudfront.net/trails_poi.json",
-    });
-  }
-  if (!map.getSource('water_trails_poi')) {
-    map.addSource("water_trails_poi", {
-      type: "vector",
-      url: "https://dwuxtsziek7cf.cloudfront.net/water_trails_poi.json",
-    });
-  }
-
-  let showWaterTrails = ["canoe", "all"].includes(travelMode);
-  let showLandTrails = travelMode !== "canoe";
-
-  let needsReload = showWaterTrails && !map.getSource('water_trails') ||
-    !showWaterTrails && map.getSource('water_trails') ||
-    showLandTrails && !map.getSource('trails') ||
-    !showLandTrails && map.getSource('trails');
-
-  if (needsReload) {
-    clearTrailLayers();
-  }
-
-  if (showWaterTrails) {
-    if (!map.getSource('water_trails')) {
-      map.addSource("water_trails", {
-        type: "vector",
-        url: "https://dwuxtsziek7cf.cloudfront.net/water_trails.json",
-      });
-    }
-  } else if (map.getSource('water_trails')) {
-    needsReload = true;
-    map.removeSource('water_trails');
-  }
-
-  if (showLandTrails) {
-    if (!map.getSource('trails')) {
-      map.addSource("trails", {
-        type: "vector",
-        url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
-      });
-    }
-  } else if (map.getSource('trails')) {
-    map.removeSource('trails');
-  }
-
-  if (needsReload) {
-    loadTrailLayers(showLandTrails, showWaterTrails);
-  }
-}
-
 let layerIdsByCategory = {};
-let trailLayerIds = [];
-
 function addTrailLayer(def, type) {
-  trailLayerIds.push(def.id);
   if (type) layerIdsByCategory[type].push(def.id);
   map.addLayer(def);
 }
-function clearTrailLayers() {
-  trailLayerIds.forEach(function(id) {
-    map.removeLayer(id);
-  });
-  trailLayerIds = [];
-}
 
-function loadTrailLayers(showLandTrails, showWaterTrails) {
+function loadTrailLayers() {
 
   layerIdsByCategory = {
     clickable: [],
     hovered: [],
     selected: [],
   };
-
-  function addNamespacedTrailLayers(def, type) {
-    let sourceSuffix = def["source-suffix"] || "";
-    let sourceLayerSuffix = def["source-layer-suffix"] || "";
-    if (showLandTrails) {
-      addTrailLayer(Object.assign(Object.assign({}, def), { id: "trail:"+ def.id, source: "trails" + sourceSuffix, "source-layer": "trail" + sourceLayerSuffix }), type);
-    }
-    if (showWaterTrails) {
-      addTrailLayer(Object.assign(Object.assign({}, def), { id: "water_trail:" + def.id, source: "water_trails" + sourceSuffix, "source-layer": "water_trail" + sourceLayerSuffix }), type);
-    }
-  }
 
   let lineWidth = [
     "interpolate", ["linear"], ["zoom"],
@@ -292,8 +198,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
     "circle-color": colors.selection,
   };
 
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "hovered-paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -318,27 +226,30 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "==", "OSM_ID", -1 
     ],
   }, 'hovered');
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "hovered-trails-qa",
-    "source-layer-suffix": "_qa",
+    "source": "trails",
+    "source-layer": "trail_qa",
     "type": "circle",
     "paint": hoveredPoiPaint,
     "filter": [
       "==", "OSM_ID", -1 
     ],
   }, 'hovered');
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "hovered-pois",
-    "source-suffix": "_poi",
-    "source-layer-suffix": "_poi",
+    "source": "trails",
+    "source-layer": "trail_poi",
     "type": "circle",
     "paint": hoveredPoiPaint,
     "filter": [
       "==", "OSM_ID", -1 
     ],
   }, 'hovered');
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "selected-paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -363,29 +274,30 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "==", "OSM_ID", -1 
     ],
   }, 'selected');
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "selected-trails-qa",
-    "source-layer-suffix": "_qa",
+    "source": "trails",
+    "source-layer": "trail_qa",
     "type": "circle",
     "paint": selectedPoiPaint,
     "filter": [
       "==", "OSM_ID", -1 
     ],
   }, 'selected');
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "selected-pois",
-    "source-suffix": "_poi",
-    "source-layer-suffix": "_poi",
+    "source": "trails",
+    "source-layer": "trail_poi",
     "type": "circle",
     "paint": selectedPoiPaint,
     "filter": [
       "==", "OSM_ID", -1 
     ],
   }, 'selected');
-  if (showWaterTrails) addTrailLayer({
+  addTrailLayer({
     "id": "disallowed-waterways",
-    "source": 'water_trails',
-    "source-layer": 'water_trail',
+    "source": 'trails',
+    "source-layer": 'trail',
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -396,8 +308,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-color": colors.disallowedWater,
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "informal-paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -409,8 +323,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-dasharray": [2, 2],
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "disallowed-informal-paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -422,8 +338,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-dasharray": [2, 2],
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "unspecified-informal-paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -435,8 +353,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-dasharray": [2, 2],
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "disallowed-paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -447,8 +367,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-pattern": ["image", "disallowed-stripes"],
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "unspecified-paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -459,10 +381,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-color": colors.unspecified,
     }
   });
-  if (showWaterTrails) addTrailLayer({
+  addTrailLayer({
     "id": "unspecified-waterways",
-    "source": 'water_trails',
-    "source-layer": 'water_trail',
+    "source": 'trails',
+    "source-layer": 'trail',
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -473,10 +395,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-color": colors.unspecified,
     }
   });
-  if (showWaterTrails) addTrailLayer({
+  addTrailLayer({
     "id": "waterways",
-    "source": 'water_trails',
-    "source-layer": 'water_trail',
+    "source": 'trails',
+    "source-layer": 'trail',
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -487,8 +409,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-color": colors.water,
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "paths",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "layout": {
       "line-cap": "round",
@@ -499,8 +423,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-color": colors.trail,
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "bridge-casings",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "minzoom": 14,
     "layout": {
@@ -513,8 +439,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "line-color": "#bbb",
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "oneway-arrows",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "symbol",
     "transition": {
       "duration": 0,
@@ -542,8 +470,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "icon-opacity": 0.8,
     },
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "trails-labels",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "symbol",
     "layout": {
       "text-field": ["coalesce", ['get', 'name'], ['get', 'waterbody:name']],
@@ -557,8 +487,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "text-halo-color": colors.labelHalo,
     }
   });
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "trails-pointer-targets",
+    "source": "trails",
+    "source-layer": "trail",
     "type": "line",
     "paint": {
         "line-color": "transparent",
@@ -613,7 +545,7 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
   }, 'clickable');
   addTrailLayer({
     "id": "trail-pois",
-    "source": 'trails_poi',
+    "source": 'trails',
     "source-layer": 'trail_poi',
     "type": "symbol",
     "transition": {
@@ -621,19 +553,13 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "delay": 0
     },
     "layout": {
-      "icon-image": [
-        "case",
-        ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
-        ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
-        ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
-        ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
-        ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
-        ""
-      ],
       "icon-anchor": [
         "case",
-        ['in', ["get", "information"], ["literal", ["guidepost", "route_marker"]]], "bottom",
-        ['==', ["get", "man_made"], "cairn"], "bottom",
+        [
+          "any",
+          ['in', ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
+          ['==', ["get", "man_made"], "cairn"],
+        ], "bottom",
         "center",
       ],
       "icon-size": [
@@ -649,70 +575,6 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
         ['==', ["get", "information"], "guidepost"], 19,
         ['==', ["get", "man_made"], "cairn"], 20,
         ['==', ["get", "information"], "route_marker"], 20,
-        10,
-      ],
-      "text-field": [
-        "step", ["zoom"], "",
-        poiLabelZoom, [
-          'format',
-          [
-            "case",
-            ["has", "name"], [
-              "concat", ["get", "name"], ["case", ["has", "ele"], '\n', ""]
-            ],
-            ""
-          ],
-          {"text-font": ['literal', ["Americana-Bold"]]},
-          [
-            "case",
-            ["has", "ele"], ["concat", [
-              "number-format",
-              ["/", ["to-number", ['get', 'ele']], 0.3048],
-              { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
-            ], " ft"],
-            ""
-          ],
-          {},
-        ]
-      ],
-      "text-optional": true,
-      "text-size": 11,
-      "text-line-height": 1.1,
-      "text-font": ["Americana-Regular"],
-      "text-variable-anchor": ["left", "right", "top", "bottom"],
-      "text-padding": 5,
-      "text-offset": [
-        "interpolate", ["linear"], ["zoom"],
-        12, ["literal", [0.4, 0.4]],
-        22, ["literal", [1.5, 1.5]]
-      ],
-      "text-justify": "auto",
-    },
-    "paint": {
-      "text-color": colors.label,
-      "text-halo-width": 2,
-      "text-halo-blur": 1,
-      "text-halo-color": colors.labelHalo,
-    }
-  }, 'clickable');
-  addTrailLayer({
-    "id": "water-trail-pois",
-    "source": 'water_trails_poi',
-    "source-layer": 'water_trail_poi',
-    "type": "symbol",
-    "transition": {
-      "duration": 0,
-      "delay": 0
-    },
-    "layout": {
-      "icon-size": [
-        "interpolate", ["linear"], ["zoom"],
-        12, 0.5,
-        22, 1
-      ],
-      "symbol-placement": "point",
-      "symbol-sort-key": [
-        "case",
         ['==', ["get", "man_made"], "monitoring_station"], 2,
         [
           "any",
@@ -775,13 +637,33 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
             ["case", ["has", "height"], " ↕︎", ""],
             {"text-font": ['literal', ["Americana-Bold"]]},
           ],
-          ["get", "name"]
+          [
+            'format',
+            [
+              "case",
+              ["has", "name"], [
+                "concat", ["get", "name"], ["case", ["has", "ele"], '\n', ""]
+              ],
+              ""
+            ],
+            {"text-font": ['literal', ["Americana-Bold"]]},
+            [
+              "case",
+              ["has", "ele"], ["concat", [
+                "number-format",
+                ["/", ["to-number", ['get', 'ele']], 0.3048],
+                { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
+              ], " ft"],
+              ""
+            ],
+            {},
+          ]
         ]
       ],
       "text-optional": true,
       "text-size": 11,
       "text-line-height": 1.1,
-      "text-font": ["Americana-Bold"],
+      "text-font": ["Americana-Regular"],
       "text-variable-anchor": ["left", "right", "top", "bottom"],
       "text-padding": 5,
       "text-offset": [
@@ -800,7 +682,7 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
   }, 'clickable');
   addTrailLayer({
     "id": "major-trail-pois",
-    "source": 'trails_poi',
+    "source": 'trails',
     "source-layer": 'trail_poi',
     "type": "symbol",
     "transition": {
@@ -841,9 +723,10 @@ function loadTrailLayers(showLandTrails, showWaterTrails) {
       "text-halo-color": colors.labelHalo,
     },
   }, 'clickable');
-  addNamespacedTrailLayers({
+  addTrailLayer({
     "id": "trails-qa",
-    "source-layer-suffix": "_qa",
+    "source": "trails",
+    "source-layer": "trail_qa",
     "type": "symbol",
     "transition": {
       "duration": 0,
@@ -1005,17 +888,6 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
   return specifiedAttributeExpression;
 }
 
-function waterTrailPoisFilter(travelMode) {
-  let filter = ["all"];
-  if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
-    filter.push(["within", focusAreaGeoJsonBuffered]);
-  }
-  if (travelMode !== "canoe" && travelMode !== "all") {
-    filter.push(["==", ["get", "waterway"], "waterfall"]);
-  }
-  return filter.length > 1 ? filter : null;
-}
-
 function trailPoisFilter(travelMode) {
   let filter = [
     "all",
@@ -1027,9 +899,22 @@ function trailPoisFilter(travelMode) {
         ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]],
       ]
     ],
-  ]
+  ];
   if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
     filter.push(["within", focusAreaGeoJsonBuffered]);
+  }
+  if (travelMode !== "canoe" && travelMode !== "all") {
+    // don't show canoe-specific POIs for other travel modes
+    filter.push([
+      "!",
+      [
+        "any",
+        ['==', ["get", "natural"], "beaver_dam"],
+        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]],
+        ['==', ["get", "lock"], "yes"],
+        ['==', ["get", "man_made"], "monitoring_station"],
+      ]
+    ]);
   }
   if (travelMode !== "all") {
     let poiKeys = [travelMode];
@@ -1103,10 +988,15 @@ function onewayArrowsFilter(travelMode) {
   return filter;
 }
 
-function waterTrailPoiIconImageExpression(travelMode) {
+function poiIconImageExpression(travelMode) {
   var showHazards = travelMode === "canoe";
   return [
     "case",
+    ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
+    ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
+    ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
+    ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
+    ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
     ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
     [
       "any",
@@ -1221,7 +1111,6 @@ function accessIsSpecifiedExpression(travelMode) {
 }
 
 function updateTrailLayers() {
-  toggleWaterTrailsIfNeeded();
 
   let focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
 
@@ -1294,7 +1183,7 @@ function updateTrailLayers() {
 
   let combinedFilterExpression = ["any"];
   function setTrailsLayerFilter(layerId, filter) {
-    setNamespacedFilter(layerId, filter);
+    map.setFilter(layerId, filter);
     combinedFilterExpression.push(filter);
   }
   
@@ -1365,26 +1254,25 @@ function updateTrailLayers() {
     ["has", "waterway"],
   ]);
 
-  setNamespacedLayoutProperty('hovered-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
-  setNamespacedLayoutProperty('selected-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
-  setNamespacedLayoutProperty('oneway-arrows', "icon-image", onewayArrowsIconImageExpression(travelMode))
-  setNamespacedLayoutProperty('water-trail-pois', "icon-image", waterTrailPoiIconImageExpression(travelMode))
+  map.setLayoutProperty('hovered-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
+  map.setLayoutProperty('selected-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
+  map.setLayoutProperty('oneway-arrows', "icon-image", onewayArrowsIconImageExpression(travelMode))
+  map.setLayoutProperty('trail-pois', "icon-image", poiIconImageExpression(travelMode))
   
-  setNamespacedPaintProperty('paths', 'line-color', pathsColors)
-  setNamespacedPaintProperty('informal-paths', 'line-color', pathsColors)
-  setNamespacedPaintProperty('waterways', 'line-color', waterwaysColors);
+  map.setPaintProperty('paths', 'line-color', pathsColors)
+  map.setPaintProperty('informal-paths', 'line-color', pathsColors)
+  map.setPaintProperty('waterways', 'line-color', waterwaysColors);
   
-  setNamespacedFilter('bridge-casings', ["all", ["has", "bridge"], ["!in", "bridge", "no", "abandoned", "raised", "proposed", "dismantled"], combinedFilterExpression])
+  map.setFilter('bridge-casings', ["all", ["has", "bridge"], ["!in", "bridge", "no", "abandoned", "raised", "proposed", "dismantled"], combinedFilterExpression])
   // oneway-arrows filter technically isn't needed since the icon-image doesn't display anything
   // if there isn't a relevant oneway value, but we might as well leave it for now in case we want
   // to add some other kind of styling in the future
-  setNamespacedFilter('oneway-arrows', ["all", onewayArrowsFilter(travelMode), combinedFilterExpression])
-  setNamespacedFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
-  setNamespacedFilter('trails-labels', combinedFilterExpression)
-  setNamespacedFilter('trails-pointer-targets', combinedFilterExpression)
-  setNamespacedFilter('water-trail-pois', waterTrailPoisFilter(travelMode))
-  setNamespacedFilter('trail-pois', trailPoisFilter(travelMode))
-  setNamespacedFilter('major-trail-pois', [
+  map.setFilter('oneway-arrows', ["all", onewayArrowsFilter(travelMode), combinedFilterExpression])
+  map.setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
+  map.setFilter('trails-labels', combinedFilterExpression)
+  map.setFilter('trails-pointer-targets', combinedFilterExpression)
+  map.setFilter('trail-pois', trailPoisFilter(travelMode))
+  map.setFilter('major-trail-pois', [
     "all",
     [
       "any",
@@ -1504,6 +1392,13 @@ function modeIsAllowedExpression(mode) {
 }
 
 async function loadInitialMap() {
+
+  map.addSource("trails", {
+    type: "vector",
+    url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
+  });
+  loadTrailLayers();
+
   updateForHash();
   updateTrailLayers();
 
@@ -1556,7 +1451,7 @@ function updateMapForSelection() {
 
   layerIdsByCategory.selected?.forEach(function(layerId) {
     // this will fail in rare cases where two features of different types but the same ID are both onscreen
-    setNamespacedFilter(layerId, [
+    map.setFilter(layerId, [
       "any",
       ["in", ["id"], ["literal", idsToHighlight.map(function(id) {
         return omtId(id, "node");
@@ -1577,7 +1472,7 @@ function updateMapForHover() {
 
   layerIdsByCategory.hovered?.forEach(function(layerId) {
     // this will fail in rare cases where two features of different types but the same ID are both onscreen
-    setNamespacedFilter(layerId, [
+    map.setFilter(layerId, [
       "any",
       ["==", ["get", "OSM_ID"], entityId],
       ["==", ["id"], omtId(entityId, hoveredEntityInfo?.type)],
