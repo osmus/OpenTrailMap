@@ -989,7 +989,7 @@ function onewayArrowsFilter(travelMode) {
 }
 
 function poiIconImageExpression(travelMode) {
-  var showHazards = travelMode === "canoe";
+  let showHazards = travelMode === "canoe";
   return [
     "case",
     ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
