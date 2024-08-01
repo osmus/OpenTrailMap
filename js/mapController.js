@@ -1635,7 +1635,7 @@ function didClickMap(e) {
   let html = "";
 
   if (tags.name) html += "<b>" + tags.name + "</b><br/>"
-  html += '<a id="view-feature-details" href="" class="button">View Details</a>';
+  html += '<a href="" class="button" onclick="return didClickViewDetails()">View Details</a>';
 
   activePopup = new maplibregl.Popup({
       className: 'quickinfo',
@@ -1644,14 +1644,10 @@ function didClickMap(e) {
     .setLngLat(coordinates)
     .setHTML(html)
     .addTo(map);
-  
-  document.getElementById("view-feature-details").addEventListener('click', function(e) {
-    e.preventDefault();
-    openSidebar();
-  });
 }
-function didClickViewDetails(e) {
-  e.preventDefault();
+function didClickViewDetails() {
+  openSidebar();
+  return false;
 }
 function didDoubleClickMap(e) {
   let entity = entityForEvent(e, ['major-trail-pois']);
