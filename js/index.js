@@ -297,7 +297,7 @@ function buildFocusAreaGeoJson() {
     });
   }
   let geoJson = compositeGeoJson(results);
-  if (!geoJson.properties.name) {
+  if (geoJson && !geoJson.properties.name) {
     // park names are on a different layer for some reason
     let poiResults = map.querySourceFeatures('openmaptiles', {
       filter: ["==", ["id"], id],
