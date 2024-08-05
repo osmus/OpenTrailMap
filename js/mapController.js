@@ -998,6 +998,7 @@ function poiIconImageExpression(travelMode) {
     ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
     ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
     ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
+    ['==', ["get", "tourism"], "camp_site"], ["image", "campground"],
     [
       "any",
       ['==', ["get", "natural"], "beaver_dam"],

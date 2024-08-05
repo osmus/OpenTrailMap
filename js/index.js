@@ -515,6 +515,7 @@ window.onload = function(event) {
     'beaver_dam-hazard',
     'bothways-arrows',
     'cairn',
+    'campground',
     'canoe',
     'canoe-noaccess',
     'dam',
