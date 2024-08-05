@@ -600,7 +600,7 @@ function loadTrailLayers() {
               ],
               ""
             ],
-            {},
+            {"text-font": ['literal', ["Americana-Bold"]]},
             [
               "case",
               ["has", "lock:height"], ["concat", [
@@ -623,7 +623,7 @@ function loadTrailLayers() {
               ],
               ""
             ],
-            {},
+            {"text-font": ['literal', ["Americana-Bold"]]},
             [
               "case",
               ["has", "height"], ["concat", [
@@ -656,7 +656,7 @@ function loadTrailLayers() {
               ], " ft"],
               ""
             ],
-            {},
+            {"text-font": ['literal', ["Americana-Regular"]]},
           ]
         ]
       ],
