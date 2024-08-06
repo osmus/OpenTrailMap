@@ -1258,6 +1258,8 @@ function updateTrailLayers() {
     ["has", "waterway"],
   ]);
 
+  map.setLayerZoomRange('trail-pois', focusedEntityInfo ? 0 : 12, 24);
+
   map.setLayoutProperty('hovered-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
   map.setLayoutProperty('selected-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
   map.setLayoutProperty('oneway-arrows', "icon-image", onewayArrowsIconImageExpression(travelMode))
