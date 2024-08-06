@@ -570,12 +570,14 @@ function loadTrailLayers() {
       "symbol-placement": "point",
       "symbol-sort-key": [
         "case",
+        ['==', ["get", "man_made"], "monitoring_station"], 1,
         ['==', ["get", "amenity"], "ranger_station"], 2,
-        ['==', ["get", "highway"], "trailhead"], 3,
+        ['==', ["get", "information"], "camp_site"], 3,
+        ['==', ["get", "highway"], "trailhead"], 4,
+        ['==', ["get", "information"], "camp_pitch"], 5,
         ['==', ["get", "information"], "guidepost"], 19,
         ['==', ["get", "man_made"], "cairn"], 20,
         ['==', ["get", "information"], "route_marker"], 20,
-        ['==', ["get", "man_made"], "monitoring_station"], 2,
         [
           "any",
           ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
@@ -584,7 +586,7 @@ function loadTrailLayers() {
             ["!", ["has", "canoe"]],
             ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
           ]
-        ], 15,
+        ], 21,
         10,
       ],
       "text-field": [
@@ -999,6 +1001,7 @@ function poiIconImageExpression(travelMode) {
     ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
     ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
     ['==', ["get", "tourism"], "camp_site"], ["image", "campground"],
+    ['==', ["get", "tourism"], "camp_pitch"], ["image", "campsite"],
     [
       "any",
       ['==', ["get", "natural"], "beaver_dam"],

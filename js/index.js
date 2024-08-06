@@ -516,6 +516,7 @@ window.onload = function(event) {
     'bothways-arrows',
     'cairn',
     'campground',
+    'campsite',
     'canoe',
     'canoe-noaccess',
     'dam',
