@@ -511,6 +511,7 @@ window.onload = function(event) {
     'slipway-canoe-noaccess',
     'streamgage',
     'trailhead',
+    'viewpoint',
     'waterfall',
     'waterfall-canoeable',
     'waterfall-hazard',
