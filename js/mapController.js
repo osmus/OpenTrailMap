@@ -1400,7 +1400,13 @@ async function loadInitialMap() {
   map.addSource("trails", {
     type: "vector",
     url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
-  });
+  })
+  .on('sourcedata', function(event) {
+    if (event.sourceId === 'trails' && event.isSourceLoaded) {
+      reloadFocusAreaIfNeeded();
+    }
+  })
+  .on('moveend', checkMapExtent);
   loadTrailLayers();
 
   updateForHash();

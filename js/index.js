@@ -279,48 +279,19 @@ let focusAreaBoundingBox;
 
 function buildFocusAreaGeoJson() {
   if (!focusedEntityInfo) return null;
-  let id = omtId(focusedEntityInfo.id, focusedEntityInfo.type);
-  let results = map.querySourceFeatures('openmaptiles', {
+  let results = map.querySourceFeatures('trails', {
     filter: [
-      "==", ["id"], id,
+      "all",
+      ["==", ["get", "OSM_ID"], focusedEntityInfo.id],
+      ["==", ["get", "OSM_TYPE"], focusedEntityInfo.type],
     ],
     sourceLayer: "park",
   });
-  if (!results.length) {
-    results = map.querySourceFeatures('openmaptiles', {
-      filter: [
-        "all",
-        ["==", ["get", "subclass"], "park"],
-        ["==", ["id"], id],
-      ],
-      sourceLayer: "landcover",
-    });
-  }
-  let geoJson = compositeGeoJson(results);
-  if (geoJson && !geoJson.properties.name) {
-    // park names are on a different layer for some reason
-    let poiResults = map.querySourceFeatures('openmaptiles', {
-      filter: ["==", ["id"], id],
-      sourceLayer: "poi",
-    });
-    if (poiResults.length && poiResults[0].properties?.name) {
-      geoJson.properties = poiResults[0].properties;
-    } else {
-      poiResults = map.querySourceFeatures('trails', {
-        filter: [
-          "all",
-          ["==", ["get", "OSM_ID"], focusedEntityInfo.id],
-          ["==", ["get", "OSM_TYPE"], focusedEntityInfo.type],
-        ],
-        sourceLayer: "trail_poi",
-      });
-      if (poiResults.length) geoJson.properties = poiResults[0].properties;
-    }
-  }
-  return geoJson;
+  return compositeGeoJson(results);
 }
 // check the current extent of the map, and if focused area is too far offscreen, put it back onscreen
 function checkMapExtent() {
+  if (!focusAreaBoundingBox) return;
   let currentBounds = map.getBounds();
   let targetBounds = currentBounds.toArray();
   let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
@@ -336,20 +307,27 @@ function checkMapExtent() {
     map.fitBounds(targetBounds);
   }
 }
-function loadFocusArea() {
-  focusAreaGeoJson = buildFocusAreaGeoJson();
-  focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
-  focusAreaBoundingBox = bboxOfGeoJson(focusAreaGeoJson);
+function fitMapToFocusArea() {
+  if (!focusAreaBoundingBox) return;
+  let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
+  let height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
+  let maxExtent = Math.max(width, height);
+  let fitBbox = extendBbox(focusAreaBoundingBox, maxExtent / 16);
+  map.fitBounds(fitBbox);
+}
+function reloadFocusAreaIfNeeded() {
+  let newFocusAreaGeoJson = buildFocusAreaGeoJson();
 
-  map.off('moveend', checkMapExtent);
+  if ((newFocusAreaGeoJson && JSON.stringify(newFocusAreaGeoJson)) !==
+    (focusAreaGeoJson && JSON.stringify(focusAreaGeoJson))) {
 
-  if (focusAreaBoundingBox) {
-    let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
-    let height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
-    let maxExtent = Math.max(width, height);
-    let fitBbox = extendBbox(focusAreaBoundingBox, maxExtent / 16);
-    map.fitBounds(fitBbox);
-    map.on('moveend', checkMapExtent);
+    focusAreaGeoJson = newFocusAreaGeoJson;
+    focusAreaBoundingBox = bboxOfGeoJson(focusAreaGeoJson);
+    focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
+
+    if (focusAreaGeoJson) document.getElementById("map-title").innerText = focusAreaGeoJson.properties.name;
+  
+    updateTrailLayers();
   }
 }
 
@@ -373,21 +351,11 @@ function focusEntity(entityInfo) {
     focus: focusedEntityInfo ? type + "/" + entityId : null
   });
 
-  loadFocusArea();
-
-  updateTrailLayers();
-
   document.getElementById("map-title").innerText = '';
-  document.getElementById("nameplate").style.display = focusedEntityInfo ? 'flex' : 'none'; 
+  document.getElementById("nameplate").style.display = focusedEntityInfo ? 'flex' : 'none';
 
-  if (focusedEntityInfo) {
-    if (focusAreaGeoJson) document.getElementById("map-title").innerText = focusAreaGeoJson.properties.name;
-    /*fetchOsmEntity(type, entityId).then(function(entity) {
-      if (entity?.tags?.name) {
-        document.getElementById("map-title").innerText = entity.tags.name;
-      }
-    });*/
-  }
+  reloadFocusAreaIfNeeded();
+  fitMapToFocusArea();
 }
 
 function selectEntity(entityInfo) {
