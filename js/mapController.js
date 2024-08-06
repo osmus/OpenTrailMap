@@ -620,8 +620,8 @@ function loadTrailLayers() {
             'format',
             [
               "case",
-              ["has", "name"], [
-                "concat", ["get", "name"], ["case", ["has", "height"], '\n', ""]
+              ["any", ["has", "name"], ["has", "ref"]], [
+                "concat", ["coalesce", ["get", "name"], ["get", "ref"]], ["case", ["has", "height"], '\n', ""]
               ],
               ""
             ],
@@ -643,8 +643,8 @@ function loadTrailLayers() {
             'format',
             [
               "case",
-              ["has", "name"], [
-                "concat", ["get", "name"], ["case", ["has", "ele"], '\n', ""]
+              ["any", ["has", "name"], ["has", "ref"]], [
+                "concat", ["coalesce", ["get", "name"], ["get", "ref"]], ["case", ["has", "ele"], '\n', ""]
               ],
               ""
             ],
