@@ -498,6 +498,29 @@ function loadTrailLayers() {
     }
   }, 'clickable');
   addTrailLayer({
+    "id": "trees",
+    "source": "trails",
+    "source-layer": "trail_poi",
+    "type": "circle",
+    "minzoom": 16,
+    "paint": {
+      "circle-radius": [
+        "interpolate", ["exponential", 2], ["zoom"],
+        16, 2,
+        22, 128
+      ],
+      "circle-opacity": [
+        "interpolate", ["linear"], ["zoom"],
+        16, 0.25,
+        22, 0.075
+      ],
+      "circle-color": colors.natural,
+    },
+    "filter": [
+      "==", "natural", "tree" 
+    ],
+  });
+  addTrailLayer({
     "id": "peaks",
     "source": "openmaptiles",
     "source-layer": "mountain_peak",
@@ -901,6 +924,7 @@ function trailPoisFilter(travelMode) {
         "any",
         ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
         ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]],
+        ["==", ["get", "natural"], "tree"],
       ]
     ],
   ];
