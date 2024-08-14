@@ -41,6 +41,16 @@ const editedDateColors = [
   2022, '#980043',
   thisYear, '#380010',
 ];
+const isHighwayExpression = [
+  "any",
+  ["has", "highway"],
+  ["==", "route", "ferry"],
+];
+const isNotHighwayExpression = [
+  "all",
+  ["!has", "highway"],
+  ["!=", "route", "ferry"],
+];
 const impliedYesExpressions = {
   atv: [],
   bicycle: [
@@ -91,7 +101,7 @@ const impliedNoExpressions = {
       ["in", "highway", "footway", "steps"],
       ["in", "vehicle", "no", "private", "discouraged"],
       ["in", "motor_vehicle", "no", "private", "discouraged"],
-      ["!has", "highway"],
+      isNotHighwayExpression,
     ]
   ],
   snowmobile: [
@@ -100,7 +110,7 @@ const impliedNoExpressions = {
       ["in", "highway", "footway", "steps"],
       ["in", "vehicle", "no", "private", "discouraged"],
       ["in", "motor_vehicle", "no", "private", "discouraged"],
-      ["!has", "highway"],
+      isNotHighwayExpression,
     ]
   ],
   bicycle: [
@@ -112,11 +122,11 @@ const impliedNoExpressions = {
         ["!=", "ramp:bicycle", "yes"],
       ],
       ["in", "vehicle", "no", "private", "discouraged"],
-      ["!has", "highway"],
+      isNotHighwayExpression,
     ]
   ],
   foot: [
-    ["!has", "highway"],
+    isNotHighwayExpression,
   ],
   canoe: [
     ["!has", "canoe"],
@@ -128,7 +138,7 @@ const impliedNoExpressions = {
     [
       "any",
       ["==", "highway", "steps"],
-      ["!has", "highway"],
+      isNotHighwayExpression,
     ],
   ],
   wheelchair: [
@@ -145,7 +155,7 @@ const impliedNoExpressions = {
         ["has", "smoothness"],
         ["!in", "smoothness", "excellent", "very_good", "good", "intermediate"],
       ],
-      ["!has", "highway"],
+      isNotHighwayExpression,
     ]
   ],
 };
@@ -227,9 +237,9 @@ function loadTrailLayers() {
     ],
   }, 'hovered');
   addTrailLayer({
-    "id": "hovered-trails-qa",
+    "id": "hovered-trail-centerpoints",
     "source": "trails",
-    "source-layer": "trail_qa",
+    "source-layer": "trail_centerpoint",
     "type": "circle",
     "paint": hoveredPoiPaint,
     "filter": [
@@ -275,9 +285,9 @@ function loadTrailLayers() {
     ],
   }, 'selected');
   addTrailLayer({
-    "id": "selected-trails-qa",
+    "id": "selected-trail-centerpoints",
     "source": "trails",
-    "source-layer": "trail_qa",
+    "source-layer": "trail_centerpoint",
     "type": "circle",
     "paint": selectedPoiPaint,
     "filter": [
@@ -751,16 +761,20 @@ function loadTrailLayers() {
     },
   }, 'clickable');
   addTrailLayer({
-    "id": "trails-qa",
+    "id": "trail-centerpoints",
     "source": "trails",
-    "source-layer": "trail_qa",
+    "source-layer": "trail_centerpoint",
     "type": "symbol",
     "transition": {
       "duration": 0,
       "delay": 0
     },
     "layout": {
-      "icon-image": ["image", "question"],
+      "icon-image": [
+        "case",
+        ["==", ["get", "route"], "ferry"], ["image", "ferry"],
+        ["image", "question"],
+      ],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
         12, 0.5,
@@ -1016,6 +1030,22 @@ function onewayArrowsFilter(travelMode) {
   return filter;
 }
 
+function trailCenterpointsFilter(lens) {
+  let filter = [
+    'any',
+    ["==", "route", "ferry"],
+  ];
+  if (lens === 'fixme') {
+    filter = filter.concat([
+      ["has", "fixme"],
+      ["has", "FIXME"],
+      ["has", "todo"],
+      ["has", "TODO"],
+    ]);
+  }
+  return filter;
+}
+
 function poiIconImageExpression(travelMode) {
   let showHazards = travelMode === "canoe";
   return [
@@ -1154,7 +1184,6 @@ function updateTrailLayers() {
   let specifiedAccessExpression = ["!=", "true", "false"];
   let specifiedExpression;
 
-  let showFixmesExpression = [lens === "fixme" ? "!=" : '==', "true", "false"];
   let showDisallowedExpression = [lens === "access" ? "!=" : '==', "true", "false"];
   let showUnspecifiedExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
@@ -1226,14 +1255,14 @@ function updateTrailLayers() {
     allowedAccessExpression,
     specifiedExpression,
     ["!=", "informal", "yes"],
-    ["has", "highway"],
+    isHighwayExpression,
   ]);
   setTrailsLayerFilter('informal-paths', [
     "all",
     allowedAccessExpression,
     specifiedExpression,
     ["==", "informal", "yes"],
-    ["has", "highway"],
+    isHighwayExpression,
   ]);
   setTrailsLayerFilter('disallowed-paths', [
     "all",
@@ -1241,7 +1270,7 @@ function updateTrailLayers() {
     ["none", allowedAccessExpression],
     specifiedExpression,
     ["!=", "informal", "yes"],
-    ["has", "highway"],
+    isHighwayExpression,
   ]);
   setTrailsLayerFilter('disallowed-informal-paths', [
     "all",
@@ -1249,7 +1278,7 @@ function updateTrailLayers() {
     ["none", allowedAccessExpression],
     specifiedExpression,
     ["==", "informal", "yes"],
-    ["has", "highway"],
+    isHighwayExpression,
   ]);
   setTrailsLayerFilter('unspecified-paths', [
     "all",
@@ -1257,7 +1286,7 @@ function updateTrailLayers() {
     allowedAccessExpression,
     ["none", specifiedExpression],
     ["!=", "informal", "yes"],
-    ["has", "highway"],
+    isHighwayExpression,
   ]);
   setTrailsLayerFilter('unspecified-informal-paths', [
     "all",
@@ -1265,7 +1294,7 @@ function updateTrailLayers() {
     allowedAccessExpression,
     ["none", specifiedExpression],
     ["==", "informal", "yes"],
-    ["has", "highway"],
+    isHighwayExpression,
   ]);
   setTrailsLayerFilter('disallowed-waterways', [
     "all",
@@ -1290,8 +1319,8 @@ function updateTrailLayers() {
 
   map.setLayerZoomRange('trail-pois', focusedEntityInfo ? 0 : 12, 24);
 
-  map.setLayoutProperty('hovered-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
-  map.setLayoutProperty('selected-trails-qa', 'visibility', lens === 'fixme' ? 'visible' : 'none')
+  map.setLayoutProperty('hovered-trail-centerpoints', 'visibility', lens === 'fixme' ? 'visible' : 'none')
+  map.setLayoutProperty('selected-trail-centerpoints', 'visibility', lens === 'fixme' ? 'visible' : 'none')
   map.setLayoutProperty('oneway-arrows', "icon-image", onewayArrowsIconImageExpression(travelMode))
   map.setLayoutProperty('trail-pois', "icon-image", poiIconImageExpression(travelMode))
   
@@ -1304,7 +1333,7 @@ function updateTrailLayers() {
   // if there isn't a relevant oneway value, but we might as well leave it for now in case we want
   // to add some other kind of styling in the future
   map.setFilter('oneway-arrows', ["all", onewayArrowsFilter(travelMode), combinedFilterExpression])
-  map.setFilter('trails-qa', ["all", showFixmesExpression, combinedFilterExpression])
+  map.setFilter('trail-centerpoints', ["all", trailCenterpointsFilter(lens), combinedFilterExpression])
   map.setFilter('trails-labels', combinedFilterExpression)
   map.setFilter('trails-pointer-targets', combinedFilterExpression)
   map.setFilter('trail-pois', trailPoisFilter(travelMode))

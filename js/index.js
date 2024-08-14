@@ -491,6 +491,7 @@ window.onload = function(event) {
     'dam-canoeable',
     'dam-hazard',
     'disallowed-stripes',
+    'ferry',
     'guidepost',
     'lock',
     'lock-canoeable',
