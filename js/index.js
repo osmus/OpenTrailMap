@@ -493,6 +493,7 @@ window.onload = function(event) {
     'disallowed-stripes',
     'ferry',
     'guidepost',
+    'lean_to',
     'lock',
     'lock-canoeable',
     'lock-hazard',
