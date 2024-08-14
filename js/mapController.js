@@ -674,6 +674,33 @@ function loadTrailLayers() {
             ["case", ["has", "height"], " ↕︎", ""],
             {"text-font": ['literal', ["Americana-Bold"]]},
           ],
+          ['in', ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]], [
+            'format',
+            [
+              "case",
+              ["any", ["has", "name"], ["has", "ref"]], [
+                "concat", ["coalesce", ["get", "name"], ["get", "ref"]], ["case", ["any", ["in", ["get", "reservation"], ["literal", ["required", "no"]]], ["==", ["get", "tents"], "no"]], '\n', ""]
+              ],
+              ""
+            ],
+            {"text-font": ['literal', ["Americana-Bold"]]},
+            [
+              "case",
+              ["==", ["get", "reservation"], "required"], [
+                "case",
+                ["==", ["get", "tents"], "no"], "No tents · Reservation required",
+                "Reservation required",
+              ],
+              ["==", ["get", "reservation"], "no"], [
+                "case",
+                ["==", ["get", "tents"], "no"], "No tents · First-come, first-served",
+                "First-come, first-served",
+              ],
+              ["==", ["get", "tents"], "no"], "No tents",
+              ""
+            ],
+            {"text-font": ['literal', ["Americana-Regular"]]},
+          ],
           [
             'format',
             [
