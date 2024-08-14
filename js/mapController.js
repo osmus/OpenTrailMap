@@ -960,14 +960,12 @@ function trailPoisFilter(travelMode) {
   let filter = [
     "all",
     [
-      "!",
-      [
-        "any",
-        ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
-        ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]],
-        ["==", ["get", "natural"], "tree"],
-      ]
+      "any",
+      ["!", ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
+      ["!", ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
+      ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
     ],
+    ["!=", ["get", "natural"], "tree"],
   ];
   if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
     filter.push(["within", focusAreaGeoJsonBuffered]);
@@ -1371,6 +1369,8 @@ function updateTrailLayers() {
       ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
       ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
     ],
+    ["!", ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]]],
+    // don't show icon and label for currently focused feature
     ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null],
     ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ?
       focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
