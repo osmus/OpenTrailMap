@@ -487,6 +487,7 @@ window.onload = function(event) {
     'campsite',
     'canoe',
     'canoe-noaccess',
+    'caravan_site',
     'dam',
     'dam-canoeable',
     'dam-hazard',
