@@ -204,6 +204,7 @@ const lensOptionsByMode = {
   "canoe": canoeLensOptions,
   "foot": hikingLensOptions,
   "horse": vehicleLensOptions,
+  "inline_skates": basicLensOptions,
   "snowmobile": vehicleLensOptions,
   "ski:nordic": basicLensOptions,
   "wheelchair": basicLensOptions,

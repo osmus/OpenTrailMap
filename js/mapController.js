@@ -68,6 +68,7 @@ const impliedYesExpressions = {
       "primary_link"
     ],
   ],
+  canoe: [],
   foot: [
     [
       "in", "highway",
@@ -88,11 +89,23 @@ const impliedYesExpressions = {
   horse: [
     ["==", "highway", "bridleway"]
   ],
-  wheelchair: [],
-  canoe: [],
+  inline_skates: [
+    [
+      "all",
+      // cycleways commonly allow skating
+      ["==", "highway", "cycleway"],
+      // as long as they're multi-use
+      ["in", "foot", "yes", "designated", "permissive"],
+      // and have the highest smoothness
+      ["==", "smoothness", "excellent"],
+      // and are properly paved (redundant to smoothness but the additional check is nice)
+      ["in", "surface", "paved", "asphalt", "concrete"],
+    ]
+  ],
   portage: [],
   'ski:nordic': [],
   snowmobile: [],
+  wheelchair: [],
 };
 
 const impliedNoExpressions = {
@@ -127,6 +140,22 @@ const impliedNoExpressions = {
     [
       "any",
       ["==", "highway", "steps"],
+      isNotHighwayExpression,
+    ],
+  ],
+  inline_skates: [
+    [
+      "any",
+      [
+        "all",
+        ["has", "smoothness"],
+        ["!in", "smoothness", "excellent", "good", "intermediate"],
+      ],
+      [
+        "all",
+        ["has", "surface"],
+        ["in", "surface", "dirt", "grass", "sand", "sett", "cobblestone", "clay", "unhewn_cobblestone", "pebblestone", "grass_paver", "earth", "ground", "artificial_turf", "mud", "rock", "stone", "woodchips"],
+      ],
       isNotHighwayExpression,
     ],
   ],
@@ -827,6 +856,7 @@ let accessHierarchy = {
   canoe: ['boat', "canoe"],
   foot: ['foot'],
   horse: ['horse'],
+  inline_skates: ['foot', 'inline_skates'],
   mtb: ['vehicle', 'bicycle', 'mtb'],
   portage: ['foot', 'portage'],
   'ski:nordic': ['foot', 'ski', 'ski:nordic'],
@@ -1232,6 +1262,7 @@ function updateTrailLayers() {
       modeIsAllowedExpression("bicycle"),
       modeIsAllowedExpression("horse"),
       modeIsAllowedExpression("atv"),
+      modeIsAllowedExpression("inline_skates"),
       modeIsAllowedExpression("snowmobile"),
       modeIsAllowedExpression("ski:nordic"),
       modeIsAllowedExpression("canoe"),
@@ -1259,6 +1290,7 @@ function updateTrailLayers() {
       ["!=", "bicycle", "unknown"],
       ["!=", "horse", "unknown"],
       ["!=", "atv", "unknown"],
+      ["!=", "inline_skates", "unknown"],
       ["!=", "portage", "unknown"],
       ["!=", "snowmobile", "unknown"],
       ["!=", "ski:nordic", "unknown"],
