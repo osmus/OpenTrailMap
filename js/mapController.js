@@ -717,24 +717,39 @@ function loadTrailLayers() {
             [
               "case",
               ["any", ["has", "name"], ["has", "ref"]], [
-                "concat", ["coalesce", ["get", "name"], ["get", "ref"]], ["case", ["any", ["in", ["get", "reservation"], ["literal", ["required", "no"]]], ["==", ["get", "tents"], "no"]], '\n', ""]
+                "concat",
+                ["coalesce", ["get", "name"], ["get", "ref"]],
+                [
+                  "case",
+                  ["any", ["in", ["get", "reservation"], ["literal", ["required", "no"]]], ["==", ["get", "group_only"], "yes"], ["==", ["get", "tents"], "no"]], '\n',
+                  ""
+                ]
               ],
               ""
             ],
             {"text-font": ['literal', ["Americana-Bold"]]},
             [
               "case",
-              ["==", ["get", "reservation"], "required"], [
-                "case",
-                ["==", ["get", "tents"], "no"], "No tents · Reservation required",
-                "Reservation required",
+              ["any", ["==", ["get", "group_only"], "yes"], ["==", ["get", "tents"], "no"]], [
+                "concat", [
+                  "case",
+                  ["==", ["get", "group_only"], "yes"], "Groups only",
+                  ["==", ["get", "tents"], "no"], "Tents only",
+                  ""
+                ],
+                [
+                  "case",
+                  ["in", ["get", "reservation"], ["literal", ["required", "no"]]], " · ",
+                  ""
+                ]
               ],
-              ["==", ["get", "reservation"], "no"], [
-                "case",
-                ["==", ["get", "tents"], "no"], "No tents · First-come, first-served",
-                "First-come, first-served",
-              ],
-              ["==", ["get", "tents"], "no"], "No tents",
+              ""
+            ],
+            {"text-font": ['literal', ["Americana-Regular"]]},
+            [
+              "case",
+              ["==", ["get", "reservation"], "required"], "Reservations required",
+              ["==", ["get", "reservation"], "no"], "First-come, first-served",
               ""
             ],
             {"text-font": ['literal', ["Americana-Regular"]]},
