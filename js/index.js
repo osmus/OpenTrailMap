@@ -65,16 +65,6 @@ let lensStrings = {
     label: "Hand Cart"
   },
 }
-
-const travelModes = [
-  "foot",
-  "wheelchair",
-  "bicycle",
-  "horse",
-  "atv",
-  "canoe",
-  "snowmobile",
-];
 const metadataLenses = {
   label: "Metadata",
   subitems: [
@@ -114,7 +104,7 @@ const allLensOptions = [
   },
   metadataLenses,
 ];
-const wheelchairLensOptions = [
+const basicLensOptions = [
   {
     label: "Attributes",
     subitems: [
@@ -128,7 +118,7 @@ const wheelchairLensOptions = [
       "smoothness",
       "surface",
       "trail_visibility",
-       "width",
+      "width",
     ]
   },
   metadataLenses,
@@ -215,7 +205,8 @@ const lensOptionsByMode = {
   "foot": hikingLensOptions,
   "horse": vehicleLensOptions,
   "snowmobile": vehicleLensOptions,
-  "wheelchair": wheelchairLensOptions,
+  "ski:nordic": basicLensOptions,
+  "wheelchair": basicLensOptions,
 };
 function lensesForMode(travelMode) {
   return lensOptionsByMode[travelMode].flatMap(function(item) {

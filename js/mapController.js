@@ -91,20 +91,12 @@ const impliedYesExpressions = {
   wheelchair: [],
   canoe: [],
   portage: [],
+  'ski:nordic': [],
   snowmobile: [],
 };
 
 const impliedNoExpressions = {
   atv: [
-    [
-      "any",
-      ["in", "highway", "footway", "steps"],
-      ["in", "vehicle", "no", "private", "discouraged"],
-      ["in", "motor_vehicle", "no", "private", "discouraged"],
-      isNotHighwayExpression,
-    ]
-  ],
-  snowmobile: [
     [
       "any",
       ["in", "highway", "footway", "steps"],
@@ -125,14 +117,11 @@ const impliedNoExpressions = {
       isNotHighwayExpression,
     ]
   ],
-  foot: [
-    isNotHighwayExpression,
-  ],
   canoe: [
     ["!has", "canoe"],
   ],
-  portage: [
-    ["!has", "portage"],
+  foot: [
+    isNotHighwayExpression,
   ],
   horse: [
     [
@@ -140,6 +129,25 @@ const impliedNoExpressions = {
       ["==", "highway", "steps"],
       isNotHighwayExpression,
     ],
+  ],
+  portage: [
+    ["!has", "portage"],
+  ],
+  'ski:nordic': [
+    [
+      "any",
+      ["in", "ski", "no", "private", "discouraged"],
+      isNotHighwayExpression,
+    ]
+  ],
+  snowmobile: [
+    [
+      "any",
+      ["in", "highway", "footway", "steps"],
+      ["in", "vehicle", "no", "private", "discouraged"],
+      ["in", "motor_vehicle", "no", "private", "discouraged"],
+      isNotHighwayExpression,
+    ]
   ],
   wheelchair: [
     [
@@ -821,6 +829,7 @@ let accessHierarchy = {
   horse: ['horse'],
   mtb: ['vehicle', 'bicycle', 'mtb'],
   portage: ['foot', 'portage'],
+  'ski:nordic': ['foot', 'ski', 'ski:nordic'],
   snowmobile: ['vehicle', 'motor_vehicle', 'snowmobile'],
   wheelchair: ['foot', 'wheelchair'],
 };
@@ -1223,6 +1232,8 @@ function updateTrailLayers() {
       modeIsAllowedExpression("bicycle"),
       modeIsAllowedExpression("horse"),
       modeIsAllowedExpression("atv"),
+      modeIsAllowedExpression("snowmobile"),
+      modeIsAllowedExpression("ski:nordic"),
       modeIsAllowedExpression("canoe"),
     ];
   } else {
@@ -1248,6 +1259,9 @@ function updateTrailLayers() {
       ["!=", "bicycle", "unknown"],
       ["!=", "horse", "unknown"],
       ["!=", "atv", "unknown"],
+      ["!=", "portage", "unknown"],
+      ["!=", "snowmobile", "unknown"],
+      ["!=", "ski:nordic", "unknown"],
     ];  
   }
 

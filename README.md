@@ -27,6 +27,7 @@ The following styles show allowed trail access for different travel modes. Dark 
 - Bicycle Trails ([`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle) access)
 - Horseback Riding Trails ([`horse`](https://wiki.openstreetmap.org/wiki/Key:horse) access)
 - ATV Trails ([`atv`](https://wiki.openstreetmap.org/wiki/Key:atv) access)
+- Cross-Country Ski Trails ([`ski:nordic`](https://wiki.openstreetmap.org/wiki/Key:ski:nordic) access)
 - Snowmobile Trails ([`snowmobile`](https://wiki.openstreetmap.org/wiki/Key:snowmobile) access)
 
 The following styles highlight the presence and values of trail attribute tags. Purple lines mean an attribute is missing, incomplete, or needs review, while teal lines indicate the attribute is good to go.
