@@ -3,6 +3,7 @@ const thisYear = new Date().getFullYear();
 const colors = {
   trail: "#4f2e28",
   noaccessTrail: "#cc9e7e",//"#A2D61D",
+  ferry: "#009FBE",
   natural: "#005908",
   specified: "#007f79",
   unspecified: "#8e00cc",
@@ -1251,7 +1252,11 @@ function updateTrailLayers() {
   let showDisallowedExpression = [lens === "access" ? "!=" : '==', "true", "false"];
   let showUnspecifiedExpression = [lens !== "" ? "!=" : '==', "true", "false"];
 
-  let pathsColors = colors.trail;
+  let pathsColors = [
+    "case",
+    ["==", ["get", "route"], "ferry"], colors.ferry,
+    colors.trail
+  ];
   let waterwaysColors = colors.water;
 
   if (travelMode === "all") {
