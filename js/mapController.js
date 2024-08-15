@@ -734,7 +734,7 @@ function loadTrailLayers() {
                 "concat", [
                   "case",
                   ["==", ["get", "group_only"], "yes"], "Groups only",
-                  ["==", ["get", "tents"], "no"], "Tents only",
+                  ["==", ["get", "tents"], "no"], "No tents",
                   ""
                 ],
                 [
