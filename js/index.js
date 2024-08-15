@@ -13,6 +13,9 @@ let lensStrings = {
   incline: {
     label: "Incline"
   },
+  lit: {
+    label: "Lit"
+  },
   maxspeed: {
     label: "Speed Limit"
   },
@@ -82,6 +85,7 @@ const allLensOptions = [
       "dog",
       "hand_cart",
       "incline",
+      "lit",
       "name",
       "oneway",
       "operator",
@@ -112,6 +116,7 @@ const basicLensOptions = [
       "covered",
       "dog",
       "incline",
+      "lit",
       "name",
       "oneway",
       "operator",
@@ -131,6 +136,7 @@ const vehicleLensOptions = [
       "covered",
       "dog",
       "incline",
+      "lit",
       "name",
       "oneway",
       "operator",
@@ -151,6 +157,7 @@ const hikingLensOptions = [
       "covered",
       "dog",
       "incline",
+      "lit",
       "name",
       "oneway",
       "operator",
@@ -189,6 +196,7 @@ const canoeLensOptions = [
     subitems: [
       "hand_cart",
       "incline",
+      "lit",
       "operator",
       "surface",
       "smoothness",
@@ -217,6 +225,7 @@ function lensesForMode(travelMode) {
 const highwayOnlyLenses = [
   "hand_cart",
   "incline",
+  "lit",
   "maxspeed",
   "operator",
   "sac_scale",
