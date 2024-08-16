@@ -641,13 +641,14 @@ function loadTrailLayers() {
       "symbol-placement": "point",
       "symbol-sort-key": [
         "case",
-        ['==', ["get", "man_made"], "monitoring_station"], 1,
-        ['==', ["get", "tourism"], "camp_site"], 2,
-        ['==', ["get", "amenity"], "ranger_station"], 3,
-        ['==', ["get", "highway"], "trailhead"], 4,
-        ['==', ["get", "tourism"], "wilderness_hut"], 5,
-        ['==', ["get", "tourism"], "camp_pitch"], 5,
-        ['==', ["get", "shelter_type"], "lean_to"], 6,
+        ['==', ["get", "route"], "ferry"], 1,
+        ['==', ["get", "man_made"], "monitoring_station"], 4,
+        ['==', ["get", "tourism"], "camp_site"], 5,
+        ['==', ["get", "amenity"], "ranger_station"], 6,
+        ['==', ["get", "highway"], "trailhead"], 7,
+        ['==', ["get", "tourism"], "wilderness_hut"], 8,
+        ['==', ["get", "tourism"], "camp_pitch"], 8,
+        ['==', ["get", "shelter_type"], "lean_to"], 9,
         ['==', ["get", "information"], "guidepost"], 19,
         ['==', ["get", "man_made"], "cairn"], 20,
         ['==', ["get", "information"], "route_marker"], 20,
@@ -850,11 +851,7 @@ function loadTrailLayers() {
       "delay": 0
     },
     "layout": {
-      "icon-image": [
-        "case",
-        ["==", ["get", "route"], "ferry"], ["image", "ferry"],
-        ["image", "question"],
-      ],
+      "icon-image": ["image", "question"],
       "icon-size": [
         "interpolate", ["linear"], ["zoom"],
         12, 0.5,
@@ -1110,26 +1107,11 @@ function onewayArrowsFilter(travelMode) {
   return filter;
 }
 
-function trailCenterpointsFilter(lens) {
-  let filter = [
-    'any',
-    ["==", "route", "ferry"],
-  ];
-  if (lens === 'fixme') {
-    filter = filter.concat([
-      ["has", "fixme"],
-      ["has", "FIXME"],
-      ["has", "todo"],
-      ["has", "TODO"],
-    ]);
-  }
-  return filter;
-}
-
 function poiIconImageExpression(travelMode) {
   let showHazards = travelMode === "canoe";
   return [
     "case",
+    ["==", ["get", "route"], "ferry"], ["image", "ferry"],
     ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
     ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
     ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
@@ -1410,6 +1392,7 @@ function updateTrailLayers() {
 
   map.setLayerZoomRange('trail-pois', focusedEntityInfo ? 0 : 12, 24);
 
+  map.setLayoutProperty('trail-centerpoints', 'visibility', lens === 'fixme' ? 'visible' : 'none')
   map.setLayoutProperty('hovered-trail-centerpoints', 'visibility', lens === 'fixme' ? 'visible' : 'none')
   map.setLayoutProperty('selected-trail-centerpoints', 'visibility', lens === 'fixme' ? 'visible' : 'none')
   map.setLayoutProperty('oneway-arrows', "icon-image", onewayArrowsIconImageExpression(travelMode))
@@ -1424,7 +1407,12 @@ function updateTrailLayers() {
   // if there isn't a relevant oneway value, but we might as well leave it for now in case we want
   // to add some other kind of styling in the future
   map.setFilter('oneway-arrows', ["all", onewayArrowsFilter(travelMode), combinedFilterExpression])
-  map.setFilter('trail-centerpoints', ["all", trailCenterpointsFilter(lens), combinedFilterExpression])
+  map.setFilter('trail-centerpoints', ["all", [
+    ["has", "fixme"],
+    ["has", "FIXME"],
+    ["has", "todo"],
+    ["has", "TODO"],
+  ], combinedFilterExpression])
   map.setFilter('trails-labels', combinedFilterExpression)
   map.setFilter('trails-pointer-targets', combinedFilterExpression)
   map.setFilter('trail-pois', trailPoisFilter(travelMode))
