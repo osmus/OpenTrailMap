@@ -649,6 +649,7 @@ function loadTrailLayers() {
         ['==', ["get", "tourism"], "wilderness_hut"], 8,
         ['==', ["get", "tourism"], "camp_pitch"], 8,
         ['==', ["get", "shelter_type"], "lean_to"], 9,
+        ['==', ["get", "tourism"], "viewpoint"], 18,
         ['==', ["get", "information"], "guidepost"], 19,
         ['==', ["get", "man_made"], "cairn"], 20,
         ['==', ["get", "information"], "route_marker"], 20,
