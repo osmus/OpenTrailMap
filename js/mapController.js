@@ -1014,8 +1014,11 @@ function trailPoisFilter(travelMode) {
     "all",
     [
       "any",
-      ["!", ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
-      ["!", ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
+      [
+        "all",
+        ["!", ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
+        ["!", ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
+      ],
       ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
     ],
     ["!=", ["get", "natural"], "tree"],
