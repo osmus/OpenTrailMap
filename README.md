@@ -24,7 +24,8 @@ The following styles show allowed trail access for different travel modes. Dark 
 
 - Hiking & Walking Trails ([`foot`](https://wiki.openstreetmap.org/wiki/Key:foot) access)
 - Wheelchair Trails ([`wheelchair`](https://wiki.openstreetmap.org/wiki/Key:wheelchair) access)
-- Bicycle Trails ([`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle) access)
+- Biking Trails ([`bicycle`](https://wiki.openstreetmap.org/wiki/Key:bicycle) access)
+- Mountain Biking Trails ([`mtb`](https://wiki.openstreetmap.org/wiki/Key:mtb) access)
 - Inline Skating Trails ([`inline_skates`](https://wiki.openstreetmap.org/wiki/Key:inline_skates) access)
 - Horseback Riding Trails ([`horse`](https://wiki.openstreetmap.org/wiki/Key:horse) access)
 - ATV Trails ([`atv`](https://wiki.openstreetmap.org/wiki/Key:atv) access)

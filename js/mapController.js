@@ -103,6 +103,7 @@ const impliedYesExpressions = {
       ["in", "surface", "paved", "asphalt", "concrete"],
     ]
   ],
+  mtb: [],
   portage: [],
   'ski:nordic': [],
   snowmobile: [],
@@ -157,6 +158,14 @@ const impliedNoExpressions = {
         ["has", "surface"],
         ["in", "surface", "dirt", "grass", "sand", "sett", "cobblestone", "clay", "unhewn_cobblestone", "pebblestone", "grass_paver", "earth", "ground", "artificial_turf", "mud", "rock", "stone", "woodchips"],
       ],
+      isNotHighwayExpression,
+    ],
+  ],
+  mtb: [
+    [
+      "any",
+      ["in", "vehicle", "no", "private", "discouraged"],
+      ["in", "bicycle", "no", "private", "discouraged"],
       isNotHighwayExpression,
     ],
   ],
@@ -524,7 +533,7 @@ function loadTrailLayers() {
     "source-layer": "trail",
     "type": "symbol",
     "layout": {
-      "text-field": ["coalesce", ['get', 'name'], ['get', 'waterbody:name']],
+      "text-field": ["coalesce", ['get', 'name'], ['get', 'mtb:name'], ['get', 'waterbody:name']],
       "text-font": ["Americana-Regular"],
       "text-size": 13,
       "symbol-placement": "line"
@@ -1268,6 +1277,7 @@ function updateTrailLayers() {
       modeIsAllowedExpression("bicycle"),
       modeIsAllowedExpression("horse"),
       modeIsAllowedExpression("atv"),
+      modeIsAllowedExpression("mtb"),
       modeIsAllowedExpression("inline_skates"),
       modeIsAllowedExpression("snowmobile"),
       modeIsAllowedExpression("ski:nordic"),
@@ -1296,6 +1306,7 @@ function updateTrailLayers() {
       ["!=", "bicycle", "unknown"],
       ["!=", "horse", "unknown"],
       ["!=", "atv", "unknown"],
+      ["!=", "mtb", "unknown"],
       ["!=", "inline_skates", "unknown"],
       ["!=", "portage", "unknown"],
       ["!=", "snowmobile", "unknown"],

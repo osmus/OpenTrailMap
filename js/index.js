@@ -209,6 +209,7 @@ const lensOptionsByMode = {
   "all": allLensOptions,
   "atv": vehicleLensOptions,
   "bicycle": vehicleLensOptions,
+  "mtb": vehicleLensOptions,
   "canoe": canoeLensOptions,
   "foot": hikingLensOptions,
   "horse": vehicleLensOptions,
