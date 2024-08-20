@@ -102,6 +102,28 @@
       "paint": {"fill-color": "#eae0d0"}
     },
     {
+      "id": "barrier_area",
+      "type": "fill",
+      "source": "trails",
+      "source-layer": "barrier_area",
+      "paint": {"fill-color": "#ccc"}
+    },
+    {
+      "id": "barrier_line",
+      "type": "line",
+      "source": "trails",
+      "source-layer": "barrier_line",
+      "layout": {"line-cap": "butt", "line-join": "round"},
+      "paint": {
+        "line-color": "#ccc",
+        "line-width": [
+          "interpolate", ["exponential", 2], ["zoom"],
+          7, 0.5,
+          18, 12
+        ]
+      }
+    },
+    {
       "id": "landuse-exclusion",
       "type": "fill",
       "source": "openmaptiles",
