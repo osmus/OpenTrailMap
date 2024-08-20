@@ -13,6 +13,10 @@
     "openmaptiles": {
       "type": "vector",
       "url": "https://tile.ourmap.us/data/v3.json"
+    },
+    "trails": {
+      "type": "vector",
+      "url": "https://dwuxtsziek7cf.cloudfront.net/trails.json"
     }
   },
   "glyphs": "https://font.americanamap.org/{fontstack}/{range}.pbf",
@@ -23,19 +27,9 @@
       "paint": {"background-color": "#f9f5ed"}
     },
     {
-      "id": "park-fill-landcover",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "landcover",
-      "filter": ["==", "subclass", "park"],
-      "paint": {
-        "fill-color": "hsla(0, 0%, 100%, 0)"
-      }
-    },
-    {
       "id": "park-fill",
       "type": "fill",
-      "source": "openmaptiles",
+      "source": "trails",
       "source-layer": "park",
       "paint": {
         "fill-color": "hsla(0, 0%, 100%, 0)"
@@ -576,24 +570,9 @@
       }
     },
     {
-      "id": "park-outline-landcover",
-      "type": "line",
-      "source": "openmaptiles",
-      "source-layer": "landcover",
-      "filter": ["==", "subclass", "park"],
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-width": 0.5,
-        "line-color": "hsla(0, 0%, 0%, 0)"
-      }
-    },
-    {
       "id": "park-outline",
       "type": "line",
-      "source": "openmaptiles",
+      "source": "trails",
       "source-layer": "park",
       "layout": {
         "line-cap": "round",

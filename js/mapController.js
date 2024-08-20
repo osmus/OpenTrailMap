@@ -1438,35 +1438,12 @@ function updateTrailLayers() {
       focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
   ]);
 
-  function setParksFilter(layer, filter) {
-    ['', '-landcover'].forEach(function(suffix) {
-      if (suffix === '-landcover') {
-        let origFilter = filter;
-        filter = [
-          "all",
-          ["==", ["get", "subclass"], "park"],
-        ];
-        if (origFilter) filter.push(origFilter);
-      }
-      map.setFilter(layer + suffix, filter);
-    });
-  }
-  function setParksPaintProperty(layer, key, value) {
-    ['', '-landcover'].forEach(function(suffix) {
-      map.setPaintProperty(layer + suffix, key, value);
-    });
-  }
-  function setParksLayoutProperty(layer, key, value) {
-    ['', '-landcover'].forEach(function(suffix) {
-      map.setLayoutProperty(layer + suffix, key, value);
-    });
-  }
-  setParksFilter('park-fill', [
+  map.setFilter('park-fill', [
     "any",
     ["==", ["id"], focusedId],
     ["!", ["in", ["id"], ["literal", conservationDistrictOmtIds]]]
   ]);
-  setParksFilter('park-outline', [
+  map.setFilter('park-outline', [
     "any",
     [
       "all",
@@ -1475,22 +1452,22 @@ function updateTrailLayers() {
     ],
     [">=", ["zoom"], 12],
   ]);
-  setParksLayoutProperty('park-outline', "line-sort-key", [
+  map.setLayoutProperty('park-outline', "line-sort-key", [
     "case",
     ["==", ["id"], focusedId], 2,
     1
   ]);
-  setParksLayoutProperty('park-fill', "fill-sort-key", [
+  map.setLayoutProperty('park-fill', "fill-sort-key", [
     "case",
     ["==", ["id"], focusedId], 2,
     1
   ]);
-  setParksPaintProperty('park-fill', "fill-color", [
+  map.setPaintProperty('park-fill', "fill-color", [
     "case",
     ["==", ["id"], focusedId], "#D8E8B7",
     "#EFF5DC"
   ]);
-  setParksPaintProperty('park-outline', "line-color", [
+  map.setPaintProperty('park-outline', "line-color", [
     "case",
     ["==", ["id"], focusedId], "#738C40",
     "#ACC47A"
@@ -1540,16 +1517,13 @@ function modeIsAllowedExpression(mode) {
 
 async function loadInitialMap() {
 
-  map.addSource("trails", {
-    type: "vector",
-    url: "https://dwuxtsziek7cf.cloudfront.net/trails.json",
-  })
-  .on('sourcedata', function(event) {
+  map.on('sourcedata', function(event) {
     if (event.sourceId === 'trails' && event.isSourceLoaded) {
       reloadFocusAreaIfNeeded();
     }
   })
   .on('moveend', checkMapExtent);
+
   loadTrailLayers();
 
   updateForHash();
