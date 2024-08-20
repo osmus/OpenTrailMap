@@ -1409,6 +1409,7 @@ function updateTrailLayers() {
   // to add some other kind of styling in the future
   map.setFilter('oneway-arrows', ["all", onewayArrowsFilter(travelMode), combinedFilterExpression])
   map.setFilter('trail-centerpoints', ["all", [
+    "any",
     ["has", "fixme"],
     ["has", "FIXME"],
     ["has", "todo"],
