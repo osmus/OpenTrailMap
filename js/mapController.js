@@ -1131,8 +1131,16 @@ function poiIconImageExpression(travelMode) {
     ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
     ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
     ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
-    ['==', ["get", "tourism"], "camp_site"], ["image", "campground"],
-    ['==', ["get", "tourism"], "caravan_site"], ["image", "caravan_site"],
+    ['==', ["get", "tourism"], "camp_site"], [
+      "case",
+      ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "campground-noaccess"],
+      ["image", "campground"],
+    ],
+    ['==', ["get", "tourism"], "caravan_site"], [
+      "case",
+      ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "caravan_site-noaccess"],
+      ["image", "caravan_site"],
+    ],
     ['==', ["get", "tourism"], "camp_pitch"], ["image", "campsite"],
     ['==', ["get", "shelter_type"], "lean_to"], ["image", "lean_to"],
     ['==', ["get", "tourism"], "wilderness_hut"], ["image", "lean_to"],
