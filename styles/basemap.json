@@ -17,6 +17,14 @@
     "trails": {
       "type": "vector",
       "url": "https://dwuxtsziek7cf.cloudfront.net/trails.json"
+    },
+    "hillshade": {
+      "type": "raster",
+      "url": "https://dwuxtsziek7cf.cloudfront.net/hillshade.json"
+    },
+    "contours": {
+      "type": "vector",
+      "url": "https://dwuxtsziek7cf.cloudfront.net/contours.json"
     }
   },
   "glyphs": "https://font.americanamap.org/{fontstack}/{range}.pbf",
@@ -27,12 +35,30 @@
       "paint": {"background-color": "#f9f5ed"}
     },
     {
+      "id": "hillshade",
+      "type": "raster",
+      "source": "hillshade",
+      "paint": {"raster-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.7, 18, 0.1]}
+    },
+    {
+      "id": "contours",
+      "type": "line",
+      "source": "contours",
+      "source-layer": "contours",
+      "paint": {
+        "line-color": "#000000",
+        "line-opacity": ["case", ["get", "idx"], 0.2, 0.1],
+        "line-width": 1.0
+      }
+    },
+    {
       "id": "park-fill",
       "type": "fill",
       "source": "trails",
       "source-layer": "park",
       "paint": {
-        "fill-color": "hsla(0, 0%, 100%, 0)"
+        "fill-color": "hsla(0, 0%, 100%, 0)",
+        "fill-opacity": 0.4
       }
     },
     {
@@ -601,7 +627,7 @@
         "line-join": "round"
       },
       "paint": {
-        "line-width": 0.5,
+        "line-width": 1,
         "line-color": "hsla(0, 0%, 0%, 0)"
       }
     },
