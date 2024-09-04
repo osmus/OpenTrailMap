@@ -675,118 +675,7 @@ function loadTrailLayers() {
       ],
       "text-field": [
         "step", ["zoom"], "",
-        poiLabelZoom, [
-          "case",
-          ['==', ["get", "lock"], "yes"], [
-            'format',
-            [
-              "case",
-              ["any", ["has", "lock_name"], ["has", "lock_ref"]], [
-                "concat", ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]], ["case", ["has", "lock:height"], '\n', ""]
-              ],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Bold"]]},
-            [
-              "case",
-              ["has", "lock:height"], ["concat", [
-                "number-format",
-                ["/", ["to-number", ['get', 'lock:height']], 0.3048],
-                { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
-              ], " ft"],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Regular"]]},
-            ["case", ["has", "lock:height"], " ↕︎", ""],
-            {"text-font": ['literal', ["Americana-Bold"]]},
-          ],
-          ['in', ["get", "waterway"], ["literal", ["waterfall", "dam", "weir"]]], [
-            'format',
-            [
-              "case",
-              ["any", ["has", "name"], ["has", "ref"]], [
-                "concat", ["coalesce", ["get", "name"], ["get", "ref"]], ["case", ["has", "height"], '\n', ""]
-              ],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Bold"]]},
-            [
-              "case",
-              ["has", "height"], ["concat", [
-                "number-format",
-                ["/", ["to-number", ['get', 'height']], 0.3048],
-                { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
-              ], " ft"],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Regular"]]},
-            ["case", ["has", "height"], " ↕︎", ""],
-            {"text-font": ['literal', ["Americana-Bold"]]},
-          ],
-          ['in', ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]], [
-            'format',
-            [
-              "case",
-              ["any", ["has", "name"], ["has", "ref"]], [
-                "concat",
-                ["coalesce", ["get", "name"], ["get", "ref"]],
-                [
-                  "case",
-                  ["any", ["in", ["get", "reservation"], ["literal", ["required", "no"]]], ["==", ["get", "group_only"], "yes"], ["==", ["get", "tents"], "no"]], '\n',
-                  ""
-                ]
-              ],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Bold"]]},
-            [
-              "case",
-              ["any", ["==", ["get", "group_only"], "yes"], ["==", ["get", "tents"], "no"]], [
-                "concat", [
-                  "case",
-                  ["==", ["get", "group_only"], "yes"], "Groups only",
-                  ["==", ["get", "tents"], "no"], "No tents",
-                  ""
-                ],
-                [
-                  "case",
-                  ["in", ["get", "reservation"], ["literal", ["required", "no"]]], " · ",
-                  ""
-                ]
-              ],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Regular"]]},
-            [
-              "case",
-              ["==", ["get", "reservation"], "required"], "Reservations required",
-              ["==", ["get", "reservation"], "no"], "First-come, first-served",
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Regular"]]},
-          ],
-          [
-            'format',
-            [
-              "case",
-              ["any", ["has", "name"], ["has", "ref"]], [
-                "concat", ["coalesce", ["get", "name"], ["get", "ref"]], ["case", ["has", "ele"], '\n', ""]
-              ],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Bold"]]},
-            [
-              "case",
-              ["has", "ele"], ["concat", [
-                "number-format",
-                ["/", ["to-number", ['get', 'ele']], 0.3048],
-                { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
-              ], " ft"],
-              ""
-            ],
-            {"text-font": ['literal', ["Americana-Regular"]]},
-          ]
-        ]
+        poiLabelZoom, getLabelExpression(poiLabelData)
       ],
       "text-optional": true,
       "text-size": 11,
@@ -1710,4 +1599,146 @@ function didMouseMoveMap(e) {
 
     updateMapForHover();
   }
+}
+
+const poiLabelData = [
+  {
+    caseSelector: ['in', ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
+    selector: ["any", ["has", "name"], ["has", "ref"]],
+    label: ["coalesce", ["get", "name"], ["get", "ref"]],
+    sublabels: [
+      {
+        selector: ["==", ["get", "tents"], "no"],
+        label: "No tents",
+      },
+      {
+        selector: ["==", ["get", "group_only"], "yes"], 
+        label: "Groups only",
+      },
+      {
+        selector: ["==", ["get", "reservation"], "required"],
+        label: "Reservations required",
+      },
+      {
+        selector: ["==", ["get", "reservation"], "no"],
+        label: "First-come, first-served",
+      }
+    ]
+  },
+  {
+    caseSelector: ['==', ["get", "lock"], "yes"],
+    selector: ["any", ["has", "lock_name"], ["has", "lock_ref"]],
+    label: ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]],
+    sublabels: [
+      {
+        selector: ["has", "lock:height"],
+        label: ["concat", [
+          "number-format",
+          ["/", ["to-number", ['get', 'lock:height']], 0.3048],
+          { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
+        ], " ft"],
+      },
+      {
+        selector: ["has", "lock:height"],
+        label: " ↕︎",
+        font: "Americana-Bold",
+        conjoined: true
+      }
+    ]
+  },
+  {
+    caseSelector: ['in', ["get", "waterway"], ["literal", ["waterfall", "dam", "weir"]]],
+    selector: ["any", ["has", "name"], ["has", "ref"]],
+    label: ["coalesce", ["get", "name"], ["get", "ref"]],
+    sublabels: [
+      {
+        selector: ["has", "height"],
+        label:  ["concat", [
+          "number-format",
+          ["/", ["to-number", ['get', 'height']], 0.3048],
+          { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
+        ], " ft"],
+      },
+      {
+        selector: ["has", "height"],
+        label: " ↕︎",
+        font: "Americana-Bold",
+        conjoined: true
+      }
+    ]
+  },
+  {
+    selector: ["any", ["has", "name"], ["has", "ref"]],
+    label: ["coalesce", ["get", "name"], ["get", "ref"]],
+    sublabels: [
+      {
+        selector: ["has", "ele"],
+        label:  ["concat", [
+          "number-format",
+          ["/", ["to-number", ['get', 'ele']], 0.3048],
+          { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
+        ], " ft"],
+      },
+    ]
+  },
+];
+
+function getLabelExpression(items) {
+  let filters = ["case"];
+  for(let i in items) {
+    let item = items[i];
+
+    if (item.caseSelector) filters.push(item.caseSelector);
+
+    let filter = [
+      "format",
+      [
+        "case",
+        item.selector, item.sublabels ? [
+          "concat",
+          item.label,
+          [
+            "case",
+            ["any", ...item.sublabels.map(item => item.selector)], '\n',
+            ""
+          ]
+        ] : item.label,
+        ""
+      ],
+      {"text-font": ['literal', [item.font ? item.font : "Americana-Bold"]]},
+    ]
+
+    if (item.sublabels) {
+      filter = filter.concat(getSublabelExpressions(item.sublabels));
+    }
+    filters.push(filter);
+  }
+  return filters;
+}
+
+function getSublabelExpressions(items) {
+  let filters = [];
+  for(let i in items) {
+    let item = items[i];
+
+    let sublabelsFilter = [];
+    if (item.sublabels) {
+      sublabelsFilter = [["any", ...item.sublabels.map(item => item.selector)], '\n'];
+    }
+    filters.push([
+        "case",
+        item.selector, [
+          "concat", item.label,
+          [
+            "case",
+            ["any", ...items.slice(parseInt(i) + 1).filter(item => !item.conjoined).map(item => item.selector)], " · ",
+            ...sublabelsFilter,
+            ""
+          ]
+        ],
+        ""
+      ]);
+    filters.push({"text-font": ['literal', [item.font ? item.font : "Americana-Regular"]]});
+  }
+  return filters;
 }
