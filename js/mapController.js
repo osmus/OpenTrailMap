@@ -533,7 +533,6 @@ function loadTrailLayers() {
     "source-layer": "trail",
     "type": "symbol",
     "layout": {
-      "text-field": ["coalesce", ['get', 'name'], ['get', 'mtb:name'], ['get', 'waterbody:name']],
       "text-font": ["Americana-Regular"],
       "text-size": 13,
       "symbol-placement": "line"
@@ -793,10 +792,14 @@ function maxspeedKeysForTravelMode(travelMode) {
 
 function specifyingKeysForLens(lens, travelMode) {
   switch (lens) {
+    case 'access':
+      let keys = accessHierarchy[travelMode].reverse();
+      if (travelMode === 'canoe') keys.push('portage');
+      return keys;
     case 'name': 
       switch (travelMode) {
-        case "canoe": return ['name', 'noname', 'waterbody:name'];
-        case 'mtb': return ['name', 'noname', 'mtb:name'];
+        case "canoe": return ['name', 'waterbody:name', 'noname'];
+        case 'mtb': return ['name', 'mtb:name', 'noname'];
       }
       return ['name', 'noname'];
     case 'oneway': return onewayKeysForTravelMode(travelMode);
@@ -1326,6 +1329,7 @@ function updateTrailLayers() {
     ["has", "todo"],
     ["has", "TODO"],
   ], combinedFilterExpression])
+  map.setLayoutProperty('trails-labels', 'text-field', getTrailLabelExpression(lens, travelMode))
   map.setFilter('trails-labels', combinedFilterExpression)
   map.setFilter('trails-pointer-targets', combinedFilterExpression)
   map.setFilter('trail-pois', trailPoisFilter(travelMode))
@@ -1599,6 +1603,37 @@ function didMouseMoveMap(e) {
 
     updateMapForHover();
   }
+}
+
+function getTrailLabelExpression(lens, travelMode) {
+
+  let sublabels = null;
+
+  if (lens !== "") {
+    let keys = specifyingKeysForLens(lens, travelMode);
+    sublabels = [{
+      selector: ["any", ...keys.map(key => ["has", key])],
+      label: ["case", ...keys.map(key => {
+        let val = ["concat", key, "=", ["get", key]];
+        if (key === 'name' || key.endsWith(':name')) val = key;
+        return [["has", key], val];
+      }).flat(1), ""],
+    }];
+  }
+
+  return getLabelExpression([
+    {
+      caseSelector: ['has', 'waterway'],
+      selector: ["any", ["has", "name"], ["has", "waterbody:name"]],
+      label: ["coalesce", ["get", "name"], ["get", "waterbody:name"]],
+      sublabels: sublabels
+    },
+    {
+      selector: ["any", ["has", "name"], ["has", "mtb:name"]],
+      label: ["coalesce", ["get", "name"], ["get", "mtb:name"]],
+      sublabels: sublabels
+    }
+  ]);
 }
 
 const poiLabelData = [
