@@ -534,7 +534,7 @@ function loadTrailLayers() {
     "type": "symbol",
     "layout": {
       "text-font": ["Americana-Regular"],
-      "text-size": 13,
+      "text-size": 12,
       "symbol-placement": "line"
     },
     "paint": {
