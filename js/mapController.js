@@ -793,8 +793,9 @@ function maxspeedKeysForTravelMode(travelMode) {
 function specifyingKeysForLens(lens, travelMode) {
   switch (lens) {
     case 'access':
-      let keys = accessHierarchy[travelMode].reverse();
+      let keys = accessHierarchy[travelMode].slice().reverse();
       if (travelMode === 'canoe') keys.push('portage');
+      keys.push('access');
       return keys;
     case 'name': 
       switch (travelMode) {
@@ -1620,8 +1621,7 @@ function getTrailLabelExpression(lens, travelMode) {
       }).flat(1), ""],
     }];
   }
-
-  return getLabelExpression([
+  const trailLabelData = [
     {
       caseSelector: ['has', 'waterway'],
       selector: ["any", ["has", "name"], ["has", "waterbody:name"]],
@@ -1633,7 +1633,9 @@ function getTrailLabelExpression(lens, travelMode) {
       label: ["coalesce", ["get", "name"], ["get", "mtb:name"]],
       sublabels: sublabels
     }
-  ]);
+  ];
+
+  return getLabelExpression(trailLabelData);
 }
 
 const poiLabelData = [
