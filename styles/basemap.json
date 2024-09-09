@@ -44,6 +44,19 @@
       }
     },
     {
+      "id": "landuse-exclusion",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "all",
+        ["==", "$type", "Polygon"],
+        ["in", "class", "military"]
+      ],
+      "layout": {"visibility": "visible"},
+      "paint": {"fill-color": "hsl(0, 55%, 88%)", "fill-opacity": 1}
+    },
+    {
       "id": "hillshade-background",
       "type": "background",
       "paint": {
@@ -176,19 +189,6 @@
           18, 12
         ]
       }
-    },
-    {
-      "id": "landuse-exclusion",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "landuse",
-      "filter": [
-        "all",
-        ["==", "$type", "Polygon"],
-        ["in", "class", "military"]
-      ],
-      "layout": {"visibility": "visible"},
-      "paint": {"fill-color": "hsl(0, 20%, 88%)", "fill-opacity": 1}
     },
     {
       "id": "waterway-tunnel",
