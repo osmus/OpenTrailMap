@@ -664,6 +664,7 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "boundary",
+      "minzoom": 3,
       "filter": ["in", "admin_level", 4, 6, 8],
       "layout": {"visibility": "visible"},
       "paint": {"line-color": "hsla(0, 0%, 60%, 0.5)", "line-dasharray": [2, 1]}
