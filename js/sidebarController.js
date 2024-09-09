@@ -112,13 +112,30 @@ function updateMetaTable(entity, changeset) {
   document.getElementById('meta-table').innerHTML = html;
 }
 
+const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
+const qidRegex = /^Q\d+$/;
+const wikipediaRegex = /^(.+):(.+)$/;
+const nwisRegex = /^\d{8,15}$/;
+
 function updateTagsTable(tags) {
   let html = "";
   html += `<tr><th>Key</th><th>Value</th></tr>`;
   let keys = Object.keys(tags).sort();
   for (let i in keys) {
     let key = keys[i];
-    html += `<tr><td>${key}</td><td>${tags[key]}</td></tr>`;
+    let value = tags[key];
+    let element = value;
+    if (urlRegex.test(value)) {
+      element = `<a target="_blank" rel="nofollow" href="${value}">${value}</a>`;
+    } else if ((key === 'wikidata' || key.endsWith(':wikidata')) && qidRegex.test(value)) {
+      element = `<a target="_blank" rel="nofollow" href="https://www.wikidata.org/wiki/${value}">${value}</a>`;
+    } else if ((key === 'wikipedia' || key.endsWith(':wikipedia')) && wikipediaRegex.test(value)) {
+      let results = wikipediaRegex.exec(value);
+      element = `<a target="_blank" rel="nofollow" href="https://${results[1]}.wikipedia.org/wiki/${results[2]}">${value}</a>`;
+    } else if (key === 'ref' && tags.man_made === 'monitoring_station' && tags.operator === "United States Geological Survey" && nwisRegex.test(value)) {
+      element = `<a target="_blank" rel="nofollow" href="https://waterdata.usgs.gov/monitoring-location/${value}/">${value}</a>`;
+    }
+    html += `<tr><td><a target="_blank" rel="nofollow" href="https://wiki.openstreetmap.org/wiki/Key:${key}">${key}</a></td><td>${element}</td></tr>`;
   }
   document.getElementById('tag-table').innerHTML = html;
 }
