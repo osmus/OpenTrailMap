@@ -17,6 +17,14 @@
     "trails": {
       "type": "vector",
       "url": "https://dwuxtsziek7cf.cloudfront.net/trails.json"
+    },
+    "hillshade": {
+      "type": "raster",
+      "url": "https://dwuxtsziek7cf.cloudfront.net/hillshade.json"
+    },
+    "contours": {
+      "type": "vector",
+      "url": "https://dwuxtsziek7cf.cloudfront.net/contours-feet.json"
     }
   },
   "glyphs": "https://font.americanamap.org/{fontstack}/{range}.pbf",
@@ -24,7 +32,7 @@
     {
       "id": "background",
       "type": "background",
-      "paint": {"background-color": "#f9f5ed"}
+      "paint": {"background-color": "#F2EADA"}
     },
     {
       "id": "park-fill",
@@ -33,6 +41,65 @@
       "source-layer": "park",
       "paint": {
         "fill-color": "hsla(0, 0%, 100%, 0)"
+      }
+    },
+    {
+      "id": "landuse-exclusion",
+      "type": "fill",
+      "source": "openmaptiles",
+      "source-layer": "landuse",
+      "filter": [
+        "all",
+        ["==", "$type", "Polygon"],
+        ["in", "class", "military"]
+      ],
+      "layout": {"visibility": "visible"},
+      "paint": {"fill-color": "hsl(0, 55%, 88%)", "fill-opacity": 1}
+    },
+    {
+      "id": "hillshade-background",
+      "type": "background",
+      "paint": {
+        "background-color": "#fff",
+        "background-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.0, 18, 0.3]
+      }
+    },
+    {
+      "id": "hillshade",
+      "type": "raster",
+      "source": "hillshade",
+      "paint": {"raster-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.5, 18, 0.1]}
+    },
+    {
+      "id": "contours",
+      "type": "line",
+      "source": "contours",
+      "source-layer": "contours",
+      "paint": {
+        "line-color": "#000000",
+        "line-opacity": ["case", ["get", "idx"], 0.2, 0.1],
+        "line-width": 0.5
+      }
+    },
+    {
+      "id": "contours-labels",
+      "type": "symbol",
+      "source": "contours",
+      "source-layer": "contours",
+      "minzoom": 12,
+      "filter": ["==", ["get", "idx"], true],
+      "layout": {
+        "text-field": "{ele} ft",
+        "text-font": ["Americana-Regular"],
+        "text-size": 8,
+        "symbol-placement": "line",
+        "symbol-spacing": ["interpolate", ["linear"], ["zoom"], 12, 150, 16, 600]
+      },
+      "paint": {
+        "text-color": "#666",
+        "text-halo-color": "hsla(0, 0%, 100%, 0.5)",
+        "text-halo-width": 1.5,
+        "text-halo-blur": 1
       }
     },
     {
@@ -122,19 +189,6 @@
           18, 12
         ]
       }
-    },
-    {
-      "id": "landuse-exclusion",
-      "type": "fill",
-      "source": "openmaptiles",
-      "source-layer": "landuse",
-      "filter": [
-        "all",
-        ["==", "$type", "Polygon"],
-        ["in", "class", "military"]
-      ],
-      "layout": {"visibility": "visible"},
-      "paint": {"fill-color": "hsl(0, 20%, 88%)", "fill-opacity": 1}
     },
     {
       "id": "waterway-tunnel",
@@ -610,6 +664,7 @@
       "type": "line",
       "source": "openmaptiles",
       "source-layer": "boundary",
+      "minzoom": 3,
       "filter": ["in", "admin_level", 4, 6, 8],
       "layout": {"visibility": "visible"},
       "paint": {"line-color": "hsla(0, 0%, 60%, 0.5)", "line-dasharray": [2, 1]}

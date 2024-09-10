@@ -1381,8 +1381,8 @@ function updateTrailLayers() {
   ]);
   map.setPaintProperty('park-fill', "fill-color", [
     "case",
-    ["==", ["id"], focusedId], "#D8E8B7",
-    "#EFF5DC"
+    ["==", ["id"], focusedId], "#B1D06F",
+    "#DFEAB8"
   ]);
   map.setPaintProperty('park-outline', "line-color", [
     "case",
