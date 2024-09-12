@@ -79,7 +79,8 @@
         "line-color": "#000000",
         "line-opacity": ["case", ["get", "idx"], 0.2, 0.1],
         "line-width": 0.5
-      }
+      },
+      "filter": ["!=", ["get", "ele"], 0]
     },
     {
       "id": "contours-labels",
@@ -87,7 +88,11 @@
       "source": "contours",
       "source-layer": "contours",
       "minzoom": 12,
-      "filter": ["==", ["get", "idx"], true],
+      "filter": [
+        "all",
+        ["==", ["get", "idx"], true],
+        ["!=", ["get", "ele"], 0]
+      ],
       "layout": {
         "text-field": "{ele} ft",
         "text-font": ["Americana-Regular"],
