@@ -455,12 +455,24 @@ window.onload = function(event) {
 
   updateLensControl();
 
+  // default
+  let initialCenter = [-111.545, 39.546];
+  let initialZoom = 6;
+
+  // show last-open area if any (this is overriden by the URL hash map parameter)
+  let cachedTransformString = localStorage?.getItem('map_transform');
+  let cachedTransform = cachedTransformString && JSON.parse(cachedTransformString);
+  if (cachedTransform && cachedTransform.zoom && cachedTransform.lat && cachedTransform.lng) {
+    initialZoom = cachedTransform.zoom;
+    initialCenter = cachedTransform;
+  }
+
   map = new maplibregl.Map({
     container: 'map',
     hash: "map",
     style: './styles/basemap.json',
-    center: [-111.545,39.546],
-    zoom: 6
+    center: initialCenter,
+    zoom: initialZoom
   });
 
   // Add zoom and rotation controls to the map.
@@ -532,5 +544,12 @@ window.onload = function(event) {
   }
 
   map
-    .on('load', loadInitialMap);
+    .on('load', loadInitialMap)
+    .on('moveend', function(event) {
+      if (localStorage) {
+        let transform = map.getCenter();
+        transform.zoom = map.getZoom();
+        localStorage.setItem('map_transform', JSON.stringify(transform));
+      }
+    });
 }
