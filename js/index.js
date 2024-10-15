@@ -378,7 +378,7 @@ function selectEntity(entityInfo) {
   updateMapForSelection();
   updateMapForHover();
 
-  if (isSidebarOpen()) updateSidebar();
+  if (isSidebarOpen()) updateSidebar(selectedEntityInfo);
 
   if (!selectedEntityInfo) return;
 

@@ -16,7 +16,7 @@ function openSidebar() {
     }
     document.getElementsByTagName('body')[0].classList.add('sidebar-open');
     setHashParameters({ inspect: 1 });
-    updateSidebar();
+    updateSidebar(selectedEntityInfo);
   }
 }
 function closeSidebar() {
@@ -26,9 +26,7 @@ function closeSidebar() {
   }
 }
 
-function updateSidebar() {
-
-  let entity = selectedEntityInfo;
+function updateSidebar(entity) {
 
   if (!entity) {
     document.getElementById('sidebar').innerHTML = "";
@@ -101,14 +99,16 @@ function updateSidebar() {
 function updateMetaTable(entity, changeset) {
   let formattedDate = getFormattedDate(new Date(entity.timestamp));
   let comment = changeset && changeset.tags && changeset.tags.comment || '';
+  let sources = changeset && changeset.tags && changeset.tags.source || '';
   let html = "";
   html += `<tr><th colspan='2'>Meta</th></tr>`;
   html += `<tr><td>ID</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}" target="_blank">${entity.type}/${entity.id}</a></td></tr>`;
   html += `<tr><td>Version</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}/history" target="_blank">${entity.version}</a></td></tr>`;
-  html += `<tr><td>Changeset</td><td><a href="https://www.openstreetmap.org/changeset/${entity.changeset}" target="_blank">${entity.changeset}</a></td></tr>`;
-  html += `<tr><td>Comment</td><td>${comment}</td></tr>`;
   html += `<tr><td>Uploaded</td><td>${formattedDate}</td></tr>`;
   html += `<tr><td>User</td><td><a href="https://www.openstreetmap.org/user/${entity.user}" target="_blank">${entity.user}</a></td></tr>`;
+  html += `<tr><td>Changeset</td><td><a href="https://www.openstreetmap.org/changeset/${entity.changeset}" target="_blank">${entity.changeset}</a></td></tr>`;
+  html += `<tr><td>Comment</td><td>${comment}</td></tr>`;
+  html += `<tr><td>Source</td><td>${sources}</td></tr>`;
   document.getElementById('meta-table').innerHTML = html;
 }
 

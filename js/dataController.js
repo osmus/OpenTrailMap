@@ -62,7 +62,7 @@ async function fetchOsmChangeset(id) {
     let url = `https://api.openstreetmap.org/api/0.6/changeset/${id}.json`;
     let response = await fetch(url);
     let json = await response.json();
-    osmChangesetCache[id] = json && json.elements && json.elements.length && json.elements[0];
+    osmChangesetCache[id] = json && json.changeset;
   }
   return osmChangesetCache[id];
 }

@@ -1533,6 +1533,7 @@ function entityForEvent(e, layerIds) {
       return {
         id: feature.properties.OSM_ID,
         type: feature.properties.OSM_TYPE,
+        changeset: feature.properties.OSM_CHANGESET,
         focusLngLat: focusLngLat,
         rawFeature: feature,
       };
