@@ -718,6 +718,7 @@ function loadTrailLayers() {
         22, 1
       ],
       "symbol-placement": "point",
+      "symbol-sort-key": ["-", ["get", "AREA_Z0_PX2"]],
       "text-field": ["get", "name"],
       "text-optional": true,
       "text-size": 11,
@@ -1341,7 +1342,7 @@ function updateTrailLayers() {
       ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
       ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
     ],
-    [">=", ["*", ["get", "BBOX_AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.0000001],
+    [">=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.000000075],
     ["!", ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]]],
     // don't show icon and label for currently focused feature
     ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null],
