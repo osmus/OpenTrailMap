@@ -279,6 +279,36 @@ let focusAreaGeoJson;
 let focusAreaGeoJsonBuffered;
 let focusAreaBoundingBox;
 
+function getEntityBoundingBox(entity) {
+  const props = entity?.properties;
+  if (props?.hasOwnProperty('MIN_LON') &&
+    props?.hasOwnProperty('MIN_LAT') &&
+    props?.hasOwnProperty('MAX_LON') &&
+    props?.hasOwnProperty('MAX_LAT')) {
+    return [
+      props.MIN_LON,
+      props.MIN_LAT,
+      props.MAX_LON,
+      props.MAX_LAT
+    ];
+  }
+}
+
+function getEntityBoundingBoxFromLayer(id, type, layer) {
+  if (!focusedEntityInfo) return null;
+  let features = map.querySourceFeatures('trails', {
+    filter: [
+      "all",
+      ["==", ["get", "OSM_ID"], id],
+      ["==", ["get", "OSM_TYPE"], type],
+    ],
+    sourceLayer: layer,
+  });
+  if (features.length) {
+    return getEntityBoundingBox(features[0]);
+  }
+}
+
 function buildFocusAreaGeoJson() {
   if (!focusedEntityInfo) return null;
   let results = map.querySourceFeatures('trails', {
@@ -309,22 +339,24 @@ function checkMapExtent() {
     map.fitBounds(targetBounds);
   }
 }
-function fitMapToFocusArea() {
-  if (!focusAreaBoundingBox) return;
-  let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
-  let height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
+
+function fitMapToBounds(bbox) {
+  let width = bbox[2] - bbox[0];
+  let height = bbox[3] - bbox[1];
   let maxExtent = Math.max(width, height);
-  let fitBbox = extendBbox(focusAreaBoundingBox, maxExtent / 16);
+  let fitBbox = extendBbox(bbox, maxExtent / 16);
   map.fitBounds(fitBbox);
 }
+
 function reloadFocusAreaIfNeeded() {
   let newFocusAreaGeoJson = buildFocusAreaGeoJson();
 
   if ((newFocusAreaGeoJson && JSON.stringify(newFocusAreaGeoJson)) !==
     (focusAreaGeoJson && JSON.stringify(focusAreaGeoJson))) {
 
+    focusAreaBoundingBox = focusedEntityInfo && getEntityBoundingBoxFromLayer(focusedEntityInfo.id, focusedEntityInfo.type, "park");
+
     focusAreaGeoJson = newFocusAreaGeoJson;
-    focusAreaBoundingBox = bboxOfGeoJson(focusAreaGeoJson);
     focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
 
     if (focusAreaGeoJson) document.getElementById("map-title").innerText = focusAreaGeoJson.properties.name;
@@ -357,7 +389,6 @@ function focusEntity(entityInfo) {
   document.getElementById("nameplate").style.display = focusedEntityInfo ? 'flex' : 'none';
 
   reloadFocusAreaIfNeeded();
-  fitMapToFocusArea();
 }
 
 function selectEntity(entityInfo) {
@@ -437,6 +468,22 @@ function setLens(value, skipMapUpdate) {
 window.onload = function(event) {
 
   window.addEventListener("hashchange", updateForHash);
+
+  document.addEventListener('keydown', function(e) {
+
+    if (e.isComposing || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+    switch(e.key) {
+      case 'z':
+        if (selectedEntityInfo) {
+          let bounds = getEntityBoundingBox(selectedEntityInfo.rawFeature);
+          if (bounds) {
+            fitMapToBounds(bounds);
+          }
+        }
+        break;
+    }
+  });
 
   document.getElementById("travel-mode").addEventListener('change', function(e) {
     setTravelMode(e.target.value);
