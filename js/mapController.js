@@ -1343,6 +1343,7 @@ function updateTrailLayers() {
       ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
     ],
     [">=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.000000075],
+    ["<=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.0001],
     ["!", ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]]],
     // don't show icon and label for currently focused feature
     ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null],
