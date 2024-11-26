@@ -1483,7 +1483,7 @@ function updateMapForSelection() {
   if (type === "relation") {
     let members = osmEntityCache[type[0] + id]?.members || [];
     members.forEach(function(member) {
-      idsToHighlight.push(member.ref);
+      if (member.role !== 'inner') idsToHighlight.push(member.ref);
       
       if (member.type === "relation") {
         // only recurse down if we have the entity cached
