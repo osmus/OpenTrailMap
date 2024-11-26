@@ -1478,7 +1478,9 @@ function updateMapForSelection() {
   let id = selectedEntityInfo && selectedEntityInfo.id;
   let type = selectedEntityInfo && selectedEntityInfo.type;
 
-  let idsToHighlight = [id ? id : -1];
+  let focusedId = focusedEntityInfo?.id;
+
+  let idsToHighlight = [id && id !== focusedId ? id : -1];
 
   if (type === "relation") {
     let members = osmEntityCache[type[0] + id]?.members || [];

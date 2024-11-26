@@ -389,6 +389,7 @@ function focusEntity(entityInfo) {
   document.getElementById("nameplate").style.display = focusedEntityInfo ? 'flex' : 'none';
 
   reloadFocusAreaIfNeeded();
+  updateMapForSelection();
 }
 
 function selectEntity(entityInfo) {
