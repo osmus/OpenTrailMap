@@ -1361,7 +1361,7 @@ function updateTrailLayers() {
   map.setFilter('park-fill', [
     "any",
     ["==", ["id"], focusedId],
-    ["!", ["in", ["id"], ["literal", conservationDistrictOmtIds]]]
+    ["!", ["in", ["get", "protected_area"], ["literal", ["conservation_district"]]]]
   ]);
   map.setFilter('park-outline', [
     "any",
@@ -1456,13 +1456,6 @@ async function loadInitialMap() {
     .on('click', didClickMap)
     .on('dblclick', didDoubleClickMap);
 }
-
-// some "park" features aren't really parks
-const conservationDistrictOmtIds = [
-  16953943, // Adirondack Park
-  62654773, // Catskill Park
-  110177633, // Pinelands NR
-];
 
 function omtId(id, type) {
   let codes = {
