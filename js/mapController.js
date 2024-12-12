@@ -878,21 +878,6 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
     ];
   }
 
-  if (waterwayOnlyLenses.includes(lens)) {
-    // don't expect waterway-only attributes on highways
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["has", "highway"],
-    ];
-  } else if (highwayOnlyLenses.includes(lens)) {
-    // don't expect highway-only attributes on waterways
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["!has", "highway"],
-    ];
-  }
   if (lens === 'oneway' && travelMode === "canoe") {
     specifiedAttributeExpression = [
       "any",
@@ -1230,6 +1215,12 @@ function updateTrailLayers() {
       allowedAccessExpression,
       specifiedAccessExpression
     ];
+
+    if (waterwayOnlyLenses.includes(lens)) {
+      allowedAccessExpression.push(["has", "waterway"]);
+    } else if (highwayOnlyLenses.includes(lens)) {
+      allowedAccessExpression.push(["has", "highway"]);
+    }
   } else {
     specifiedExpression = specifiedAccessExpression;
   }
