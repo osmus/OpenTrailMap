@@ -6,7 +6,8 @@ const colors = {
   ferry: "#009FBE",
   natural: "#005908",
   specified: "#007f79",
-  unspecified: "#8e00cc",
+  unspecified: "#c100cc",
+  tidal: "#0041e5",
   disallowedWater: "#a6b2c4",
   water: "#003b93",
   label: "#333",
@@ -1157,6 +1158,12 @@ function updateTrailLayers() {
 
     pathsColors = lens === 'check_date' ? checkDateColors :
       lens === 'OSM_TIMESTAMP' ? editedDateColors :
+      lens === 'tidal' ? [
+        "case",
+        ["any", ["==", ["get", "tidal"], "yes"], isImpliedExpressionForLens("tidal")], colors.tidal,
+        ["==", ["get", "tidal"], "no"], colors.specified,
+        colors.unspecified
+      ] :
       colors.specified;
     
     waterwaysColors = pathsColors;
