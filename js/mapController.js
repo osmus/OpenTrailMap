@@ -45,165 +45,130 @@ const editedDateColors = [
 const isHighwayExpression = [
   "any",
   ["has", "highway"],
-  ["==", "route", "ferry"],
+  ["==", ["get", "route"], "ferry"],
 ];
 const isNotHighwayExpression = [
   "all",
-  ["!has", "highway"],
-  ["!=", "route", "ferry"],
+  ["!", ["has", "highway"]],
+  ["!=", ["get", "route"], "ferry"],
 ];
-const impliedYesExpressions = {
-  atv: [],
+const impliedYesExpression = {
   bicycle: [
-    [
-      "in", "highway",
-      "cycleway",
-      "service",
-      "unclassified",
-      "residential",
-      "tertiary",
-      "secondary",
-      "primary",
-      "tertiary_link",
-      "secondary_link",
-      "primary_link"
-    ],
+    "in", ["get", "highway"],
+    ["literal", [
+    "cycleway",
+    "service",
+    "unclassified",
+    "residential",
+    "tertiary",
+    "secondary",
+    "primary",
+    "tertiary_link",
+    "secondary_link",
+    "primary_link"]]
   ],
-  canoe: [],
   foot: [
-    [
-      "in", "highway",
-      "path",
-      "footway",
-      "steps",
-      "service",
-      "unclassified",
-      "residential",
-      "tertiary",
-      "secondary",
-      "primary",
-      "tertiary_link",
-      "secondary_link",
-      "primary_link"
-    ],
+    "in", ["get", "highway"],
+    ["literal", [
+    "path",
+    "footway",
+    "steps",
+    "service",
+    "unclassified",
+    "residential",
+    "tertiary",
+    "secondary",
+    "primary",
+    "tertiary_link",
+    "secondary_link",
+    "primary_link"]]
   ],
-  horse: [
-    ["==", "highway", "bridleway"]
-  ],
+  horse: ["==", ["get", "highway"], "bridleway"],
   inline_skates: [
-    [
-      "all",
-      // cycleways commonly allow skating
-      ["==", "highway", "cycleway"],
-      // as long as they're multi-use
-      ["in", "foot", "yes", "designated", "permissive"],
-      // and have the highest smoothness
-      ["==", "smoothness", "excellent"],
-      // and are properly paved (redundant to smoothness but the additional check is nice)
-      ["in", "surface", "paved", "asphalt", "concrete"],
-    ]
+    "all",
+    // cycleways commonly allow skating
+    ["==", ["get", "highway"], "cycleway"],
+    // as long as they're multi-use
+    ["in", ["get", "foot"], ["literal", ["yes", "designated", "permissive"]]],
+    // and have the highest smoothness
+    ["==", ["get", "smoothness"], "excellent"],
+    // and are properly paved (redundant to smoothness but the additional check is nice)
+    ["in", ["get", "surface"], ["literal", ["paved", "asphalt", "concrete"]]],
   ],
-  mtb: [],
-  portage: [],
-  'ski:nordic': [],
-  snowmobile: [],
-  wheelchair: [],
 };
 
-const impliedNoExpressions = {
+const impliedNoExpression = {
   atv: [
-    [
       "any",
-      ["in", "highway", "footway", "steps"],
-      ["in", "vehicle", "no", "private", "discouraged"],
-      ["in", "motor_vehicle", "no", "private", "discouraged"],
+      ["in", ["get", "highway"], ["literal", ["footway", "steps"]]],
+      ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
+      ["in", ["get", "motor_vehicle"], ["literal", ["no", "private", "discouraged"]]],
       isNotHighwayExpression,
-    ]
   ],
   bicycle: [
+    "any",
     [
-      "any",
-      [
-        "all",
-        ["==", "highway", "steps"],
-        ["!=", "ramp:bicycle", "yes"],
-      ],
-      ["in", "vehicle", "no", "private", "discouraged"],
-      isNotHighwayExpression,
-    ]
-  ],
-  canoe: [
-    ["!has", "canoe"],
-  ],
-  foot: [
+      "all",
+      ["==", ["get", "highway"], "steps"],
+      ["!=", ["get", "ramp:bicycle"], "yes"],
+    ],
+    ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
     isNotHighwayExpression,
   ],
+  canoe: ["!", ["has", "canoe"]],
+  foot: isNotHighwayExpression,
   horse: [
-    [
-      "any",
-      ["==", "highway", "steps"],
-      isNotHighwayExpression,
-    ],
+    "any",
+    ["==", ["get", "highway"], "steps"],
+    isNotHighwayExpression,
   ],
   inline_skates: [
+    "any",
     [
-      "any",
-      [
-        "all",
-        ["has", "smoothness"],
-        ["!in", "smoothness", "excellent", "good", "intermediate"],
-      ],
-      [
-        "all",
-        ["has", "surface"],
-        ["in", "surface", "dirt", "grass", "sand", "sett", "cobblestone", "clay", "unhewn_cobblestone", "pebblestone", "grass_paver", "earth", "ground", "artificial_turf", "mud", "rock", "stone", "woodchips"],
-      ],
-      isNotHighwayExpression,
+      "all",
+      ["has", "smoothness"],
+      ["!", ["in", ["get", "smoothness"], ["literal", ["excellent", "good", "intermediate"]]]],
     ],
+    [
+      "all",
+      ["has", "surface"],
+      ["in", ["get", "surface"], ["literal", ["dirt", "grass", "sand", "sett", "cobblestone", "clay", "unhewn_cobblestone", "pebblestone", "grass_paver", "earth", "ground", "artificial_turf", "mud", "rock", "stone", "woodchips"]]],
+    ],
+    isNotHighwayExpression,
   ],
   mtb: [
-    [
-      "any",
-      ["in", "vehicle", "no", "private", "discouraged"],
-      ["in", "bicycle", "no", "private", "discouraged"],
-      isNotHighwayExpression,
-    ],
+    "any",
+    ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
+    ["in", ["get", "bicycle"], ["literal", ["no", "private", "discouraged"]]],
+    isNotHighwayExpression,
   ],
-  portage: [
-    ["!has", "portage"],
-  ],
+  portage: ["!", ["has", "portage"]],
   'ski:nordic': [
-    [
-      "any",
-      ["in", "ski", "no", "private", "discouraged"],
-      isNotHighwayExpression,
-    ]
+    "any",
+    ["in", ["get", "ski"], ["literal", ["no", "private", "discouraged"]]],
+    isNotHighwayExpression,
   ],
   snowmobile: [
-    [
-      "any",
-      ["in", "highway", "footway", "steps"],
-      ["in", "vehicle", "no", "private", "discouraged"],
-      ["in", "motor_vehicle", "no", "private", "discouraged"],
-      isNotHighwayExpression,
-    ]
+    "any",
+    ["in", ["get", "highway"], ["literal", ["footway", "steps"]]],
+    ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
+    ["in", ["get", "motor_vehicle"], ["literal", ["no", "private", "discouraged"]]],
+    isNotHighwayExpression,
   ],
   wheelchair: [
+    "any",
+    ["==", ["get", "highway"], "steps"],
     [
-      "any",
-      ["==", "highway", "steps"],
-      [
-        "all",
-        ["has", "sac_scale"],
-        ["!=", "sac_scale", "hiking"],
-      ],
-      [
-        "all",
-        ["has", "smoothness"],
-        ["!in", "smoothness", "excellent", "very_good", "good", "intermediate"],
-      ],
-      isNotHighwayExpression,
-    ]
+      "all",
+      ["has", "sac_scale"],
+      ["!=", ["get", "sac_scale"], "hiking"],
+    ],
+    [
+      "all",
+      ["has", "smoothness"],
+      ["!", ["in", ["get", "smoothness"], ["literal", ["excellent", "very_good", "good", "intermediate"]]]],
+    ],
+    isNotHighwayExpression,
   ],
 };
 
@@ -573,7 +538,7 @@ function loadTrailLayers() {
       "circle-color": colors.natural,
     },
     "filter": [
-      "==", "natural", "tree" 
+      "==", ["get", "natural"], "tree" 
     ],
   });
   addTrailLayer({
@@ -636,8 +601,8 @@ function loadTrailLayers() {
         "case",
         [
           "any",
-          ['in', ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
-          ['==', ["get", "man_made"], "cairn"],
+          ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
+          ["==", ["get", "man_made"], "cairn"],
         ], "bottom",
         "center",
       ],
@@ -649,18 +614,18 @@ function loadTrailLayers() {
       "symbol-placement": "point",
       "symbol-sort-key": [
         "case",
-        ['==', ["get", "route"], "ferry"], 1,
-        ['==', ["get", "man_made"], "monitoring_station"], 4,
-        ['==', ["get", "tourism"], "camp_site"], 5,
-        ['==', ["get", "amenity"], "ranger_station"], 6,
-        ['==', ["get", "highway"], "trailhead"], 7,
-        ['==', ["get", "tourism"], "wilderness_hut"], 8,
-        ['==', ["get", "tourism"], "camp_pitch"], 8,
-        ['==', ["get", "shelter_type"], "lean_to"], 9,
-        ['==', ["get", "tourism"], "viewpoint"], 18,
-        ['==', ["get", "information"], "guidepost"], 19,
-        ['==', ["get", "man_made"], "cairn"], 20,
-        ['==', ["get", "information"], "route_marker"], 20,
+        ["==", ["get", "route"], "ferry"], 1,
+        ["==", ["get", "man_made"], "monitoring_station"], 4,
+        ["==", ["get", "tourism"], "camp_site"], 5,
+        ["==", ["get", "amenity"], "ranger_station"], 6,
+        ["==", ["get", "highway"], "trailhead"], 7,
+        ["==", ["get", "tourism"], "wilderness_hut"], 8,
+        ["==", ["get", "tourism"], "camp_pitch"], 8,
+        ["==", ["get", "shelter_type"], "lean_to"], 9,
+        ["==", ["get", "tourism"], "viewpoint"], 18,
+        ["==", ["get", "information"], "guidepost"], 19,
+        ["==", ["get", "man_made"], "cairn"], 20,
+        ["==", ["get", "information"], "route_marker"], 20,
         [
           "any",
           ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
@@ -708,8 +673,8 @@ function loadTrailLayers() {
     "layout": {
       "icon-image": [
         "case",
-        ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]], ["image", "protected_area"],
-        ['==', ["get", "leisure"], "nature_reserve"], ["image", "nature_reserve"],
+        ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]], ["image", "protected_area"],
+        ["==", ["get", "leisure"], "nature_reserve"], ["image", "nature_reserve"],
         ["image", "park"],
       ],
       "icon-size": [
@@ -819,81 +784,74 @@ function attributeIsSpecifiedExpression(keys) {
       return [
         "all",
         ["has", key],
-        ["!=", key, "unknown"],
+        ["!=", ["get", key], "unknown"],
       ];
     }),
   ];
+}
+function isImpliedExpressionForLens(lens) {
+  switch (lens) {
+    case 'operator':
+      // if a path is `informal=yes` then there's probably no operator, always style as complete
+      return ["==", ["get", "informal"], "yes"];
+    case 'tidal':
+      // assume tidal channels are always tidal=yes
+      return ["==", ["get", "waterway"], "tidal_channel"];
+    case 'open_water':
+      // only expect open_water tag on certain features
+      return ["!", ["in", ["get", "waterway"], ["literal", ["fairway", "flowline"]]]];
+    case 'width':
+      // don't expect width tag on links
+      return ["==", ["get", "waterway"], "link"];
+  }
+  return null;
 }
 function isSpecifiedExpressionForLens(lens, travelMode) {
 
   let specifiedAttributeExpression = attributeIsSpecifiedExpression(
     specifyingKeysForLens(lens, travelMode)
   );
-  // for fixmes we're looking for extant values instead of missing values
-  if (lens === 'fixme') {
-    specifiedAttributeExpression = [
-      "none",
-      specifiedAttributeExpression,
-    ];
-  }
-  if (lens === 'operator') {
-    // if a path is `informal=yes` then there's probably no operator, always style as complete
+  let impliedAttributeExpression = isImpliedExpressionForLens(lens);
+  if (impliedAttributeExpression) {
     specifiedAttributeExpression = [
       "any",
       specifiedAttributeExpression,
-      ["==", "informal", "yes"],
+      impliedAttributeExpression
     ];
   }
-  if (lens === 'sac_scale') {
-    // if a path is `informal=yes` then there's probably no operator, always style as complete
-    specifiedAttributeExpression = [
-      "all",
-      specifiedAttributeExpression,
-      ["in", "sac_scale", 'no', 'hiking', 'mountain_hiking', 'demanding_mountain_hiking', 'alpine_hiking', 'demanding_alpine_hiking', 'difficult_alpine_hiking'],
-    ];
-  }
-
-  if (lens === 'tidal') {
-    // assume tidal channels are always tidal=yes
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["==", "waterway", "tidal_channel"],
-    ];
-  }
-  if (lens === 'open_water') {
-    // only expect open_water tag on certain features
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["!in", "waterway", "fairway", "flowline"],
-    ];
-  }
-  if (lens === 'width') {
-    // don't expect width tag on links
-    specifiedAttributeExpression = [
-      "any",
-      specifiedAttributeExpression,
-      ["==", "waterway", "link"],
-    ];
-  }
-
-  if (lens === 'oneway' && travelMode === "canoe") {
-    specifiedAttributeExpression = [
-      "any",
-      [
+  switch (lens) {
+    case 'fixme':
+      // for fixmes we're looking for extant values instead of missing values
+      specifiedAttributeExpression = ["!", specifiedAttributeExpression];
+      break;
+    case 'sac_scale':
+      // there are a lot of junk sac_scale values, so require one from a known set
+      specifiedAttributeExpression = [
         "all",
         specifiedAttributeExpression,
-        ["has", "waterway"],
-      ],
-      [
-        "all",
-        attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
-        ["!has", "waterway"],
-      ],
-    ];
+        ["in", ["get", "sac_scale"], ["literal", ['no', 'hiking', 'mountain_hiking', 'demanding_mountain_hiking', 'alpine_hiking', 'demanding_alpine_hiking', 'difficult_alpine_hiking']]],
+      ];
+      break;
+    case 'oneway':
+      if (travelMode === 'canoe') {
+        specifiedAttributeExpression = [
+          "any",
+          [
+            "all",
+            specifiedAttributeExpression,
+            ["has", "waterway"],
+          ],
+          [
+            "all",
+            attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
+            ["!", ["has", "waterway"]],
+          ],
+        ];
+      }
+      break;
+    default:
+      break;
   }
-  
   return specifiedAttributeExpression;
 }
 
@@ -904,8 +862,8 @@ function trailPoisFilter(travelMode) {
       "any",
       [
         "all",
-        ["!", ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
-        ["!", ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
+        ["!", ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
+        ["!", ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
       ],
       ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
     ],
@@ -917,13 +875,12 @@ function trailPoisFilter(travelMode) {
   if (travelMode !== "canoe" && travelMode !== "all") {
     // don't show canoe-specific POIs for other travel modes
     filter.push([
-      "!",
-      [
+      "!", [
         "any",
-        ['==', ["get", "natural"], "beaver_dam"],
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]],
-        ['==', ["get", "lock"], "yes"],
-        ['==', ["get", "man_made"], "monitoring_station"],
+        ["==", ["get", "natural"], "beaver_dam"],
+        ["in", ["get", "waterway"], ["literal", ["dam", "weir"]]],
+        ["==", ["get", "lock"], "yes"],
+        ["==", ["get", "man_made"], "monitoring_station"],
       ]
     ]);
   }
@@ -935,10 +892,9 @@ function trailPoisFilter(travelMode) {
     };
     if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
     filter.push([
-      'any',
+      "any",
       [
-        "!",
-        [
+        "!", [
           "any",
           ["==", ["get", "highway"], "trailhead"],
           ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
@@ -967,7 +923,7 @@ function trailPoisFilter(travelMode) {
 }
 
 function onewayArrowsFilter(travelMode) {
-  let filter = ['any'];
+  let filter = ["any"];
   let onewayKeys = onewayKeysForTravelMode(travelMode);
   while (onewayKeys.length) {
     let leastSpecificKey = onewayKeys.shift();
@@ -975,10 +931,10 @@ function onewayArrowsFilter(travelMode) {
       "all",
       // if there isn't a more specific key (e.g. 'oneway:foot')
       ...onewayKeys.map(function(key) {
-        return ["!has", key];
+        return ["!", ["has", key]];
       }),
       // then pay attention to the most specific key we have (e.g. 'oneway')
-      ["in", leastSpecificKey, "yes", "-1", "alternating", "reversible"],
+      ["in", ["get", leastSpecificKey], ["literal", ["yes", "-1", "alternating", "reversible"]]],
     ]);
   }
   if (travelMode === "canoe") {
@@ -992,7 +948,7 @@ function onewayArrowsFilter(travelMode) {
       [
         "all",
         onewayArrowsFilter('portage'),
-        ["!has", "waterway"],
+        ["!", ["has", "waterway"]],
       ],
     ];
   }
@@ -1004,31 +960,31 @@ function poiIconImageExpression(travelMode) {
   return [
     "case",
     ["==", ["get", "route"], "ferry"], ["image", "ferry"],
-    ['==', ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
-    ['==', ["get", "highway"], "trailhead"], ["image", "trailhead"],
-    ['==', ["get", "man_made"], "cairn"], ["image", "cairn"],
-    ['==', ["get", "information"], "guidepost"], ["image", "guidepost"],
-    ['==', ["get", "information"], "route_marker"], ["image", "route_marker"],
-    ['==', ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
-    ['==', ["get", "tourism"], "camp_site"], [
+    ["==", ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
+    ["==", ["get", "highway"], "trailhead"], ["image", "trailhead"],
+    ["==", ["get", "man_made"], "cairn"], ["image", "cairn"],
+    ["==", ["get", "information"], "guidepost"], ["image", "guidepost"],
+    ["==", ["get", "information"], "route_marker"], ["image", "route_marker"],
+    ["==", ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
+    ["==", ["get", "tourism"], "camp_site"], [
       "case",
       ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "campground-noaccess"],
       ["image", "campground"],
     ],
-    ['==', ["get", "tourism"], "caravan_site"], [
+    ["==", ["get", "tourism"], "caravan_site"], [
       "case",
       ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "caravan_site-noaccess"],
       ["image", "caravan_site"],
     ],
-    ['==', ["get", "tourism"], "camp_pitch"], ["image", "campsite"],
-    ['==', ["get", "shelter_type"], "lean_to"], ["image", "lean_to"],
-    ['==', ["get", "tourism"], "wilderness_hut"], ["image", "lean_to"],
-    ['==', ["get", "tourism"], "viewpoint"], ["image", "viewpoint"],
+    ["==", ["get", "tourism"], "camp_pitch"], ["image", "campsite"],
+    ["==", ["get", "shelter_type"], "lean_to"], ["image", "lean_to"],
+    ["==", ["get", "tourism"], "wilderness_hut"], ["image", "lean_to"],
+    ["==", ["get", "tourism"], "viewpoint"], ["image", "viewpoint"],
     [
       "any",
-      ['==', ["get", "natural"], "beaver_dam"],
-      ['in', ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
-      ['==', ["get", "lock"], "yes"],
+      ["==", ["get", "natural"], "beaver_dam"],
+      ["in", ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
+      ["==", ["get", "lock"], "yes"],
     ], [
       "case",
       [
@@ -1037,14 +993,14 @@ function poiIconImageExpression(travelMode) {
         ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]
       ], [
         "case",
-        ['==', ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-canoeable" : "beaver_dam"],
-        ['==', ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-canoeable" : "waterfall"],
-        ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-canoeable" : "dam"],
+        ["==", ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-canoeable" : "beaver_dam"],
+        ["==", ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-canoeable" : "waterfall"],
+        ["in", ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-canoeable" : "dam"],
         ["image", showHazards ? "lock-canoeable" : "lock"],
       ],
-      ['==', ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-hazard" : "beaver_dam"],
-      ['==', ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-hazard" : "waterfall"],
-      ['in', ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-hazard" : "dam"],
+      ["==", ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-hazard" : "beaver_dam"],
+      ["==", ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-hazard" : "waterfall"],
+      ["in", ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-hazard" : "dam"],
       ["image", showHazards ? "lock-hazard" : "lock"],
     ],
     [
@@ -1057,24 +1013,24 @@ function poiIconImageExpression(travelMode) {
       ]
     ], [
       "case",
-      ['==', ["get", "leisure"], "slipway"], ["case",
-        ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
+      ["==", ["get", "leisure"], "slipway"], ["case",
+        ["==", ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
         ["image", "slipway-canoe-trailer-noaccess"],
       ],
-      ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe-noaccess"],
+      ["any", ["==", ["get", "waterway"], "access_point"], ["in", ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe-noaccess"],
       ""
     ],
-    ['==', ["get", "leisure"], "slipway"], [
+    ["==", ["get", "leisure"], "slipway"], [
       "case",
-      ['==', ["get", "trailer"], "no"], ["image", "slipway-canoe"],
+      ["==", ["get", "trailer"], "no"], ["image", "slipway-canoe"],
       ["image", "slipway-canoe-trailer"],
     ],
-    ['any', ["==", ["get", "waterway"], "access_point"], ['in', ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
+    ["any", ["==", ["get", "waterway"], "access_point"], ["in", ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
     ""
   ];
 }
 function onewayArrowsIconImageExpression(travelMode) {
-  let expression = ['case'];
+  let expression = ["case"];
   onewayKeysForTravelMode(travelMode).reverse().forEach(function(key) {
     expression = expression.concat([
       ["has", key],
@@ -1101,21 +1057,17 @@ function onewayArrowsIconImageExpression(travelMode) {
 // determine whether access is allowed or not allowed
 function accessIsSpecifiedExpression(travelMode) {
   let filter = [
-    "none",
-    [
+    "!", [
       "any",
       [
         "all",
-        ["!has", travelMode],
-        ...notNoAccessExpressions("access"),
-        [
-          "none",
-          ...impliedYesExpressions[travelMode],
-          ...impliedNoExpressions[travelMode]
-        ]
+        ["!", ["has", travelMode]],
+        notNoAccessExpression("access"),
+        ...[impliedYesExpression[travelMode] ? ["!", impliedYesExpression[travelMode]] : null].filter(Boolean),
+        ...[impliedNoExpression[travelMode] ? ["!", impliedNoExpression[travelMode]] : null].filter(Boolean),
       ],
       // access if always unspecified if mode is explicitly set to `unknown`
-      ["==", travelMode, "unknown"],
+      ["==", ["get", travelMode], "unknown"],
     ]
   ];
   if (travelMode === "canoe") {
@@ -1129,7 +1081,7 @@ function accessIsSpecifiedExpression(travelMode) {
       [
         "all",
         accessIsSpecifiedExpression('portage'),
-        ["!has", "waterway"],
+        ["!", ["has", "waterway"]],
       ],
     ];
   }
@@ -1142,12 +1094,12 @@ function updateTrailLayers() {
 
   // ["!=", "true", "false"] always evalutes to true because "true" actually refers to the name of a
   // data attribute key, which is always undefined, while "false" is the string it's compared to.
-  let allowedAccessExpression = ["!=", "true", "false"];
-  let specifiedAccessExpression = ["!=", "true", "false"];
+  let allowedAccessExpression = ["!=", ["get", "true"], "false"];
+  let specifiedAccessExpression = ["!=", ["get", "true"], "false"];
   let specifiedExpression;
 
-  let showDisallowedExpression = [lens === "access" ? "!=" : '==', "true", "false"];
-  let showUnspecifiedExpression = [lens !== "" ? "!=" : '==', "true", "false"];
+  let showDisallowedExpression = [lens === "access" ? "!=" : "==", ["get", "true"], "false"];
+  let showUnspecifiedExpression = [lens !== "" ? "!=" : "==", ["get", "true"], "false"];
 
   let pathsColors = [
     "case",
@@ -1187,17 +1139,17 @@ function updateTrailLayers() {
     specifiedAccessExpression = [
       "all",
       // access not fully specified if any access tag is explicitly set to `unknown`
-      ["!=", "access", "unknown"],
-      ["!=", "foot", "unknown"],
-      ["!=", "wheelchair", "unknown"],
-      ["!=", "bicycle", "unknown"],
-      ["!=", "horse", "unknown"],
-      ["!=", "atv", "unknown"],
-      ["!=", "mtb", "unknown"],
-      ["!=", "inline_skates", "unknown"],
-      ["!=", "portage", "unknown"],
-      ["!=", "snowmobile", "unknown"],
-      ["!=", "ski:nordic", "unknown"],
+      ["!=", ["get", "access"], "unknown"],
+      ["!=", ["get", "foot"], "unknown"],
+      ["!=", ["get", "wheelchair"], "unknown"],
+      ["!=", ["get", "bicycle"], "unknown"],
+      ["!=", ["get", "horse"], "unknown"],
+      ["!=", ["get", "atv"], "unknown"],
+      ["!=", ["get", "mtb"], "unknown"],
+      ["!=", ["get", "inline_skates"], "unknown"],
+      ["!=", ["get", "portage"], "unknown"],
+      ["!=", ["get", "snowmobile"], "unknown"],
+      ["!=", ["get", "ski:nordic"], "unknown"],
     ];  
   }
 
@@ -1235,52 +1187,52 @@ function updateTrailLayers() {
     "all",
     allowedAccessExpression,
     specifiedExpression,
-    ["!=", "informal", "yes"],
+    ["!=", ["get", "informal"], "yes"],
     isHighwayExpression,
   ]);
   setTrailsLayerFilter('informal-paths', [
     "all",
     allowedAccessExpression,
     specifiedExpression,
-    ["==", "informal", "yes"],
+    ["==", ["get", "informal"], "yes"],
     isHighwayExpression,
   ]);
   setTrailsLayerFilter('disallowed-paths', [
     "all",
     showDisallowedExpression,
-    ["none", allowedAccessExpression],
+    ["!", allowedAccessExpression],
     specifiedExpression,
-    ["!=", "informal", "yes"],
+    ["!=", ["get", "informal"], "yes"],
     isHighwayExpression,
   ]);
   setTrailsLayerFilter('disallowed-informal-paths', [
     "all",
     showDisallowedExpression,
-    ["none", allowedAccessExpression],
+    ["!", allowedAccessExpression],
     specifiedExpression,
-    ["==", "informal", "yes"],
+    ["==", ["get", "informal"], "yes"],
     isHighwayExpression,
   ]);
   setTrailsLayerFilter('unspecified-paths', [
     "all",
     showUnspecifiedExpression,
     allowedAccessExpression,
-    ["none", specifiedExpression],
-    ["!=", "informal", "yes"],
+    ["!", specifiedExpression],
+    ["!=", ["get", "informal"], "yes"],
     isHighwayExpression,
   ]);
   setTrailsLayerFilter('unspecified-informal-paths', [
     "all",
     showUnspecifiedExpression,
     allowedAccessExpression,
-    ["none", specifiedExpression],
-    ["==", "informal", "yes"],
+    ["!", specifiedExpression],
+    ["==", ["get", "informal"], "yes"],
     isHighwayExpression,
   ]);
   setTrailsLayerFilter('disallowed-waterways', [
     "all",
     showDisallowedExpression,
-    ["none", allowedAccessExpression],
+    ["!", allowedAccessExpression],
     specifiedExpression,
     ["has", "waterway"],
   ]);
@@ -1288,7 +1240,7 @@ function updateTrailLayers() {
     "all",
     showUnspecifiedExpression,
     allowedAccessExpression,
-    ["none", specifiedExpression],
+    ["!", specifiedExpression],
     ["has", "waterway"],
   ]);
   setTrailsLayerFilter('waterways', [
@@ -1310,7 +1262,7 @@ function updateTrailLayers() {
   map.setPaintProperty('informal-paths', 'line-color', pathsColors)
   map.setPaintProperty('waterways', 'line-color', waterwaysColors);
   
-  map.setFilter('bridge-casings', ["all", ["has", "bridge"], ["!in", "bridge", "no", "abandoned", "raised", "proposed", "dismantled"], combinedFilterExpression])
+  map.setFilter('bridge-casings', ["all", ["has", "bridge"], ["!", ["in", ["get", "bridge"], ["literal", ["no", "abandoned", "raised", "proposed", "dismantled"]]]], combinedFilterExpression])
   // oneway-arrows filter technically isn't needed since the icon-image doesn't display anything
   // if there isn't a relevant oneway value, but we might as well leave it for now in case we want
   // to add some other kind of styling in the future
@@ -1330,8 +1282,8 @@ function updateTrailLayers() {
     "all",
     [
       "any",
-      ['in', ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
-      ['in', ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
+      ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
+      ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
     ],
     [">=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.000000075],
     ["<=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.0001],
@@ -1385,14 +1337,8 @@ function updateTrailLayers() {
   ]);
 }
 
-function notNoAccessExpressions(mode) {
-  return [
-    ["!=", mode, "no"],
-    ["!=", mode, "private"],
-    ["!=", mode, "discouraged"],
-    ["!=", mode, "customers"],
-    ["!=", mode, "limited"], // for `wheelchair`
-  ];
+function notNoAccessExpression(mode) {
+  return ["!", ["in", ["get", mode], ["literal", ["no", "private", "discouraged", "customers", "limited"]]]];
 }
 
 function modeIsAllowedExpression(mode) {
@@ -1402,24 +1348,22 @@ function modeIsAllowedExpression(mode) {
       "any",
       [
         "all",
-        ["!has", mode],
-        ...notNoAccessExpressions("access"),
+        ["!", ["has", mode]],
+        notNoAccessExpression("access"),
       ],
       [
         "all",
         ["has", mode],
-        ...notNoAccessExpressions(mode),
+        notNoAccessExpression(mode),
       ],
     ],
   ];
-  if (impliedNoExpressions[mode]) {
+  if (impliedNoExpression[mode]) {
     allowedAccessExpression.push(
       [
         "any",
         ["has", mode],
-        ["none",
-          ...impliedNoExpressions[mode],
-        ],
+        ["!", impliedNoExpression[mode]],
       ]
     );
   }
@@ -1613,7 +1557,7 @@ function getTrailLabelExpression(lens, travelMode) {
   }
   const trailLabelData = [
     {
-      caseSelector: ['has', 'waterway'],
+      caseSelector: ["has", "waterway"],
       selector: ["any", ["has", "name"], ["has", "waterbody:name"]],
       label: ["coalesce", ["get", "name"], ["get", "waterbody:name"]],
       sublabels: sublabels
@@ -1630,7 +1574,7 @@ function getTrailLabelExpression(lens, travelMode) {
 
 const poiLabelData = [
   {
-    caseSelector: ['in', ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
+    caseSelector: ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
     selector: ["any", ["has", "name"], ["has", "ref"]],
     label: ["coalesce", ["get", "name"], ["get", "ref"]],
     sublabels: [
@@ -1653,7 +1597,7 @@ const poiLabelData = [
     ]
   },
   {
-    caseSelector: ['==', ["get", "lock"], "yes"],
+    caseSelector: ["==", ["get", "lock"], "yes"],
     selector: ["any", ["has", "lock_name"], ["has", "lock_ref"]],
     label: ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]],
     sublabels: [
@@ -1674,7 +1618,7 @@ const poiLabelData = [
     ]
   },
   {
-    caseSelector: ['in', ["get", "waterway"], ["literal", ["waterfall", "dam", "weir"]]],
+    caseSelector: ["in", ["get", "waterway"], ["literal", ["waterfall", "dam", "weir"]]],
     selector: ["any", ["has", "name"], ["has", "ref"]],
     label: ["coalesce", ["get", "name"], ["get", "ref"]],
     sublabels: [
