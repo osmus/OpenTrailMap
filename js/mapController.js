@@ -43,15 +43,29 @@ const editedDateColors = [
   2022, '#980043',
   thisYear, '#380010',
 ];
+const isWaterwayExpression = [
+  "in", ["get", "waterway"],
+  ["literal", [
+      "river",
+      "stream",
+      "tidal_channel",
+      "canal",
+      "drain",
+      "ditch",
+      "canoe_pass",
+      "fairway",
+      "link",
+      "flowline"
+    ]
+  ]
+];
 const isHighwayExpression = [
   "any",
   ["has", "highway"],
   ["==", ["get", "route"], "ferry"],
 ];
 const isNotHighwayExpression = [
-  "all",
-  ["!", ["has", "highway"]],
-  ["!=", ["get", "route"], "ferry"],
+  "!", isHighwayExpression
 ];
 const impliedYesExpression = {
   bicycle: [
@@ -840,12 +854,12 @@ function isSpecifiedExpressionForLens(lens, travelMode) {
           [
             "all",
             specifiedAttributeExpression,
-            ["has", "waterway"],
+            isWaterwayExpression,
           ],
           [
             "all",
             attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
-            ["!", ["has", "waterway"]],
+            ["!", isWaterwayExpression],
           ],
         ];
       }
@@ -944,12 +958,12 @@ function onewayArrowsFilter(travelMode) {
       [
         "all",
         filter,
-        ["has", "waterway"],
+        isWaterwayExpression,
       ],
       [
         "all",
         onewayArrowsFilter('portage'),
-        ["!", ["has", "waterway"]],
+        ["!", isWaterwayExpression],
       ],
     ];
   }
@@ -1048,7 +1062,7 @@ function onewayArrowsIconImageExpression(travelMode) {
   if (travelMode === "canoe") {
     expression = [
       "case",
-      ["has", "waterway"], expression,
+      isWaterwayExpression, expression,
       onewayArrowsIconImageExpression('portage'),
     ];
   }
@@ -1077,12 +1091,12 @@ function accessIsSpecifiedExpression(travelMode) {
       [
         "all",
         filter,
-        ["has", "waterway"],
+        isWaterwayExpression,
       ],
       [
         "all",
         accessIsSpecifiedExpression('portage'),
-        ["!", ["has", "waterway"]],
+        ["!", isWaterwayExpression],
       ],
     ];
   }
@@ -1176,9 +1190,9 @@ function updateTrailLayers() {
     ];
 
     if (waterwayOnlyLenses.includes(lens)) {
-      allowedAccessExpression.push(["has", "waterway"]);
+      allowedAccessExpression.push(isWaterwayExpression);
     } else if (highwayOnlyLenses.includes(lens)) {
-      allowedAccessExpression.push(["has", "highway"]);
+      allowedAccessExpression.push(isHighwayExpression);
     }
   } else {
     specifiedExpression = specifiedAccessExpression;
@@ -1241,20 +1255,20 @@ function updateTrailLayers() {
     showDisallowedExpression,
     ["!", allowedAccessExpression],
     specifiedExpression,
-    ["has", "waterway"],
+    isWaterwayExpression,
   ]);
   setTrailsLayerFilter('unspecified-waterways', [
     "all",
     showUnspecifiedExpression,
     allowedAccessExpression,
     ["!", specifiedExpression],
-    ["has", "waterway"],
+    isWaterwayExpression,
   ]);
   setTrailsLayerFilter('waterways', [
     "all",
     allowedAccessExpression,
     specifiedExpression,
-    ["has", "waterway"],
+    isWaterwayExpression,
   ]);
 
   map.setLayerZoomRange('trail-pois', focusedEntityInfo ? 0 : 12, 24);
@@ -1564,7 +1578,7 @@ function getTrailLabelExpression(lens, travelMode) {
   }
   const trailLabelData = [
     {
-      caseSelector: ["has", "waterway"],
+      caseSelector: isWaterwayExpression,
       selector: ["any", ["has", "name"], ["has", "waterbody:name"]],
       label: ["coalesce", ["get", "name"], ["get", "waterbody:name"]],
       sublabels: sublabels
