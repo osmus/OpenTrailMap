@@ -2,7 +2,7 @@
 <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>question</title>
     <g id="question" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect id="Rectangle" fill="#8E00CC" x="0" y="0" width="24" height="24" rx="5.86000013"></rect>
+        <rect id="Rectangle" fill="#C100CC" x="0" y="0" width="24" height="24" rx="5.86000013"></rect>
         <path d="M8,8 C8,6.34314575 9.34314575,5 11,5 L13,5 C14.6568542,5 16,6.34314575 16,8 C16,9.76312055 14.8000507,11.2999873 13.0895725,11.7276069 L12,12 L12,12 L12,12.5" id="Path-3" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
         <circle id="Oval" fill="#FFFFFF" cx="12" cy="18" r="2.5"></circle>
     </g>
