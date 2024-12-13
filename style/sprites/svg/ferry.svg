@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ferry</title>
+    <defs>
+        <path d="M18,18.9903717 C16,17.6634572 14,18 12,20 C10,18 8,17.6634572 6,18.9903717" id="path-1"></path>
+    </defs>
+    <g id="ferry" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-4">
+            <rect id="Rectangle" fill="#009FBE" x="0" y="0" width="24" height="24" rx="5.87368421"></rect>
+            <path d="M4,16 L6,14.5 L6,7 L18,7 L18,14.5 L20,16 L18,18 C16.752,16.96 13.76,16.66 12,18 C10.304,16.66 7.232,16.98 6,18 L4,16 Z M16,13.5 L16,11 C16,9.8954305 15.1045695,9 14,9 L10,9 C8.8954305,9 8,9.8954305 8,11 L8,13.5 L8,13.5 L12,11 L16,13.5 Z M16,4 L16,6 L16,6 L8,6 L8,4 C8,3.44771525 8.44771525,3 9,3 L15,3 C15.5522847,3 16,3.44771525 16,4 Z" id="Shape" fill="#FFFFFF" fill-rule="nonzero"></path>
+            <g id="Path-Copy" stroke-linecap="round" fill-rule="nonzero">
+                <use stroke="#009FBE" stroke-width="5" xlink:href="#path-1"></use>
+                <use stroke="#FFFFFF" stroke-width="2" xlink:href="#path-1"></use>
+            </g>
+        </g>
+    </g>
+</svg>

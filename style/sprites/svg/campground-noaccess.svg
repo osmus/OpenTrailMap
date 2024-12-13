@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>campground-noaccess</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="24" height="24" rx="5.86000013"></rect>
+        <path d="M22,2 L2,22" id="path-3"></path>
+    </defs>
+    <g id="campground-noaccess" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Rectangle" fill="#A1857F" xlink:href="#path-1"></use>
+        <polyline id="Rectangle" mask="url(#mask-2)" points="17 16 12 7.5 7 16"></polyline>
+        <path d="M12,5.03461463 L13.0774178,6.86622484 L18.0774178,15.3662248 C18.4274421,15.9612662 18.2288166,16.7273934 17.6337752,17.0774178 C17.0387338,17.4274421 16.2726066,17.2288166 15.9225822,16.6337752 L12,9.965 L8.07741777,16.6337752 C7.75072837,17.1891471 7.06156719,17.3991969 6.48734028,17.1401524 L6.36622484,17.0774178 C5.77118344,16.7273934 5.57255788,15.9612662 5.92258223,15.3662248 L10.9225822,6.86622484 L12,5.03461463 Z" id="Rectangle-Copy-2" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-2)"></path>
+        <path d="M5,15 L19,15 C19.5522847,15 20,15.4477153 20,16 L20,17 C20,17.5522847 19.5522847,18 19,18 L5,18 C4.44771525,18 4,17.5522847 4,17 L4,16 C4,15.4477153 4.44771525,15 5,15 Z" id="Rectangle-Copy" fill="#FFFFFF" mask="url(#mask-2)"></path>
+        <g id="Line-3" stroke-linecap="square" mask="url(#mask-2)">
+            <use stroke="#A1857F" stroke-width="4" xlink:href="#path-3"></use>
+            <use stroke="#FFFFFF" stroke-width="2" xlink:href="#path-3"></use>
+        </g>
+    </g>
+</svg>

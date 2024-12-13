@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="22px" height="18px" viewBox="0 0 22 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>peak</title>
+    <g id="peak" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Rectangle-Copy" fill="#005908" points="11 2 20 16 2 16"></polygon>
+        <path d="M12.682357,0.918484817 L21.682357,14.9184848 C22.5380148,16.2495081 21.5823316,18 20,18 L2,18 C0.417668413,18 -0.538014768,16.2495081 0.317643049,14.9184848 L9.31764305,0.918484817 C10.1049157,-0.306161606 11.8950843,-0.306161606 12.682357,0.918484817 Z M11,2 L2,16 L20,16 L11,2 Z" id="Rectangle-Copy" fill="#FFFFFF" fill-rule="nonzero"></path>
+    </g>
+</svg>

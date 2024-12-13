@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="25px" height="25px" viewBox="0 0 25 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ranger_station</title>
+    <g id="ranger_station" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Combined-Shape" fill="#4F2E28" x="0" y="0" width="25" height="25" rx="6.11842105"></rect>
+        <path d="M13.5416667,9.245 L20.8333333,15.625 L18.75,15.625 L18.75,21.875 L14.5833333,21.875 L14.5833333,16.6666667 L10.4166667,16.6666667 L10.4166667,21.875 L6.25,21.875 L6.25,15.625 L4.16666667,15.625 L11.4576667,9.245 L11.4583333,3.125 L16.6666667,3.125 L16.6666667,4.166 L19.7916667,4.16666667 L19.7916667,7.29166667 L15.625,7.29166667 L15.6246667,6.25 L13.5416667,6.25 L13.5416667,9.245 Z" id="Combined-Shape" fill="#FFFFFF"></path>
+    </g>
+</svg>

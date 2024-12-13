@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>protected_area</title>
+    <g id="protected_area" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" stroke="#FFFFFF" stroke-width="2" fill="#005908" x="1" y="1" width="30" height="30" rx="5.87368441"></rect>
+        <ellipse id="Oval" fill="#FFFFFF" cx="16" cy="18" rx="11" ry="4"></ellipse>
+        <path d="M11.6265651,10.1690839 L13.5,9.5 L13.5,9.5 L15.2928932,7.70710678 C15.6834175,7.31658249 16.3165825,7.31658249 16.7071068,7.70710678 L18.5,9.5 L18.5,9.5 L20.3734349,10.1690839 C20.663655,10.2727339 20.8898746,10.5044068 20.9865834,10.797013 L23,16.8888889 L23,16.8888889 C20.6666667,17.6296296 18.3333333,18 16,18 C13.6666667,18 11.3333333,17.6296296 9,16.8888889 L11.0134166,10.797013 C11.1101254,10.5044068 11.336345,10.2727339 11.6265651,10.1690839 Z" id="Rectangle-Copy" fill="#FFFFFF"></path>
+        <path d="M23,16 C20.6666667,17 18.3333333,17.5 16,17.5 C13.6666667,17.5 11.3333333,17 9,16" id="Rectangle-Copy-2" stroke="#005908" stroke-width="3" fill="#FFFFFF"></path>
+        <path d="M15,10 L15,11 C15,11.5522847 14.5522847,12 14,12 C13.6666667,12 13.3333333,12 13,12 C13,12 13.6666667,11.3333333 15,10 Z" id="Oval" fill="#005908"></path>
+        <path d="M19,10 L19,11 C19,11.5522847 18.5522847,12 18,12 C17.6666667,12 17.3333333,12 17,12 C17,12 17.6666667,11.3333333 19,10 Z" id="Oval-Copy" fill="#005908" transform="translate(18, 11) scale(-1, 1) translate(-18, -11)"></path>
+    </g>
+</svg>

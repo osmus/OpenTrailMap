@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>nature_reserve</title>
+    <g id="nature_reserve" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" stroke="#FFFFFF" stroke-width="2" fill="#005908" x="1" y="1" width="30" height="30" rx="5.87368441"></rect>
+        <path d="M25,25 C18.9981422,18.5 15.5,21.25 11.5,19 C8.83333333,17.5 7.33333333,13.8333333 7,8 C8.74973632,11.1344734 10.5830697,13.2178067 12.5,14.25 C14.4169303,15.2821933 16.5002637,15.8655266 18.75,16 C16.9382461,14.5648678 15.1882461,12.9815344 13.5,11.25 C11.8117539,9.51846557 10.3117539,7.76846557 9,6 C17.836556,6 25,13.163444 25,22 L25,25 L25,25 Z" id="path18" fill="#FFFFFF" fill-rule="nonzero" transform="translate(16, 15.5) scale(1, -1) translate(-16, -15.5)"></path>
+    </g>
+</svg>

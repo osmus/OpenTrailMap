@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="4px" height="4px" viewBox="0 0 4 4" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>restricted-zone</title>
+    <g id="restricted-zone" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect fill="#F9F5ED" x="0" y="0" width="4" height="4"></rect>
+        <polygon id="Rectangle-Copy-3" fill="#7F7F7F" opacity="0.498186384" points="2 4 4 2 2 2 -8.1360844e-14 4"></polygon>
+        <polygon id="Rectangle-Copy-4" fill="#7F7F7F" opacity="0.498186384" points="4 2 6 0 4 0 2 2"></polygon>
+        <polygon id="Rectangle-Copy-5" fill="#7F7F7F" opacity="0.498186384" points="-4.4408921e-15 2 2 0 2.7533531e-14 0 -2 2"></polygon>
+    </g>
+</svg>

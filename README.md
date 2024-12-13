@@ -95,6 +95,13 @@ We also collaborate via the [#opentrailmap](https://osmus.slack.com/archives/ope
 5. Visit [http://localhost:4001](http://localhost:4001) in your browser
 6. That's it!
 
+#### Building sprites
+
+Source vector images for use in the map are located at [/style/sprites/svg/](/style/sprites/svg/). If you add or change any of these, you'll need to rebuild the spritesheets.
+
+1. Install the [spreet](https://github.com/flother/spreet) command line tool
+2. Run `npm run sprites`
+
 ## License
 
 The OpenTrailMap source code is distributed under the [MIT license](https://github.com/osmus/OpenTrailMap/blob/main/LICENSE). Dependencies are subject to their respective licenses.

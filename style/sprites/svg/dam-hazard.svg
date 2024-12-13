@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>dam-hazard</title>
+    <g id="dam-hazard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Combined-Shape" fill="#F56503" x="0" y="0" width="24" height="24" rx="5.87368421"></rect>
+        <g id="dam" transform="translate(5, 5)" fill="#FFFFFF" fill-rule="nonzero">
+            <path d="M6,14 L0,14 L0,0.5 C0,0.223857625 0.223857625,5.55111512e-17 0.5,0 L1.62284929,2.22044605e-16 C1.84608947,2.22044605e-16 2.04228247,0.147988657 2.10361127,0.362639436 L6,14 L6,14 Z" id="Path"></path>
+        </g>
+        <polygon id="Path-2-Copy" fill="#FFFFFF" fill-rule="nonzero" points="16.5 13 15.5 13 14 12 13 12 11.5 13 10.5 13 9 12 8 12 6.5 13 5.5 13 5.5 15 6.5 15 8 14 9 14 10.5 15 11.5 15 13 14 14 14 15.5 15 16.5 15 18 14 19 14 19 12 18 12"></polygon>
+        <polygon id="Path-2-Copy-3" fill="#FFFFFF" fill-rule="nonzero" points="16.5 9 15.5 9 14 8 13 8 11.5 9 10.5 9 9 8 8 8 6.5 9 5.5 9 5.5 11 6.5 11 8 10 9 10 10.5 11 11.5 11 13 10 14 10 15.5 11 16.5 11 18 10 19 10 19 8 18 8"></polygon>
+        <polygon id="Path-2-Copy-2" fill="#FFFFFF" fill-rule="nonzero" points="16.5 17 15.5 17 14 16 13 16 11.5 17 10.5 17 9 16 8 16 6.5 17 5.5 17 5.5 19 6.5 19 8 18 9 18 10.5 19 11.5 19 13 18 14 18 15.5 19 16.5 19 18 18 19 18 19 16 18 16"></polygon>
+    </g>
+</svg>

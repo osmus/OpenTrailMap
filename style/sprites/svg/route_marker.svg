@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18px" height="24px" viewBox="0 0 18 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>route_marker</title>
+    <g id="route_marker" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" stroke-linejoin="round">
+        <path d="M7,1 C7.51009361,1 7.97552606,1.19104288 8.32886191,1.50528644 C8.54048683,1.69349766 8.71167299,1.92602203 8.82819741,2.18822056 L18.2111873,7.01244034 L9,11.618034 L9,23 L5,23 L5,3 C5,2.44771525 5.22385763,1.94771525 5.58578644,1.58578644 C5.94771525,1.22385763 6.44771525,1 7,1 Z" id="Rectangle" stroke="#FFFFFF" stroke-width="2" fill="#333333"></path>
+    </g>
+</svg>

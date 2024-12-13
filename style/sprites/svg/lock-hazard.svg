@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>lock-hazard</title>
+    <g id="lock-hazard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Combined-Shape" fill="#F56503" x="0" y="0" width="24" height="24" rx="5.87368421"></rect>
+        <path d="M12.5,2.515 L12.7172794,2.73837583 L16.7172794,7.42086137 L17,7.71189731 L17,20.4645733 L15.2827206,18.6967857 L12.5,15.832 L12.5,12.962 L12.7172794,13.1855673 L15,15.535 L15,9 L12.5,6.028 L12.5,2.515 Z M11.5,2.514 L11.5,6.028 L9,8.999 L9,15.535 L11.2827206,13.1855673 L11.5,12.961 L11.5,15.83 L8.71727938,18.6967857 L7,20.4645733 L7,7.71189731 L7.28272062,7.42086137 L11.2827206,2.73837583 L11.5,2.514 Z" id="Path" fill="#FFFFFF" fill-rule="nonzero"></path>
+    </g>
+</svg>

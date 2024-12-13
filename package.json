@@ -4,7 +4,8 @@
     "version": "0.0.1",
     "scripts": {
         "build": "rollup --config rollup.config.js",
-        "serve": "node ./serve.js"
+        "serve": "node ./serve.js",
+        "sprites": "spreet --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap && spreet --retina --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap@2x"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "^28.0.0",

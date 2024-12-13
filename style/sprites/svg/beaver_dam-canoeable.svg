@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>beaver_dam-canoeable</title>
+    <defs>
+        <path d="M9.5,15.5 L15.5,4.5" id="path-1"></path>
+        <path d="M6.5,15.5 L12.5,4.5" id="path-2"></path>
+        <path d="M8.5,17.5 L14.5,6.5" id="path-3"></path>
+        <path d="M8.5,15.5 L14.5,4.5" id="path-4"></path>
+        <path d="M9.5,17.5 L15.5,6.5" id="path-5"></path>
+        <path d="M13.5,17.8663132 L18.0634436,9.5" id="path-6"></path>
+        <path d="M10.5,19.5 L16.5,8.5" id="path-7"></path>
+        <path d="M12.7114787,19.2789557 L17.5,10.5" id="path-8"></path>
+    </defs>
+    <g id="beaver_dam-canoeable" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" fill="#003B93" x="0" y="0" width="24" height="24" rx="5.87368421"></rect>
+        <g id="Line-4-Copy-5" stroke-linecap="round" transform="translate(12.5, 10) scale(-1, 1) translate(-12.5, -10)">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-1"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-1"></use>
+        </g>
+        <g id="Line-4" stroke-linecap="round">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-2"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-2"></use>
+        </g>
+        <g id="Line-4-Copy-6" stroke-linecap="round" transform="translate(11.5, 12) scale(-1, 1) translate(-11.5, -12)">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-3"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-3"></use>
+        </g>
+        <g id="Line-4-Copy" stroke-linecap="round">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-4"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-4"></use>
+        </g>
+        <g id="Line-4-Copy-2" stroke-linecap="round">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-5"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-5"></use>
+        </g>
+        <g id="Line-4-Copy-7" stroke-linecap="round" transform="translate(15.7817, 13.6832) scale(1, -1) rotate(0) translate(-15.7817, -13.6832)">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-6"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-6"></use>
+        </g>
+        <g id="Line-4-Copy-3" stroke-linecap="round">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-7"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-7"></use>
+        </g>
+        <g id="Line-4-Copy-4" stroke-linecap="round" transform="translate(15.1057, 14.8895) scale(-1, -1) translate(-15.1057, -14.8895)">
+            <use stroke="#003B93" stroke-width="2.5" xlink:href="#path-8"></use>
+            <use stroke="#FFFFFF" stroke-width="1" xlink:href="#path-8"></use>
+        </g>
+        <path d="M5.87907944,6.64124089 C6.30223524,6.52275727 6.77059102,6.56570214 7.18384796,6.79815917 C7.82964351,7.16141917 8.27337307,7.74792387 8.47038553,8.40805943 C8.66739799,9.06819499 8.61769334,9.80196139 8.27659274,10.4597983 L6.60025357,13.691468 C7.53483601,13.3134906 8.50150409,13.125 9.5,13.125 C11.0021739,13.125 12.2124532,13.2742937 13.1327275,13.5642692 C13.3305392,13.3463718 13.5323252,13.15386 13.7377695,12.9863935 C13.6576056,12.7318137 13.6358119,12.5411456 13.6452116,12.4000639 C15.2700778,12.1506441 15.508049,12.1419092 15.7367771,12.1322793 C17.1388805,12.1241746 18.2451915,12.5155493 19.375,13.3013356 L19.375,18.375 L4.625,18.375 L4.625,8.29469497 C4.625,7.99981479 4.70094246,7.70990394 4.84551078,7.45289358 C5.07796782,7.03963664 5.45592364,6.75972452 5.87907944,6.64124089 Z" id="Rectangle-Copy-5" stroke="#003B93" stroke-width="0.75" fill="#FFFFFF" stroke-linejoin="round"></path>
+        <path d="M16.5,13.5 C16.81603,13.5 17.1149252,13.6436565 17.3123475,13.8904344 L17.525016,14.1562701 C17.6253931,14.2817413 17.6050502,14.4648275 17.4795789,14.5652046 C17.4150237,14.6168487 17.3315461,14.638591 17.25,14.625 L17.051411,14.5919018 C16.7049694,14.5341616 16.4070705,14.3141409 16.25,14 L16.2236068,13.9472136 C16.1472829,13.7945658 16.2091556,13.6089477 16.3618034,13.5326238 C16.4047121,13.5111694 16.4520266,13.5 16.5,13.5 Z" id="Rectangle" fill="#003B93"></path>
+        <path d="M7.65138782,16.5 L9.15138782,17.5 L9.84861218,17.5 L11.3486122,16.5 L12.6513878,16.5 L14.1513878,17.5 L14.8486122,17.5 L16.3486122,16.5 L17.6513458,16.5 L19.499,17.7313586 L19.499,20.9330857 L17.3486542,19.5 L16.6513878,19.5 L15.1513878,20.5 L13.8486122,20.5 L12.3486122,19.5 L11.6513878,19.5 L10.1513878,20.5 L8.84861218,20.5 L7.34861218,19.5 L6.65138782,19.5 L4.5,20.9342585 L4.5,17.7324081 L6.34861218,16.5 L7.65138782,16.5 Z" id="Path" stroke="#003B93" fill="#FFFFFF" fill-rule="nonzero" transform="translate(11.9995, 18.5) scale(1, -1) translate(-11.9995, -18.5)"></path>
+    </g>
+</svg>

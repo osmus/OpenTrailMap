@@ -45,10 +45,10 @@ function selectedEntityInfoFromHash() {
   return null;
 }
 
-function updateForHash() { 
-  setTravelMode(hashValue("mode"));
-  setLens(hashValue("lens"));
-  selectEntity(selectedEntityInfoFromHash());
-  focusEntity(focusedEntityInfoFromHash());
+function updateForHash(skipMapUpdate) { 
+  setTravelMode(hashValue("mode"), skipMapUpdate);
+  setLens(hashValue("lens"), skipMapUpdate);
+  selectEntity(selectedEntityInfoFromHash(), skipMapUpdate);
+  focusEntity(focusedEntityInfoFromHash(), skipMapUpdate);
   hashValue("inspect") ? openSidebar() : closeSidebar();
 }

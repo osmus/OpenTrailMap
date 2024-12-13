@@ -255,117 +255,7 @@ function isValidEntityInfo(entityInfo) {
     entityInfo?.id > 0;
 }
 
-function compositeGeoJson(features) {
-  if (!features.length) return;
-  let coordinates = [];
-  features.forEach(function(feature) {
-    if (feature.geometry.type === 'Polygon') {
-      coordinates.push(feature.geometry.coordinates);
-    } else if (feature.geometry.type === 'MultiPolygon') {
-      coordinates = coordinates.concat(feature.geometry.coordinates);
-    }
-  });
-  return {
-    type: "Feature",
-    geometry: {
-      type: "MultiPolygon",
-      coordinates: coordinates,
-    },
-    properties: features[0].properties
-  };
-}
-
-let focusAreaGeoJson;
-let focusAreaGeoJsonBuffered;
-let focusAreaBoundingBox;
-
-function getEntityBoundingBox(entity) {
-  const props = entity?.properties;
-  if (props?.hasOwnProperty('MIN_LON') &&
-    props?.hasOwnProperty('MIN_LAT') &&
-    props?.hasOwnProperty('MAX_LON') &&
-    props?.hasOwnProperty('MAX_LAT')) {
-    return [
-      props.MIN_LON,
-      props.MIN_LAT,
-      props.MAX_LON,
-      props.MAX_LAT
-    ];
-  }
-}
-
-function getEntityBoundingBoxFromLayer(id, type, layer) {
-  if (!focusedEntityInfo) return null;
-  let features = map.querySourceFeatures('trails', {
-    filter: [
-      "all",
-      ["==", ["get", "OSM_ID"], id],
-      ["==", ["get", "OSM_TYPE"], type],
-    ],
-    sourceLayer: layer,
-  });
-  if (features.length) {
-    return getEntityBoundingBox(features[0]);
-  }
-}
-
-function buildFocusAreaGeoJson() {
-  if (!focusedEntityInfo) return null;
-  let results = map.querySourceFeatures('trails', {
-    filter: [
-      "all",
-      ["==", ["get", "OSM_ID"], focusedEntityInfo.id],
-      ["==", ["get", "OSM_TYPE"], focusedEntityInfo.type],
-    ],
-    sourceLayer: "park",
-  });
-  return compositeGeoJson(results);
-}
-// check the current extent of the map, and if focused area is too far offscreen, put it back onscreen
-function checkMapExtent() {
-  if (!focusAreaBoundingBox) return;
-  let currentBounds = map.getBounds();
-  let targetBounds = currentBounds.toArray();
-  let width = focusAreaBoundingBox[2] - focusAreaBoundingBox[0];
-  let height = focusAreaBoundingBox[3] - focusAreaBoundingBox[1];
-  let maxExtent = Math.max(width, height);
-  let margin = maxExtent / 4;
-
-  if (currentBounds.getNorth() < focusAreaBoundingBox[1] - margin) targetBounds[1][1] = focusAreaBoundingBox[1] + margin;
-  if (currentBounds.getSouth() > focusAreaBoundingBox[3] + margin) targetBounds[0][1] = focusAreaBoundingBox[3] - margin;
-  if (currentBounds.getEast() < focusAreaBoundingBox[0] - margin) targetBounds[1][0] = focusAreaBoundingBox[0] + margin;
-  if (currentBounds.getWest() > focusAreaBoundingBox[2] + margin) targetBounds[0][0] = focusAreaBoundingBox[2] - margin;
-  if (currentBounds.toArray().toString() !== targetBounds.toString()) {
-    map.fitBounds(targetBounds);
-  }
-}
-
-function fitMapToBounds(bbox) {
-  let width = bbox[2] - bbox[0];
-  let height = bbox[3] - bbox[1];
-  let maxExtent = Math.max(width, height);
-  let fitBbox = extendBbox(bbox, maxExtent / 16);
-  map.fitBounds(fitBbox);
-}
-
-function reloadFocusAreaIfNeeded() {
-  let newFocusAreaGeoJson = buildFocusAreaGeoJson();
-
-  if ((newFocusAreaGeoJson && JSON.stringify(newFocusAreaGeoJson)) !==
-    (focusAreaGeoJson && JSON.stringify(focusAreaGeoJson))) {
-
-    focusAreaBoundingBox = focusedEntityInfo && getEntityBoundingBoxFromLayer(focusedEntityInfo.id, focusedEntityInfo.type, "park");
-
-    focusAreaGeoJson = newFocusAreaGeoJson;
-    focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
-
-    if (focusAreaGeoJson) document.getElementById("map-title").innerText = focusAreaGeoJson.properties.name;
-  
-    updateTrailLayers();
-  }
-}
-
-function focusEntity(entityInfo) {
+function focusEntity(entityInfo, skipMapUpdate) {
   if (!isValidEntityInfo(entityInfo)) entityInfo = null;
 
   if (focusedEntityInfo?.id === entityInfo?.id &&
@@ -388,11 +278,13 @@ function focusEntity(entityInfo) {
   document.getElementById("map-title").innerText = '';
   document.getElementById("nameplate").style.display = focusedEntityInfo ? 'flex' : 'none';
 
-  reloadFocusAreaIfNeeded();
-  updateMapForSelection();
+  if (!skipMapUpdate) {
+    reloadFocusAreaIfNeeded();
+    updateMapForSelection();
+  }
 }
 
-function selectEntity(entityInfo) {
+function selectEntity(entityInfo, skipMapUpdate) {
 
   if (selectedEntityInfo?.id === entityInfo?.id &&
     selectedEntityInfo?.type === entityInfo?.type
@@ -407,8 +299,10 @@ function selectEntity(entityInfo) {
     selected: selectedEntityInfo ? type + "/" + entityId : null
   });
 
-  updateMapForSelection();
-  updateMapForHover();
+  if (!skipMapUpdate) {
+    updateMapForSelection();
+    updateMapForHover();
+  }
 
   if (isSidebarOpen()) updateSidebar(selectedEntityInfo);
 
@@ -421,6 +315,7 @@ function selectEntity(entityInfo) {
     });
   }
 }
+
 function updateLensControl() {
   let html = "";
   let items = lensOptionsByMode[travelMode];
@@ -440,7 +335,7 @@ function updateLensControl() {
   lensElement.innerHTML = html;
   lensElement.value = lens;
 }
-function setTravelMode(value) {
+function setTravelMode(value, skipMapUpdate) {
   if (value === null) value = defaultTravelMode;
   if (travelMode === value) return;
   travelMode = value;
@@ -450,7 +345,7 @@ function setTravelMode(value) {
   document.getElementById("travel-mode").value = travelMode;
 
   updateLensControl();
-  updateTrailLayers();
+  if (!skipMapUpdate) reloadMapStyle();
   setHashParameters({ mode: travelMode === defaultTravelMode ? null : value });
 }
 function setLens(value, skipMapUpdate) {
@@ -462,13 +357,15 @@ function setLens(value, skipMapUpdate) {
 
   document.getElementById("lens").value = lens;
 
-  if (!skipMapUpdate) updateTrailLayers();
+  if (!skipMapUpdate) reloadMapStyle();
   setHashParameters({ lens: lens === defaultLens ? null : value });
 }
 
-window.onload = function(event) {
+window.onload = function() {
 
-  window.addEventListener("hashchange", updateForHash);
+  window.addEventListener("hashchange", function() {
+    updateForHash(false);
+  });
 
   document.addEventListener('keydown', function(e) {
 
@@ -518,9 +415,10 @@ window.onload = function(event) {
   map = new maplibregl.Map({
     container: 'map',
     hash: "map",
-    style: './styles/basemap.json',
+    style: './style/basestyle.json',
     center: initialCenter,
-    zoom: initialZoom
+    zoom: initialZoom,
+    fadeDuration: 0,
   });
 
   // Add zoom and rotation controls to the map.
@@ -539,65 +437,6 @@ window.onload = function(event) {
         unit: 'imperial'
     }), "bottom-left");
 
-  const imageToLoad = [
-    'beaver_dam',
-    'beaver_dam-canoeable',
-    'beaver_dam-hazard',
-    'bothways-arrows',
-    'cairn',
-    'campground',
-    'campground-noaccess',
-    'campsite',
-    'canoe',
-    'canoe-noaccess',
-    'caravan_site',
-    'caravan_site-noaccess',
-    'dam',
-    'dam-canoeable',
-    'dam-hazard',
-    'disallowed-stripes',
-    'ferry',
-    'guidepost',
-    'lean_to',
-    'lock',
-    'lock-canoeable',
-    'lock-hazard',
-    'nature_reserve',
-    'oneway-arrow-right',
-    'oneway-arrow-left',
-    'question',
-    'park',
-    'peak',
-    'protected_area',
-    'ranger_station',
-    'restricted-zone',
-    'route_marker',
-    'slipway-canoe-trailer',
-    'slipway-canoe-trailer-noaccess',
-    'slipway-canoe',
-    'slipway-canoe-noaccess',
-    'streamgage',
-    'trailhead',
-    'viewpoint',
-    'waterfall',
-    'waterfall-canoeable',
-    'waterfall-hazard',
-  ];
-
-  for (let i in imageToLoad) {
-    let img = imageToLoad[i];
-    map.loadImage('img/map/' + img + '.png').then(function(resp) {
-      return map.addImage(img, resp.data, { pixelRatio: 2 });
-    });
-  }
-
   map
-    .on('load', loadInitialMap)
-    .on('moveend', function(event) {
-      if (localStorage) {
-        let transform = map.getCenter();
-        transform.zoom = map.getZoom();
-        localStorage.setItem('map_transform', JSON.stringify(transform));
-      }
-    });
+    .on('load', loadInitialMap);
 }

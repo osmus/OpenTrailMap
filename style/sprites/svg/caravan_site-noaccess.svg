@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>caravan_site-noaccess</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="24" height="24" rx="5.86000013"></rect>
+        <path d="M22,2 L2,22" id="path-3"></path>
+    </defs>
+    <g id="caravan_site-noaccess" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Rectangle" fill="#A1857F" xlink:href="#path-1"></use>
+        <path d="M9,16 C9.55228475,16 10,15.5522847 10,15 L10,10 C10,9.44771525 9.55228475,9 9,9 L7,9 C6.44771525,9 6,9.44771525 6,10 L6,15 C6,15.5522847 6.44771525,16 7,16 L6.10746171,16 C5.01681238,16 4.12725329,15.1261841 4.10778051,14.0357086 L4.02318194,9.30078201 C4.00970656,8.48455843 4.49364861,7.74206657 5.24584886,7.42489577 C7.49739583,6.47515885 9.74869792,6 12,6 C14.2591146,6 16.5182292,6.47846238 18.7773438,7.43538713 C19.5176469,7.74671807 19.9989652,8.47131165 19.9999983,9.27441406 L20,16 C20,17.1045695 19.1045695,18 18,18 L17.7142857,18 L15,16 Z M15,9 L13,9 C12.4477153,9 12,9.44771525 12,10 L12,11 C12,11.5522847 12.4477153,12 13,12 L15,12 C15.5522847,12 16,11.5522847 16,11 L16,10 C16,9.44771525 15.5522847,9 15,9 Z" id="Rectangle-Copy-2" fill="#FFFFFF" mask="url(#mask-2)"></path>
+        <path d="M13,15.75 C13.345178,15.75 13.657678,15.889911 13.8838835,16.1161165 C14.110089,16.342322 14.25,16.654822 14.25,17 C14.25,17.345178 14.110089,17.657678 13.8838835,17.8838835 C13.657678,18.110089 13.345178,18.25 13,18.25 L4,18.25 C3.65482203,18.25 3.34232203,18.110089 3.11611652,17.8838835 C2.88991102,17.657678 2.75,17.345178 2.75,17 C2.75,16.654822 2.88991102,16.342322 3.11611652,16.1161165 C3.34232203,15.889911 3.65482203,15.75 4,15.75 Z" id="Rectangle" stroke="#A1857F" stroke-width="0.5" fill="#FFFFFF" mask="url(#mask-2)"></path>
+        <circle id="Oval-Copy" stroke="#A1857F" stroke-width="1.5" fill="#FFFFFF" mask="url(#mask-2)" cx="16" cy="17" r="2.75"></circle>
+        <g id="Line-3" stroke-linecap="square" mask="url(#mask-2)">
+            <use stroke="#A1857F" stroke-width="4" xlink:href="#path-3"></use>
+            <use stroke="#FFFFFF" stroke-width="2" xlink:href="#path-3"></use>
+        </g>
+    </g>
+</svg>

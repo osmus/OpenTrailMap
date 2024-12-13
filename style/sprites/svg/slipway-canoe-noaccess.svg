@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>slipway-canoe-noaccess</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="24" height="24" rx="5.87368421"></rect>
+        <path d="M22,2 L2,22" id="path-3"></path>
+    </defs>
+    <g id="slipway-canoe-noaccess" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Rectangle" fill="#8E9BAF" xlink:href="#path-1"></use>
+        <path d="M4,13 L20,18 L18.5,19 L17.5,19 L16,18 L15,18 L13.5,19 L12.5,19 L11,18 L10,18 L8.5,19 L7.5,19 L6,18 L5,18 L3.99909037,18.6663295 L4,13 Z M6.40557543,7.06356403 L6.58428254,7.07245747 C6.09699636,8.66629873 7.04873422,9.82868399 9.43949611,10.5596133 L15.655477,12.4600293 C18.0462389,13.1909586 19.4852629,12.7595026 19.9725491,11.1656613 L20.1256772,11.2582201 C20.9693152,11.8105375 21.3991434,12.8263518 21.1947808,13.8259802 C20.9208008,15.1661377 19.612284,16.0304453 18.2721266,15.7564653 L18.0216781,15.704575 C17.3752733,15.5690186 16.900741,15.4549741 16.5980811,15.3624417 L7.03503352,12.4387247 C6.73237362,12.3461922 6.27519564,12.1753842 5.66349959,11.9263007 L5.42685172,11.8292707 C4.16260323,11.3070038 3.56110826,9.85874701 4.08337511,8.59449852 C4.47293589,7.65149088 5.3973158,7.04969948 6.40557543,7.06356403 Z" id="Path-2" fill="#FFFFFF" fill-rule="nonzero" mask="url(#mask-2)"></path>
+        <g id="Line-3" stroke-linecap="square" mask="url(#mask-2)">
+            <use stroke="#8E9BAF" stroke-width="4" xlink:href="#path-3"></use>
+            <use stroke="#FFFFFF" stroke-width="2" xlink:href="#path-3"></use>
+        </g>
+    </g>
+</svg>

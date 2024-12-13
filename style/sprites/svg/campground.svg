@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>campground</title>
+    <g id="campground" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" fill="#4F2E28" x="0" y="0" width="24" height="24" rx="5.86000013"></rect>
+        <path d="M17,16 L12,7.5 L7,16" id="Rectangle" stroke="#FFFFFF" stroke-width="2.5"></path>
+        <path d="M5,15 L19,15 C19.5522847,15 20,15.4477153 20,16 L20,17 C20,17.5522847 19.5522847,18 19,18 L5,18 C4.44771525,18 4,17.5522847 4,17 L4,16 C4,15.4477153 4.44771525,15 5,15 Z" id="Rectangle-Copy" fill="#FFFFFF"></path>
+    </g>
+</svg>

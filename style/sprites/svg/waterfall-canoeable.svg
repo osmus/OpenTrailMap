@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>waterfall-canoeable</title>
+    <g id="waterfall-canoeable" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Combined-Shape" fill="#003B93" x="0" y="0" width="24" height="24" rx="5.87368421"></rect>
+        <path d="M18,6 L11,6 C8.790861,6 7,7.790861 7,10 L7,18 L7,18" id="Line" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"></path>
+        <path d="M19,6 L15,6 C12.790861,6 11,7.790861 11,10 L11,18 L11,18" id="Line-Copy" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"></path>
+        <path d="M20,6 L19,6 C16.790861,6 15,7.790861 15,10 L15,18 L15,18" id="Line-Copy-2" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"></path>
+        <path d="M6.65138782,16.5 L8.15138782,17.5 L8.84861218,17.5 L10.3486122,16.5 L11.6513878,16.5 L13.1513878,17.5 L13.8486122,17.5 L15.3486122,16.5 L16.6513458,16.5 L18.499,17.7313586 L18.499,20.9330857 L16.3486542,19.5 L15.6513878,19.5 L14.1513878,20.5 L12.8486122,20.5 L11.3486122,19.5 L10.6513878,19.5 L9.15138782,20.5 L7.84861218,20.5 L6.34861218,19.5 L5.65138782,19.5 L3.5,20.9342585 L3.5,17.7324081 L5.34861218,16.5 L6.65138782,16.5 Z" id="Path" stroke="#003B93" fill="#FFFFFF" fill-rule="nonzero" transform="translate(10.9995, 18.5) scale(1, -1) translate(-10.9995, -18.5)"></path>
+    </g>
+</svg>
