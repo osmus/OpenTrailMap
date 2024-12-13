@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ranger_station-noaccess</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="24" height="24" rx="5.87368421"></rect>
+        <path d="M22,2 L2,22" id="path-3"></path>
+    </defs>
+    <g id="ranger_station-noaccess" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Rectangle" fill="#A1857F" xlink:href="#path-1"></use>
+        <path d="M13,8.875 L20,15 L18,15 L18,21 L14,21 L14,16 L10,16 L10,21 L6,21 L6,15 L4,15 L11,8.875 L11,3 L16,3 L16,4 L19,4 L19,7 L15,7 L15,6 L13,6 L13,8.875 Z" id="Combined-Shape" fill="#FFFFFF" mask="url(#mask-2)"></path>
+        <g id="Line-3" stroke-linecap="square" mask="url(#mask-2)">
+            <use stroke="#A1857F" stroke-width="4" xlink:href="#path-3"></use>
+            <use stroke="#FFFFFF" stroke-width="2" xlink:href="#path-3"></use>
+        </g>
+    </g>
+</svg>

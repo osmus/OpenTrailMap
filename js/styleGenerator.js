@@ -1112,9 +1112,21 @@ async function generateStyle(travelMode, lens) {
     let showHazards = travelMode === "canoe";
     return [
       "case",
-      ["==", ["get", "route"], "ferry"], ["image", "ferry"],
-      ["==", ["get", "amenity"], "ranger_station"], ["image", "ranger_station"],
-      ["==", ["get", "highway"], "trailhead"], ["image", "trailhead"],
+      ["==", ["get", "route"], "ferry"], [
+        "case",
+        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "ferry-noaccess"],
+        ["image", "ferry"],
+      ],
+      ["==", ["get", "amenity"], "ranger_station"], [
+        "case",
+        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "ranger_station-noaccess"],
+        ["image", "ranger_station"],
+      ],
+      ["==", ["get", "highway"], "trailhead"], [
+        "case",
+        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "trailhead-noaccess"],
+        ["image", "trailhead"],
+      ],
       ["==", ["get", "man_made"], "cairn"], ["image", "cairn"],
       ["==", ["get", "information"], "guidepost"], ["image", "guidepost"],
       ["==", ["get", "information"], "route_marker"], ["image", "route_marker"],
