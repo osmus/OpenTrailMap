@@ -28,8 +28,11 @@ function closeSidebar() {
 
 function updateSidebar(entity) {
 
+  let sidebarElement = document.getElementById('sidebar');
+  if (!sidebarElement) return;
+
   if (!entity) {
-    document.getElementById('sidebar').innerHTML = "";
+    sidebarElement.innerHTML = "";
     return;
   }
 
@@ -79,7 +82,7 @@ function updateSidebar(entity) {
   html += "</p>";
   html += "</div>";
 
-  document.getElementById('sidebar').innerHTML = html;
+  sidebarElement.innerHTML = html;
 
   fetchOsmEntity(type, entityId).then(function(entity) {
     if (entity) {
@@ -97,6 +100,9 @@ function updateSidebar(entity) {
 }
 
 function updateMetaTable(entity, changeset) {
+  const element = document.getElementById('meta-table');
+  if (!element) return;
+
   let formattedDate = getFormattedDate(new Date(entity.timestamp));
   let comment = changeset && changeset.tags && changeset.tags.comment || '';
   let sources = changeset && changeset.tags && changeset.tags.source || '';
@@ -109,7 +115,7 @@ function updateMetaTable(entity, changeset) {
   html += `<tr><td>Changeset</td><td><a href="https://www.openstreetmap.org/changeset/${entity.changeset}" target="_blank">${entity.changeset}</a></td></tr>`;
   html += `<tr><td>Comment</td><td>${comment}</td></tr>`;
   html += `<tr><td>Source</td><td>${sources}</td></tr>`;
-  document.getElementById('meta-table').innerHTML = html;
+  element.innerHTML = html;
 }
 
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
@@ -118,6 +124,9 @@ const wikipediaRegex = /^(.+):(.+)$/;
 const nwisRegex = /^\d{8,15}$/;
 
 function updateTagsTable(tags) {
+  const element = document.getElementById('tag-table');
+  if (!element) return;
+
   let html = "";
   html += `<tr><th>Key</th><th>Value</th></tr>`;
   let keys = Object.keys(tags).sort();
@@ -137,10 +146,13 @@ function updateTagsTable(tags) {
     }
     html += `<tr><td><a target="_blank" rel="nofollow" href="https://wiki.openstreetmap.org/wiki/Key:${key}">${key}</a></td><td>${element}</td></tr>`;
   }
-  document.getElementById('tag-table').innerHTML = html;
+  element.innerHTML = html;
 }
 
 function updateMembershipsTable(memberships) {
+  const element = document.getElementById('relations-table');
+  if (!element) return;
+
   let html = "";
  
   if (memberships.length) {
@@ -159,7 +171,7 @@ function updateMembershipsTable(memberships) {
     html += `<tr><th>Relations</th></tr>`;
     html += `<tr><td><i>none</i></td></tr>`;
   }
-  document.getElementById('relations-table').innerHTML = html;
+  element.innerHTML = html;
 }
 
 function didClickEntityLink(e) {
