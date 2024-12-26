@@ -23,6 +23,7 @@ async function generateStyle(travelMode, lens) {
     labelHalo: "rgba(255, 255, 255, 1)",
     selection: "yellow",
   };
+  const noaccessValsLiteral = ["literal", ["no", "private", "discouraged", "limited"]]; // `limited` for `wheelchair`
   const lineWidth = [
     "interpolate", ["linear"], ["zoom"],
     12, 1,
@@ -158,8 +159,8 @@ async function generateStyle(travelMode, lens) {
     atv: [
         "any",
         ["in", ["get", "highway"], ["literal", ["footway", "steps"]]],
-        ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
-        ["in", ["get", "motor_vehicle"], ["literal", ["no", "private", "discouraged"]]],
+        ["in", ["get", "vehicle"], noaccessValsLiteral],
+        ["in", ["get", "motor_vehicle"], noaccessValsLiteral],
         isNotHighwayExpression,
     ],
     bicycle: [
@@ -169,7 +170,7 @@ async function generateStyle(travelMode, lens) {
         ["==", ["get", "highway"], "steps"],
         ["!=", ["get", "ramp:bicycle"], "yes"],
       ],
-      ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
+      ["in", ["get", "vehicle"], noaccessValsLiteral],
       isNotHighwayExpression,
     ],
     canoe: ["!", ["has", "canoe"]],
@@ -195,21 +196,21 @@ async function generateStyle(travelMode, lens) {
     ],
     mtb: [
       "any",
-      ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
-      ["in", ["get", "bicycle"], ["literal", ["no", "private", "discouraged"]]],
+      ["in", ["get", "vehicle"], noaccessValsLiteral],
+      ["in", ["get", "bicycle"], noaccessValsLiteral],
       isNotHighwayExpression,
     ],
     portage: ["!", ["has", "portage"]],
     'ski:nordic': [
       "any",
-      ["in", ["get", "ski"], ["literal", ["no", "private", "discouraged"]]],
+      ["in", ["get", "ski"], noaccessValsLiteral],
       isNotHighwayExpression,
     ],
     snowmobile: [
       "any",
       ["in", ["get", "highway"], ["literal", ["footway", "steps"]]],
-      ["in", ["get", "vehicle"], ["literal", ["no", "private", "discouraged"]]],
-      ["in", ["get", "motor_vehicle"], ["literal", ["no", "private", "discouraged"]]],
+      ["in", ["get", "vehicle"], noaccessValsLiteral],
+      ["in", ["get", "motor_vehicle"], noaccessValsLiteral],
       isNotHighwayExpression,
     ],
     wheelchair: [
@@ -846,11 +847,11 @@ async function generateStyle(travelMode, lens) {
           ["==", ["get", "information"], "route_marker"], 20,
           [
             "any",
-            ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
+            ["in", ["get", "canoe"], noaccessValsLiteral],
             [
               "all",
               ["!", ["has", "canoe"]],
-              ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
+              ["in", ["get", "access"], noaccessValsLiteral]
             ]
           ], 21,
           10,
@@ -1114,17 +1115,17 @@ async function generateStyle(travelMode, lens) {
       "case",
       ["==", ["get", "route"], "ferry"], [
         "case",
-        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "ferry-noaccess"],
+        ["in", ["get", "access"], noaccessValsLiteral], ["image", "ferry-noaccess"],
         ["image", "ferry"],
       ],
       ["==", ["get", "amenity"], "ranger_station"], [
         "case",
-        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "ranger_station-noaccess"],
+        ["in", ["get", "access"], noaccessValsLiteral], ["image", "ranger_station-noaccess"],
         ["image", "ranger_station"],
       ],
       ["==", ["get", "highway"], "trailhead"], [
         "case",
-        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "trailhead-noaccess"],
+        ["in", ["get", "access"], noaccessValsLiteral], ["image", "trailhead-noaccess"],
         ["image", "trailhead"],
       ],
       ["==", ["get", "man_made"], "cairn"], ["image", "cairn"],
@@ -1133,12 +1134,12 @@ async function generateStyle(travelMode, lens) {
       ["==", ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
       ["==", ["get", "tourism"], "camp_site"], [
         "case",
-        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "campground-noaccess"],
+        ["in", ["get", "access"], noaccessValsLiteral], ["image", "campground-noaccess"],
         ["image", "campground"],
       ],
       ["==", ["get", "tourism"], "caravan_site"], [
         "case",
-        ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]], ["image", "caravan_site-noaccess"],
+        ["in", ["get", "access"], noaccessValsLiteral], ["image", "caravan_site-noaccess"],
         ["image", "caravan_site"],
       ],
       ["==", ["get", "tourism"], "camp_pitch"], ["image", "campsite"],
@@ -1155,7 +1156,7 @@ async function generateStyle(travelMode, lens) {
         [
           "all",
           ["has", "canoe"],
-          ["!", ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]]]
+          ["!", ["in", ["get", "canoe"], noaccessValsLiteral]]
         ], [
           "case",
           ["==", ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-canoeable" : "beaver_dam"],
@@ -1170,11 +1171,11 @@ async function generateStyle(travelMode, lens) {
       ],
       [
         "any",
-        ["in", ["get", "canoe"], ["literal", ["no", "private", "discouraged"]]],
+        ["in", ["get", "canoe"], noaccessValsLiteral],
         [
           "all",
           ["!", ["has", "canoe"]],
-          ["in", ["get", "access"], ["literal", ["no", "private", "discouraged"]]]
+          ["in", ["get", "access"], noaccessValsLiteral]
         ]
       ], [
         "case",
@@ -1256,7 +1257,7 @@ async function generateStyle(travelMode, lens) {
   }
 
   function notNoAccessExpression(mode) {
-    return ["!", ["in", ["get", mode], ["literal", ["no", "private", "discouraged", "customers", "limited"]]]];
+    return ["!", ["in", ["get", mode], noaccessValsLiteral]];
   }
 
   function modeIsAllowedExpression(mode) {
