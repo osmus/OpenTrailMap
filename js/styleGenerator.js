@@ -1183,7 +1183,7 @@ async function generateStyle(travelMode, lens) {
           ["==", ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
           ["image", "slipway-canoe-trailer-noaccess"],
         ],
-        ["any", ["==", ["get", "waterway"], "access_point"], ["in", ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe-noaccess"],
+        ["==", ["get", "waterway"], "access_point"], ["image", "access_point-noaccess"],
         ""
       ],
       ["==", ["get", "leisure"], "slipway"], [
@@ -1191,7 +1191,11 @@ async function generateStyle(travelMode, lens) {
         ["==", ["get", "trailer"], "no"], ["image", "slipway-canoe"],
         ["image", "slipway-canoe-trailer"],
       ],
-      ["any", ["==", ["get", "waterway"], "access_point"], ["in", ["get", "canoe"], ["literal", ["put_in", "put_in;egress", "egress"]]]], ["image", "canoe"],
+      ["==", ["get", "waterway"], "access_point"], [
+        "case",
+        ["==", ["get", "parking"], "no"], ["image", "access_point-minor"],
+        ["image", "access_point"],
+      ],
       ""
     ];
   }
