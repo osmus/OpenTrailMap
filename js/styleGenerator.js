@@ -1175,6 +1175,12 @@ async function generateStyle(travelMode, lens) {
         [
           "all",
           ["!", ["has", "canoe"]],
+          ["in", ["get", "boat"], noaccessValsLiteral]
+        ],
+        [
+          "all",
+          ["!", ["has", "canoe"]],
+          ["!", ["has", "boat"]],
           ["in", ["get", "access"], noaccessValsLiteral]
         ]
       ], [
