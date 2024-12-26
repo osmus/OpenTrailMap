@@ -24,6 +24,21 @@ async function generateStyle(travelMode, lens) {
     selection: "yellow",
   };
   const noaccessValsLiteral = ["literal", ["no", "private", "discouraged", "limited"]]; // `limited` for `wheelchair`
+  const canoeNoaccessExpression = [
+    "any",
+    ["in", ["get", "canoe"], noaccessValsLiteral],
+    [
+      "all",
+      ["!", ["has", "canoe"]],
+      ["in", ["get", "boat"], noaccessValsLiteral]
+    ],
+    [
+      "all",
+      ["!", ["has", "canoe"]],
+      ["!", ["has", "boat"]],
+      ["in", ["get", "access"], noaccessValsLiteral]
+    ]
+  ];
   const lineWidth = [
     "interpolate", ["linear"], ["zoom"],
     12, 1,
@@ -234,7 +249,7 @@ async function generateStyle(travelMode, lens) {
     all: [],
     atv: ['vehicle', 'motor_vehicle', 'atv'],
     bicycle:  ['vehicle', 'bicycle'],
-    canoe: ['boat', "canoe"],
+    canoe: ['boat', 'canoe'],
     foot: ['foot'],
     horse: ['horse'],
     inline_skates: ['foot', 'inline_skates'],
@@ -845,15 +860,8 @@ async function generateStyle(travelMode, lens) {
           ["==", ["get", "information"], "guidepost"], 19,
           ["==", ["get", "man_made"], "cairn"], 20,
           ["==", ["get", "information"], "route_marker"], 20,
-          [
-            "any",
-            ["in", ["get", "canoe"], noaccessValsLiteral],
-            [
-              "all",
-              ["!", ["has", "canoe"]],
-              ["in", ["get", "access"], noaccessValsLiteral]
-            ]
-          ], 21,
+          canoeNoaccessExpression, 21,
+          ["==", ["get", "parking"], "no"], 11,
           10,
         ],
         "text-field": [
@@ -1169,21 +1177,7 @@ async function generateStyle(travelMode, lens) {
         ["in", ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-hazard" : "dam"],
         ["image", showHazards ? "lock-hazard" : "lock"],
       ],
-      [
-        "any",
-        ["in", ["get", "canoe"], noaccessValsLiteral],
-        [
-          "all",
-          ["!", ["has", "canoe"]],
-          ["in", ["get", "boat"], noaccessValsLiteral]
-        ],
-        [
-          "all",
-          ["!", ["has", "canoe"]],
-          ["!", ["has", "boat"]],
-          ["in", ["get", "access"], noaccessValsLiteral]
-        ]
-      ], [
+      canoeNoaccessExpression, [
         "case",
         ["==", ["get", "leisure"], "slipway"], ["case",
           ["==", ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
