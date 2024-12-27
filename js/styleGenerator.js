@@ -717,10 +717,8 @@ async function generateStyle(travelMode, lens) {
       "paint": {
         "icon-opacity": 0.8,
       },
-      // oneway-arrows filter technically isn't needed since the icon-image doesn't display anything
-      // if there isn't a relevant oneway value, but we might as well leave it for now in case we want
-      // to add some other kind of styling in the future
-      "filter": ["all", onewayArrowsFilter(travelMode), combinedFilterExpression],
+      // A specific filter isn't needed since the icon-image doesn't display anything if there isn't a relevant oneway value.
+      "filter": /*["all", onewayArrowsFilter(travelMode), */ combinedFilterExpression //],
     });
     addTrailLayer({
       "id": "trails-labels",
@@ -968,7 +966,7 @@ async function generateStyle(travelMode, lens) {
 
   function onewayKeysForTravelMode(travelMode) {
     let keys = [];
-    // oneway tag is irrelevant on waterways
+    // basic `oneway` tag is ambiguous on waterways
     if (travelMode !== "canoe") keys.push('oneway');
     return keys.concat(accessHierarchy[travelMode].map(function(val) {
       return 'oneway:' + val;
@@ -1083,7 +1081,7 @@ async function generateStyle(travelMode, lens) {
     }
     return specifiedAttributeExpression;
   }
-
+/*
   function onewayArrowsFilter(travelMode) {
     let filter = ["any"];
     let onewayKeys = onewayKeysForTravelMode(travelMode);
@@ -1116,7 +1114,7 @@ async function generateStyle(travelMode, lens) {
     }
     return filter;
   }
-
+*/
   function poiIconImageExpression(travelMode) {
     let showHazards = travelMode === "canoe";
     return [
@@ -1200,7 +1198,7 @@ async function generateStyle(travelMode, lens) {
     ];
   }
 
-  function onewayArrowsIconImageExpression(travelMode) {
+  function onewayArrowsIconImageExpression(travelMode, fromAll) {
     let expression = ["case"];
     onewayKeysForTravelMode(travelMode).reverse().forEach(function(key) {
       expression = expression.concat([
@@ -1214,14 +1212,46 @@ async function generateStyle(travelMode, lens) {
         ]
       ]);
     });
-    expression.push("");
     if (travelMode === "canoe") {
+
+      expression = expression.concat([
+        ["all",
+          // assume features with current are oneway
+          ["in", ["get", "waterway"], ["literal", [
+            "river",
+            "stream",
+            "canal",
+            "drain",
+            "ditch",
+            "canoe_pass"
+          ]]],
+          // unless they're tidal
+          ["!=", ["get", "tidal"], "yes"],
+        ],
+        ["image", "arrow-right"],
+        "",
+      ]);
+
+      if (!fromAll) {
+        expression = [
+          "case",
+          isWaterwayExpression, expression,
+          onewayArrowsIconImageExpression('portage'),
+        ];
+      }
+      
+    } else {
+      expression.push("");
+    }
+
+    if (travelMode === 'all') {
       expression = [
         "case",
-        isWaterwayExpression, expression,
-        onewayArrowsIconImageExpression('portage'),
+        isWaterwayExpression, onewayArrowsIconImageExpression('canoe', true),
+        expression,
       ];
     }
+
     return expression;
   }
 
