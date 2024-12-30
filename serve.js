@@ -26,8 +26,11 @@ http.createServer(function (request, response) {
           options.end = parseInt(matches[2])+1;
           response.setHeader('Content-Length', options.end - options.start);
         }
+        // set MIME types
         if (fsPath.endsWith(".svg")) {
           response.setHeader('Content-Type', "image/svg+xml");
+        } else if (fsPath.endsWith(".js")) {
+          response.setHeader('Content-Type', "text/javascript");
         }
 
         let fileStream = fs.createReadStream(fsPath, options)
