@@ -42,7 +42,8 @@
       "source-layer": "park",
       "paint": {
         "fill-color": "hsla(0, 0%, 100%, 0)"
-      }
+      },
+      "filter": ["!=", ["get", "protected_area"], "conservation_district"]
     },
     {
       "id": "landuse-exclusion",
@@ -663,7 +664,8 @@
       "paint": {
         "line-width": 0.5,
         "line-color": "hsla(0, 0%, 0%, 0)"
-      }
+      },
+      "filter": [">=", ["zoom"], 10]
     },
     {
       "id": "admin_sub",

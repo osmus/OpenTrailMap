@@ -40,18 +40,27 @@ async function loadInitialMap() {
     });
 }
 
+function getStyleId() {
+  return travelMode + '/' + lens;
+}
+
+function getCachedStyleLayer(layerId) {
+  let cachedStyle = JSON.parse(cachedStyles[getStyleId()]);
+  return cachedStyle.layers.find(layer => layer.id === layerId);
+}
+
 async function reloadMapStyle() {
 
-  let styleId = travelMode + '/' + lens;
-  if (!cachedStyles[styleId]) cachedStyles[styleId] = await generateStyle(travelMode, lens);
+  let styleId = getStyleId();
+  if (!cachedStyles[styleId]) cachedStyles[styleId] = JSON.stringify(await generateStyle(travelMode, lens));
   
-  let style = cachedStyles[styleId];
+  // always parse from string to avoid stale referenced objects
+  let style = JSON.parse(cachedStyles[styleId]);
 
   for (let cat in possibleLayerIdsByCategory) {
     layerIdsByCategory[cat] = possibleLayerIdsByCategory[cat].filter(id => style.layers.find(layer => layer.id === id));
   }
 
-  // it doesn't matter that we write to a cached referenced objects as long as we update the same properties each time
   applyStyleAddendumsToStyle(style, styleAddendumsForHover());
   applyStyleAddendumsToStyle(style, styleAddendumsForSelection());
   applyStyleAddendumsToStyle(style, styleAddendumsForFocus());
@@ -136,31 +145,27 @@ function styleAddendumsForFocus() {
   let focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
   return {
     "trail-pois": {
-      "minzoom": focusedEntityInfo ? 0 : 12,
-      "filter": trailPoisFilter(travelMode),
+      "minzoom": focusedEntityInfo ? 0 : getCachedStyleLayer('trail-pois').minzoom,
+      "filter": [
+        "all",
+        getCachedStyleLayer('trail-pois').filter,
+        ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ? [["within", focusAreaGeoJsonBuffered]] : []),
+      ]
     },
     "major-trail-pois": {
       "filter": [
         "all",
-        [
-          "any",
-          ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
-          ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
-        ],
-        [">=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.000000075],
-        ["<=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.0001],
-        ["!", ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]]],
+        getCachedStyleLayer('major-trail-pois').filter,
         // don't show icon and label for currently focused feature
         ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null],
         ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ?
           focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
-      ]
+      ],
     },
     "peaks": {
       "filter": [
         "all",
-        ["has", "name"],
-        ["has", "ele_ft"],
+        getCachedStyleLayer('peaks').filter,
         ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ?
           focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
       ]
@@ -168,8 +173,8 @@ function styleAddendumsForFocus() {
     "park-fill": {
       "filter": [
         "any",
+        getCachedStyleLayer('park-fill').filter,
         ["==", ["id"], focusedId],
-        ["!", ["in", ["get", "protected_area"], ["literal", ["conservation_district"]]]]
       ],
       "layout": {
         "fill-sort-key": [
@@ -187,15 +192,6 @@ function styleAddendumsForFocus() {
       }
     },
     "park-outline": {
-      "filter": [
-        "any",
-        [
-          "all",
-          ["!=", ["id"], focusedId],
-          [">=", ["zoom"], 10],
-        ],
-        [">=", ["zoom"], 12],
-      ],
       "layout": {
         "line-sort-key": [
           "case",
@@ -458,73 +454,4 @@ function fitMapToBounds(bbox) {
   let maxExtent = Math.max(width, height);
   let fitBbox = extendBbox(bbox, maxExtent / 16);
   map.fitBounds(fitBbox);
-}
-
-
-function trailPoisFilter(travelMode) {
-  let filter = [
-    "all",
-    [
-      "any",
-      [
-        "all",
-        ["!", ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
-        ["!", ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
-      ],
-      ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
-    ],
-    ["!=", ["get", "natural"], "tree"],
-  ];
-  if (focusAreaGeoJsonBuffered?.geometry?.coordinates?.length) {
-    filter.push(["within", focusAreaGeoJsonBuffered]);
-  }
-  if (travelMode !== "canoe" && travelMode !== "all") {
-    // don't show canoe-specific POIs for other travel modes
-    filter.push([
-      "!", [
-        "any",
-        ["==", ["get", "natural"], "beaver_dam"],
-        ["==", ["get", "leisure"], "slipway"],
-        ["in", ["get", "waterway"], ["literal", ["dam", "weir", "access_point"]]],
-        ["==", ["get", "lock"], "yes"],
-        ["==", ["get", "man_made"], "monitoring_station"],
-      ]
-    ]);
-  }
-  if (travelMode !== "all") {
-    let poiKeys = [travelMode];
-    let poiKeysByTravelMode = {
-      "foot": ["hiking"],
-      "canoe": ["canoe", "portage"],
-    };
-    if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
-    filter.push([
-      "any",
-      [
-        "!", [
-          "any",
-          ["==", ["get", "highway"], "trailhead"],
-          ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
-          ["==", ["get", "man_made"], "cairn"],
-        ]
-      ],
-      travelMode === "canoe" ? [
-        "any",
-        ...poiKeys.map(function(key) {
-          return ["==", ["get", key], "yes"];
-        })
-      ] :
-      [
-        "all",
-        ...poiKeys.map(function(key) {
-          return [
-            "any",
-            ["!", ["has", key]],
-            ["==", ["get", key], "yes"],
-          ];
-        })
-      ]
-    ]);
-  }
-  return filter;
 }

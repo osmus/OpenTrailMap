@@ -817,12 +817,18 @@ async function generateStyle(travelMode, lens) {
         "text-halo-blur": 1,
         "text-halo-color": colors.labelHalo,
       },
+      "filter": [
+        "all",
+        ["has", "name"],
+        ["has", "ele_ft"],
+      ],
     });
     addTrailLayer({
       "id": "trail-pois",
       "source": 'trails',
       "source-layer": 'trail_poi',
       "type": "symbol",
+      "minzoom": 12,
       "transition": {
         "duration": 0,
         "delay": 0
@@ -885,6 +891,7 @@ async function generateStyle(travelMode, lens) {
         "text-halo-blur": 1,
         "text-halo-color": colors.labelHalo,
       },
+      "filter": trailPoisFilter(travelMode),
     });
     addTrailLayer({
       "id": "major-trail-pois",
@@ -929,6 +936,17 @@ async function generateStyle(travelMode, lens) {
         "text-halo-blur": 1,
         "text-halo-color": colors.labelHalo,
       },
+      "filter": [
+        "all",
+        [
+          "any",
+          ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
+          ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
+        ],
+        [">=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.000000075],
+        ["<=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.0001],
+        ["!", ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]]],
+      ],
     });
     if (showTrailCenterpoints) {
       addTrailLayer({
@@ -1196,6 +1214,71 @@ async function generateStyle(travelMode, lens) {
       ],
       ""
     ];
+  }
+
+  function trailPoisFilter(travelMode) {
+    let filter = [
+      "all",
+      [
+        "any",
+        [
+          "all",
+          ["!", ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
+          ["!", ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
+        ],
+        ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
+      ],
+      ["!=", ["get", "natural"], "tree"],
+    ];
+    if (travelMode !== "canoe" && travelMode !== "all") {
+      // don't show canoe-specific POIs for other travel modes
+      filter.push([
+        "!", [
+          "any",
+          ["==", ["get", "natural"], "beaver_dam"],
+          ["==", ["get", "leisure"], "slipway"],
+          ["in", ["get", "waterway"], ["literal", ["dam", "weir", "access_point"]]],
+          ["==", ["get", "lock"], "yes"],
+          ["==", ["get", "man_made"], "monitoring_station"],
+        ]
+      ]);
+    }
+    if (travelMode !== "all") {
+      let poiKeys = [travelMode];
+      let poiKeysByTravelMode = {
+        "foot": ["hiking"],
+        "canoe": ["canoe", "portage"],
+      };
+      if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
+      filter.push([
+        "any",
+        [
+          "!", [
+            "any",
+            ["==", ["get", "highway"], "trailhead"],
+            ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
+            ["==", ["get", "man_made"], "cairn"],
+          ]
+        ],
+        travelMode === "canoe" ? [
+          "any",
+          ...poiKeys.map(function(key) {
+            return ["==", ["get", key], "yes"];
+          })
+        ] :
+        [
+          "all",
+          ...poiKeys.map(function(key) {
+            return [
+              "any",
+              ["!", ["has", key]],
+              ["==", ["get", key], "yes"],
+            ];
+          })
+        ]
+      ]);
+    }
+    return filter;
   }
 
   function onewayArrowsIconImageExpression(travelMode, fromAll) {
