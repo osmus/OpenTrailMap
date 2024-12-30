@@ -484,7 +484,8 @@ function trailPoisFilter(travelMode) {
       "!", [
         "any",
         ["==", ["get", "natural"], "beaver_dam"],
-        ["in", ["get", "waterway"], ["literal", ["dam", "weir"]]],
+        ["==", ["get", "leisure"], "slipway"],
+        ["in", ["get", "waterway"], ["literal", ["dam", "weir", "access_point"]]],
         ["==", ["get", "lock"], "yes"],
         ["==", ["get", "man_made"], "monitoring_station"],
       ]
