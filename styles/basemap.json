@@ -17,11 +17,11 @@
     }
   },
   "glyphs": "https://font.americanamap.org/{fontstack}/{range}.pbf",
-  "layers": [
+"layers": [
     {
       "id": "background",
       "type": "background",
-      "paint": { "background-color": "#c8facc" }
+      "paint": {"background-color": "#c8facc"}
     },
     {
       "id": "hillshade",
@@ -32,10 +32,7 @@
         "raster-fade-duration": 300,
         "raster-opacity": {
           "base": 0.8,
-          "stops": [
-            [5, 0.5],
-            [14, 0.1]
-          ]
+          "stops": [[5, 0.5], [14, 0.1]]
         }
       }
     },
@@ -58,11 +55,7 @@
       "source": "contours",
       "source-layer": "contours",
       "minzoom": 12,
-      "filter": [
-        "all",
-        ["==", ["get", "idx"], true],
-        ["!=", ["get", "ele"], 0]
-      ],
+      "filter": ["!=", ["get", "ele"], 0],
       "layout": {
         "symbol-avoid-edges": true,
         "symbol-placement": "line",
@@ -72,24 +65,11 @@
         "text-ignore-placement": false,
         "text-padding": 10,
         "text-rotation-alignment": "map",
-        "text-size": {
-          "base": 1,
-          "stops": [
-            [10, 9],
-            [20, 12]
-          ]
-        },
-        "symbol-spacing": [
-          "interpolate",
-          ["linear"],
-          ["zoom"],
-          12,
-          100,
-          15,
-          600
-        ]
+        "text-size": ["interpolate", ["exponential", 0.5], ["zoom"], 12, 9, 16, 12],
+        "symbol-spacing": ["interpolate", ["linear"], ["zoom"], 12, 120, 15, 300]
       },
       "paint": {
+        "text-opacity": ["step", ["zoom"], 0, 12, ["case", ["==", ["get", "idx"], true], 0.8, 0], 15, ["case", ["==", ["get", "idx"], true], 1, 0.8]],
         "text-color": "#526653",
         "text-halo-color": "#c8facc",
         "text-halo-width": 1.5
