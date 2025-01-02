@@ -63,10 +63,9 @@
         "text-field": "{ele} ft",
         "text-font": ["Americana-Regular"],
         "text-ignore-placement": false,
-        "text-padding": 10,
         "text-rotation-alignment": "map",
-        "text-size": ["interpolate", ["exponential", 0.5], ["zoom"], 12, 9, 16, 12],
-        "symbol-spacing": ["interpolate", ["linear"], ["zoom"], 12, 120, 15, 300]
+        "text-size": ["interpolate", ["exponential", 0.5], ["zoom"], 12, 9, 15, 10, 18, 12],
+        "symbol-spacing": ["interpolate", ["exponential", 0.5], ["zoom"], 12, 80, 15, 360, 18, 720]
       },
       "paint": {
         "text-opacity": ["step", ["zoom"], 0, 12, ["case", ["==", ["get", "idx"], true], 0.8, 0], 15, ["case", ["==", ["get", "idx"], true], 1, 0.8]],
