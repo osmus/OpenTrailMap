@@ -21,7 +21,7 @@
     {
       "id": "background",
       "type": "background",
-      "paint": {"background-color": "#c8facc"}
+      "paint": {"background-color": "#537e4e"}
     },
     {
       "id": "hillshade",
@@ -44,7 +44,7 @@
       "filter": ["!=", ["get", "ele"], 0],
       "minzoom": 10,
       "paint": {
-        "line-color": "#526653",
+        "line-color": "#000000",
         "line-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.1, 14, 1.0],
         "line-width": ["case", ["get", "idx"], 0.5, 0.1]
       }
@@ -69,8 +69,8 @@
       },
       "paint": {
         "text-opacity": ["step", ["zoom"], 0, 12, ["case", ["==", ["get", "idx"], true], 0.8, 0], 15, ["case", ["==", ["get", "idx"], true], 1, 0.8]],
-        "text-color": "#526653",
-        "text-halo-color": "#c8facc",
+        "text-color": "#000000",
+        "text-halo-color": "#537e4e",
         "text-halo-width": 1.5
       }
     }
