@@ -1,0 +1,75 @@
+{
+  "version": 8,
+  "name": "OpenTrailMap-v0.5",
+  "metadata": {},
+  "sources": {
+    "hillshade": {
+      "type": "raster",
+      "url": "https://dwuxtsziek7cf.cloudfront.net/hillshade.json"
+    },
+    "contours": {
+      "type": "vector",
+      "url": "https://dwuxtsziek7cf.cloudfront.net/contours-feet.json"
+    }
+  },
+  "glyphs": "https://font.americanamap.org/{fontstack}/{range}.pbf",
+"layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "paint": {"background-color": "#c8facc"}
+    },
+    {
+      "id": "hillshade",
+      "type": "raster",
+      "source": "hillshade",
+      "paint": {
+        "raster-contrast": 0,
+        "raster-fade-duration": 300,
+        "raster-opacity": {
+          "base": 0.8,
+          "stops": [[5, 0.5], [14, 0.1]]
+        }
+      }
+    },
+    {
+      "id": "contours",
+      "type": "line",
+      "source": "contours",
+      "source-layer": "contours",
+      "filter": ["!=", ["get", "ele"], 0],
+      "minzoom": 10,
+      "paint": {
+        "line-color": "#526653",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 10, 0.1, 14, 1.0],
+        "line-width": ["case", ["get", "idx"], 0.5, 0.1]
+      }
+    },
+    {
+      "id": "contour_label",
+      "type": "symbol",
+      "source": "contours",
+      "source-layer": "contours",
+      "minzoom": 12,
+      "filter": ["!=", ["get", "ele"], 0],
+      "layout": {
+        "symbol-avoid-edges": true,
+        "symbol-placement": "line",
+        "text-allow-overlap": false,
+        "text-field": "{ele} ft",
+        "text-font": ["Americana-Regular"],
+        "text-ignore-placement": false,
+        "text-rotation-alignment": "map",
+        "text-size": ["interpolate", ["exponential", 0.5], ["zoom"], 12, 9, 15, 10, 18, 12],
+        "symbol-spacing": ["interpolate", ["exponential", 0.5], ["zoom"], 12, 80, 15, 360, 18, 720]
+      },
+      "paint": {
+        "text-opacity": ["step", ["zoom"], 0, 12, ["case", ["==", ["get", "idx"], true], 0.8, 0], 15, ["case", ["==", ["get", "idx"], true], 1, 0.8]],
+        "text-color": "#526653",
+        "text-halo-color": "#c8facc",
+        "text-halo-width": 1.5
+      }
+    }
+  ],
+  "id": "OpenTrailMap-v0.5"
+}
