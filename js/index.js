@@ -415,7 +415,6 @@ window.onload = function() {
   map = new maplibregl.Map({
     container: 'map',
     hash: "map",
-    style: './style/basestyle.json',
     center: initialCenter,
     zoom: initialZoom,
     fadeDuration: 0,
@@ -437,6 +436,5 @@ window.onload = function() {
         unit: 'imperial'
     }), "bottom-left");
 
-  map
-    .on('load', loadInitialMap);
+    loadInitialMap();
 }

@@ -22,18 +22,18 @@ async function loadInitialMap() {
   updateForHash(true);
   reloadMapStyle();
 
-  map.on('mousemove', didMouseMoveMap)
-    .on('click', didClickMap)
-    .on('dblclick', didDoubleClickMap)
-    .on('moveend', checkMapExtent)
-    .on('moveend', function() {
+  map.on('mousemove', didMouseMoveMap);
+  map.on('click', didClickMap);
+  map.on('dblclick', didDoubleClickMap);
+  map.on('moveend', checkMapExtent);
+  map.on('moveend', function() {
       if (localStorage) {
         let transform = map.getCenter();
         transform.zoom = map.getZoom();
         localStorage.setItem('map_transform', JSON.stringify(transform));
       }
-    })
-    .on('sourcedata', function(event) {
+    });
+  map.on('sourcedata', function(event) {
       if (event.sourceId === 'trails' && event.isSourceLoaded) {
         reloadFocusAreaIfNeeded();
       }
@@ -56,6 +56,9 @@ async function reloadMapStyle() {
   
   // always parse from string to avoid stale referenced objects
   let style = JSON.parse(cachedStyles[styleId]);
+
+  // MapLibre requires an absolute URL for `sprite`
+  style.sprite = window.location.origin + style.sprite;
 
   for (let cat in possibleLayerIdsByCategory) {
     layerIdsByCategory[cat] = possibleLayerIdsByCategory[cat].filter(id => style.layers.find(layer => layer.id === id));
