@@ -373,10 +373,14 @@ window.onload = function() {
 
     switch(e.key) {
       case 'z':
-        if (selectedEntityInfo) {
-          let bounds = getEntityBoundingBox(selectedEntityInfo.rawFeature);
+        let info = selectedEntityInfo || focusedEntityInfo;
+        let feature = info && getFeatureFromLayers(info.id, info.type, ['park', 'trail', 'trail_poi', {source: 'openmaptiles', layer: 'mountain_peak'}]) || info?.rawFeature;
+        if (feature) {
+          let bounds = getEntityBoundingBox(feature);
           if (bounds) {
             fitMapToBounds(bounds);
+          } else if (feature.geometry.type === "Point") {
+            map.flyTo({center: feature.geometry.coordinates, zoom: Math.max(map.getZoom(), 12)});
           }
         }
         break;

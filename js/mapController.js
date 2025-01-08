@@ -405,18 +405,30 @@ function getEntityBoundingBox(entity) {
   }
 }
 
+function getFeatureFromLayers(id, type, layers) {
+  for (let i in layers) {
+    let layer = layers[i];
+    let features = map.querySourceFeatures(layer.source || 'trails', {
+      filter: [
+        "any",
+        [
+          "all",
+          ["==", ["get", "OSM_ID"], id],
+          ["==", ["get", "OSM_TYPE"], type],
+        ],
+        ["==", ["id"], omtId(id, type)],
+      ],
+      sourceLayer: layer.layer || layer,
+    });
+    if (features.length) return features[0];
+  }
+}
+
 function getEntityBoundingBoxFromLayer(id, type, layer) {
   if (!focusedEntityInfo) return null;
-  let features = map.querySourceFeatures('trails', {
-    filter: [
-      "all",
-      ["==", ["get", "OSM_ID"], id],
-      ["==", ["get", "OSM_TYPE"], type],
-    ],
-    sourceLayer: layer,
-  });
-  if (features.length) {
-    return getEntityBoundingBox(features[0]);
+  let feature = getFeatureFromLayers(id, type, [layer]);
+  if (feature) {
+    return getEntityBoundingBox(feature);
   }
 }
 
