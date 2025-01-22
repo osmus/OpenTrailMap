@@ -76,6 +76,9 @@ Trail vector tiles are rendered and hosted by OpenStreetMap US using the schema 
 
 The trail vector tilesets are segmented so you do not have to download data that you're not viewing. Namely, the water trail tiles are distinct from the land trail tiles.
 
+### Static stylesheets
+OpenTrailMap has complex, parameter-driven styling. For performance, styles are generated at runtime. However, static stylesheets are also generated at build time for ease-of-use by other apps. You can browse the full list of available styles [here](https://opentrailmap.us/dist/styles/). Generated styles are subject to the same license as the rest of OpenTrailMap (see below).
+
 ## Get involved
 
 ### Code of Conduct
