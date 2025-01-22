@@ -919,9 +919,10 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
       "layout": {
         "icon-image": [
           "case",
-          ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]], ["image", "protected_area"],
+          ["==", ["get", "protected_area"], "game_land"], ["image", "game_land"],
           ["==", ["get", "leisure"], "nature_reserve"], ["image", "nature_reserve"],
-          ["image", "park"],
+          ["==", ["get", "leisure"], "park"], ["image", "park"],
+          ["image", "protected_area"],
         ],
         "icon-size": [
           "interpolate", ["linear"], ["zoom"],
