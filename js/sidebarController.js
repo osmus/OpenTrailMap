@@ -1,28 +1,19 @@
+import { osm } from "./osmController.js";
+import { state } from "./stateController.js";
+import { createElement } from "./utils.js";
+
 function isSidebarOpen() {
   return document.getElementsByTagName('body')[0].classList.contains('sidebar-open');
 }
-function toggleSidebar(toOpen) {
-  if (isSidebarOpen()) {
-    closeSidebar();
-  } else {
-    openSidebar();
-  }
-}
 function openSidebar() {
   if (!isSidebarOpen()) {
-    if (activePopup) {
-      activePopup.remove();
-      activePopup = null;
-    }
     document.getElementsByTagName('body')[0].classList.add('sidebar-open');
-    setHashParameters({ inspect: 1 });
-    updateSidebar(selectedEntityInfo);
+    updateSidebar(state.selectedEntityInfo);
   }
 }
 function closeSidebar() {
   if (isSidebarOpen()) {
     document.getElementsByTagName('body')[0].classList.remove('sidebar-open');
-    setHashParameters({ inspect: null });
   }
 }
 
@@ -41,10 +32,10 @@ function updateSidebar(entity) {
   let focusLngLat = entity.focusLngLat;
 
   let bbox = focusLngLat && {
-    left: left = focusLngLat.lng - 0.001,
-    right: right = focusLngLat.lng + 0.001,
-    bottom: left = focusLngLat.lat - 0.001,
-    top: right = focusLngLat.lat + 0.001,
+    left: focusLngLat.lng - 0.001,
+    right: focusLngLat.lng + 0.001,
+    bottom: focusLngLat.lat - 0.001,
+    top: focusLngLat.lat + 0.001,
   };
   
   let opQuery = encodeURIComponent(`${type}(${entityId});\n(._;>;);\nout;`);
@@ -84,9 +75,9 @@ function updateSidebar(entity) {
 
   sidebarElement.innerHTML = html;
 
-  fetchOsmEntity(type, entityId).then(function(entity) {
+  osm.fetchOsmEntity(type, entityId).then(function(entity) {
     if (entity) {
-      fetchOsmChangeset(entity.changeset).then(function(changeset) {
+      osm.fetchOsmChangeset(entity.changeset).then(function(changeset) {
         updateMetaTable(entity, changeset);
       });
     }
@@ -94,7 +85,7 @@ function updateSidebar(entity) {
     if (tags) updateTagsTable(tags);
   });
 
-  fetchOsmEntityMemberships(type, entityId).then(function(memberships) {
+  osm.fetchOsmEntityMemberships(type, entityId).then(function(memberships) {
     updateMembershipsTable(memberships);
   });
 }
@@ -150,33 +141,60 @@ function updateTagsTable(tags) {
 }
 
 function updateMembershipsTable(memberships) {
-  const element = document.getElementById('relations-table');
-  if (!element) return;
-
-  let html = "";
+  const table = document.getElementById('relations-table');
+  if (!table) return;
+  table.innerHTML = "";
  
   if (memberships.length) {
-    html += `<tr><th>Relation</th><th>Type</th><th>Role</th></tr>`;
+    table.append(
+      createElement('tr')
+        .append(
+          createElement('th')
+            .append('Relation'),
+          createElement('th')
+            .append('Type'),
+          createElement('th')
+            .append('Role')
+        )
+    );
     for (let i in memberships) {
       let membership = memberships[i];
-      let rel = osmEntityCache[membership.key];
+      let rel = osm.getCachedEntity(membership.type, membership.id);
       let label = rel.tags.name || rel.id;
       let relType = rel.tags.type || '';
       if ((relType === "route" || relType === "superroute") && rel.tags.route) {
         relType += " (" + (rel.tags.route || rel.tags.superroute) + ")";
       }
-      html += `<tr><td><a href="#" onclick="didClickEntityLink(event);" key="${membership.key}">${label}</a></td><td>${relType}</td><td>${membership.role}</td></tr>`;
+      table.append(
+        createElement('tr')
+          .append(
+            createElement('td')
+              .append(
+                createElement('a')
+                .setAttribute('href', '#')
+                .setAttribute('type', membership.type)
+                .setAttribute('id', membership.id)
+                .addEventListener('click', didClickEntityLink)
+                .append(label)
+              ),
+            createElement('td')
+              .append(relType),
+            createElement('td')
+              .append(membership.role)
+          )
+      );
     }
   } else {
+    let html = "";
     html += `<tr><th>Relations</th></tr>`;
     html += `<tr><td><i>none</i></td></tr>`;
+    table.innerHTML = html;
   }
-  element.innerHTML = html;
 }
 
 function didClickEntityLink(e) {
   e.preventDefault();
-  selectEntity(osmEntityCache[e.target.getAttribute("key")]);
+  state.selectEntity(osm.getCachedEntity(e.target.getAttribute("type"), e.target.getAttribute("id")));
 }
 
 function getFormattedDate(date) {
@@ -184,3 +202,24 @@ function getFormattedDate(date) {
   let components = offsetDate.toISOString().split('T')
   return components[0] + " " + components[1].split(".")[0];
 }
+
+window.addEventListener('load', function() {
+
+  document.getElementById("inspect-toggle").addEventListener('click', function(e) {
+    e.preventDefault();
+    state.setInspectorOpen(!isSidebarOpen());
+  });
+
+  state.addEventListener('selectedEntityChange', function() {
+    if (isSidebarOpen()) updateSidebar(state.selectedEntityInfo);
+  });
+
+  state.addEventListener('inspectorOpenChange', function() {
+    if (state.inspectorOpen) {
+      openSidebar();
+    } else {
+      closeSidebar();
+    }
+  });
+
+});

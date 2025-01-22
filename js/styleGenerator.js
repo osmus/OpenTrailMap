@@ -1,11 +1,25 @@
-let baseStyleJsonString;
-
-async function generateStyle(travelMode, lens) {
-
-  if (!baseStyleJsonString) baseStyleJsonString = await fetch('./style/basestyle.json').then(response => response.text());
+export function generateStyle(baseStyleJsonString, travelMode, lens) {
 
   // parse anew every time to avoid object references
   const style = JSON.parse(baseStyleJsonString);
+
+  const highwayOnlyLenses = [
+    "hand_cart",
+    "incline",
+    "lit",
+    "maxspeed",
+    "operator",
+    "sac_scale",
+    "smoothness",
+    "surface",
+    "trail_visibility",
+  ];
+  const waterwayOnlyLenses = [
+    "tidal",
+    "intermittent",
+    "rapids",
+    "open_water",
+  ];
 
   const poiLabelZoom = 14;
   const thisYear = new Date().getFullYear();

@@ -1,34 +1,16 @@
-function getMaxArrayDepth(value) {
-    return Array.isArray(value) ? 
-        1 + Math.max(0, ...value.map(getMaxArrayDepth)) :
-        0;
-}
 
-function bboxOfGeoJson(geojson) {
-
-    if (!geojson?.geometry?.coordinates?.length) return;
-  
-    let depth = getMaxArrayDepth(geojson.geometry.coordinates);
-    let coords = geojson.geometry.coordinates.flat(depth - 2);
-    let bbox = [ Infinity, Infinity, -Infinity, -Infinity];
-  
-    bbox = coords.reduce(function(prev, coord) {
-      return [
-        Math.min(coord[0], prev[0]),
-        Math.min(coord[1], prev[1]),
-        Math.max(coord[0], prev[2]),
-        Math.max(coord[1], prev[3])
-      ];
-    }, bbox);
-    if (bbox[0].isNaN) return;
-    return bbox;
-};
-
-function extendBbox(bbox, buffer) {
-    bbox = bbox.slice();
-    bbox[0] -= buffer; // west
-    bbox[1] -= buffer; // south
-    bbox[2] += buffer; // east
-    bbox[3] += buffer; // north
-    return bbox;
+// Creates a new HTML element but wraps certain function so they return the
+// element itself in order to enable chaining.
+export function createElement(...args) {
+  let el = document.createElement(...args)
+  let fnNames = ['setAttribute', 'addEventListener', 'append', 'appendChild'];
+  for (let i in fnNames) {
+    let fnName = fnNames[i];
+    let fn = el[fnName];
+    el[fnName] = function(...args) {
+      fn.apply(this, args);
+      return el;
+    };
+  }
+  return el;
 }
