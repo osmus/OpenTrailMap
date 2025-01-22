@@ -4,6 +4,7 @@
     "version": "0.0.1",
     "scripts": {
         "build": "rm -rf dist/ && rollup --config rollup.config.js && cp -a node_modules/maplibre-gl/dist/. dist/maplibre/",
+        "build-static-styles": "node ./scripts/buildStaticStyles.js",
         "serve": "node ./serve.js",
         "sprites": "spreet --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap && spreet --retina --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap@2x"
     },

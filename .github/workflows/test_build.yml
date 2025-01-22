@@ -21,3 +21,5 @@ jobs:
         run: npm install
       - name: Build 
         run: npm run build
+      - name: Build static styles
+        run: npm run build-static-styles
