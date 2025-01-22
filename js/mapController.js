@@ -1,10 +1,20 @@
+import { state } from "./stateController.js";
+import { osm } from "./osmController.js";
+import { generateStyle } from './styleGenerator.js'; 
+import { createElement } from "./utils.js";
+
+let map;
+
 let activePopup;
+let baseStyleJsonString;
 
 let cachedStyles = {};
 
 let focusAreaGeoJson;
 let focusAreaGeoJsonBuffered;
 let focusAreaBoundingBox;
+
+let hoveredEntityInfo;
 
 const possibleLayerIdsByCategory = {
   clickable: ["trails-pointer-targets", "peaks", "trail-pois", "major-trail-pois", "trail-centerpoints"],
@@ -17,9 +27,77 @@ const layerIdsByCategory = {
   selected: [],
 };
 
-async function loadInitialMap() {
+window.addEventListener('load', function() {
+  initializeMap();
 
-  updateForHash(true);
+  state.addEventListener('inspectorOpenChange', function() {
+    if (state.inspectorOpen && activePopup) {
+      activePopup.remove();
+      activePopup = null;
+    }
+  });
+});
+
+async function initializeMap() {
+
+  baseStyleJsonString = await fetch('/style/basestyle.json').then(response => response.text());
+
+  document.addEventListener('keydown', function(e) {
+
+    if (e.isComposing || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+
+    switch(e.key) {
+      case 'z':
+        let info = state.selectedEntityInfo || state.focusedEntityInfo;
+        let feature = info && getFeatureFromLayers(info.id, info.type, ['park', 'trail', 'trail_poi', {source: 'openmaptiles', layer: 'mountain_peak'}]) || info?.rawFeature;
+        if (feature) {
+          let bounds = getEntityBoundingBox(feature);
+          if (bounds) {
+            fitMapToBounds(bounds);
+          } else if (feature.geometry.type === "Point") {
+            map.flyTo({center: feature.geometry.coordinates, zoom: Math.max(map.getZoom(), 12)});
+          }
+        }
+        break;
+    }
+  });
+
+  // default
+  let initialCenter = [-111.545, 39.546];
+  let initialZoom = 6;
+
+  // show last-open area if any (this is overriden by the URL hash map parameter)
+  let cachedTransformString = localStorage?.getItem('map_transform');
+  let cachedTransform = cachedTransformString && JSON.parse(cachedTransformString);
+  if (cachedTransform && cachedTransform.zoom && cachedTransform.lat && cachedTransform.lng) {
+    initialZoom = cachedTransform.zoom;
+    initialCenter = cachedTransform;
+  }
+
+  map = new maplibregl.Map({
+    container: 'map',
+    hash: "map",
+    center: initialCenter,
+    zoom: initialZoom,
+    fadeDuration: 0,
+  });
+
+  // Add zoom and rotation controls to the map.
+  map
+    .addControl(new maplibregl.NavigationControl({
+      visualizePitch: true
+    }))
+    .addControl(new maplibregl.GeolocateControl({
+        positionOptions: {
+            enableHighAccuracy: true
+        },
+        trackUserLocation: true
+    }))
+    .addControl(new maplibregl.ScaleControl({
+        maxWidth: 150,
+        unit: 'imperial'
+    }), "bottom-left");
+
   reloadMapStyle();
 
   map.on('mousemove', didMouseMoveMap);
@@ -38,10 +116,32 @@ async function loadInitialMap() {
         reloadFocusAreaIfNeeded();
       }
     });
+
+  state.addEventListener('travelModeChange', function() {
+    reloadMapStyle();
+  });
+  state.addEventListener('lensChange', function() {
+    reloadMapStyle();
+  });
+  state.addEventListener('selectedEntityChange', function() {
+    updateMapForSelection();
+
+    let selectedEntityInfo = state.selectedEntityInfo;
+    if (selectedEntityInfo && selectedEntityInfo?.type === "relation") {
+      osm.fetchOsmEntity(selectedEntityInfo.type, selectedEntityInfo.id).then(function() {
+        // update map again to add highlighting to any relation members
+        updateMapForSelection();
+      });
+    }
+  });
+  state.addEventListener('focusedEntityChange', function() {
+    reloadFocusAreaIfNeeded();
+    updateMapForSelection();
+  });
 }
 
 function getStyleId() {
-  return travelMode + '/' + lens;
+  return state.travelMode + '/' + state.lens;
 }
 
 function getCachedStyleLayer(layerId) {
@@ -49,10 +149,12 @@ function getCachedStyleLayer(layerId) {
   return cachedStyle.layers.find(layer => layer.id === layerId);
 }
 
-async function reloadMapStyle() {
+function reloadMapStyle() {
+
+  if (!baseStyleJsonString) return;
 
   let styleId = getStyleId();
-  if (!cachedStyles[styleId]) cachedStyles[styleId] = JSON.stringify(await generateStyle(travelMode, lens));
+  if (!cachedStyles[styleId]) cachedStyles[styleId] = JSON.stringify(generateStyle(baseStyleJsonString, state.travelMode, state.lens));
   
   // always parse from string to avoid stale referenced objects
   let style = JSON.parse(cachedStyles[styleId]);
@@ -75,6 +177,7 @@ async function reloadMapStyle() {
 }
 
 function reloadFocusAreaIfNeeded() {
+  let focusedEntityInfo = state.focusedEntityInfo;
   let newFocusAreaGeoJson = buildFocusAreaGeoJson();
 
   if ((newFocusAreaGeoJson && JSON.stringify(newFocusAreaGeoJson)) !==
@@ -145,6 +248,7 @@ function updateMapForFocus() {
 }
 
 function styleAddendumsForFocus() {
+  let focusedEntityInfo = state.focusedEntityInfo;
   let focusedId = focusedEntityInfo?.id ? omtId(focusedEntityInfo.id, focusedEntityInfo.type) : null;
   return {
     "trail-pois": {
@@ -161,16 +265,14 @@ function styleAddendumsForFocus() {
         getCachedStyleLayer('major-trail-pois').filter,
         // don't show icon and label for currently focused feature
         ["!=", ["get", "OSM_ID"], focusedEntityInfo ? focusedEntityInfo.id : null],
-        ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ?
-          focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
+        ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ? [["within", focusAreaGeoJsonBuffered]] : []),
       ],
     },
     "peaks": {
       "filter": [
         "all",
         getCachedStyleLayer('peaks').filter,
-        ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ?
-          focusAreaFilter = [["within", focusAreaGeoJsonBuffered]] : []),
+        ...(focusAreaGeoJsonBuffered?.geometry?.coordinates?.length ? [["within", focusAreaGeoJsonBuffered]] : []),
       ]
     },
     "park-fill": {
@@ -215,9 +317,13 @@ function styleAddendumsForFocus() {
 
 function updateMapForSelection() {
   applyStyleAddendumsToMap(styleAddendumsForSelection());
+  updateMapForHover();
 }
 
 function styleAddendumsForSelection() {
+  let selectedEntityInfo = state.selectedEntityInfo;
+  let focusedEntityInfo = state.focusedEntityInfo;
+
   let id = selectedEntityInfo && selectedEntityInfo.id;
   let type = selectedEntityInfo && selectedEntityInfo.type;
 
@@ -226,13 +332,13 @@ function styleAddendumsForSelection() {
   let idsToHighlight = [id && id !== focusedId ? id : -1];
 
   if (type === "relation") {
-    let members = osmEntityCache[type[0] + id]?.members || [];
+    let members = osm.getCachedEntity(type, id)?.members || [];
     members.forEach(function(member) {
       if (member.role !== 'inner') idsToHighlight.push(member.ref);
       
       if (member.type === "relation") {
         // only recurse down if we have the entity cached
-        let childRelationMembers = osmEntityCache[member.type[0] + member.ref]?.members || [];
+        let childRelationMembers = osm.getCachedEntity(member.type, member.ref)?.members || [];
         childRelationMembers.forEach(function(member) {
           idsToHighlight.push(member.ref);
           // don't recurse relations again in case of self-references
@@ -262,6 +368,8 @@ function updateMapForHover() {
 }
 
 function styleAddendumsForHover() {
+
+  let selectedEntityInfo = state.selectedEntityInfo;
 
   let entityId = hoveredEntityInfo?.id || -1;
 
@@ -312,9 +420,9 @@ function entityForEvent(e, layerIds) {
 function didClickMap(e) {
 
   let entity = entityForEvent(e, layerIdsByCategory.clickable);
-  selectEntity(entity);
+  state.selectEntity(entity);
 
-  if (!entity || isSidebarOpen()) return;
+  if (!entity || state.inspectorOpen) return;
   
   let coordinates = entity.focusLngLat;
 
@@ -327,22 +435,34 @@ function didClickMap(e) {
 
   let tags = entity.rawFeature.properties;
 
-  let html = "";
-
-  if (tags.name) html += "<b>" + tags.name + "</b><br/>"
-  html += '<a href="" class="button" onclick="return didClickViewDetails()">View Details</a>';
+  let div = createElement('div');
+  if (tags.name) {
+    div.append(
+      createElement('b')
+        .append(tags.name),
+      createElement('br')
+    );
+  }  
+  div.append(
+    createElement('a')
+      .setAttribute('href', '#')
+      .setAttribute('class', 'button')
+      .addEventListener('click', didClickViewDetails)
+      .append('View Details')
+  );
 
   activePopup = new maplibregl.Popup({
       className: 'quickinfo',
       closeButton: false,
     })
     .setLngLat(coordinates)
-    .setHTML(html)
+    .setDOMContent(div)
     .addTo(map);
 }
 
-function didClickViewDetails() {
-  openSidebar();
+function didClickViewDetails(e) {
+  e.preventDefault();
+  state.setInspectorOpen(true);
   return false;
 }
 
@@ -351,7 +471,7 @@ function didDoubleClickMap(e) {
   let entity = entityForEvent(e, ['major-trail-pois']);
   if (entity) {
     e.preventDefault();
-    focusEntity(entity);    
+    state.focusEntity(entity);    
   }
 }
 
@@ -425,6 +545,7 @@ function getFeatureFromLayers(id, type, layers) {
 }
 
 function getEntityBoundingBoxFromLayer(id, type, layer) {
+  let focusedEntityInfo = state.focusedEntityInfo;
   if (!focusedEntityInfo) return null;
   let feature = getFeatureFromLayers(id, type, [layer]);
   if (feature) {
@@ -433,6 +554,7 @@ function getEntityBoundingBoxFromLayer(id, type, layer) {
 }
 
 function buildFocusAreaGeoJson() {
+  let focusedEntityInfo = state.focusedEntityInfo;
   if (!focusedEntityInfo) return null;
   let results = map.querySourceFeatures('trails', {
     filter: [
@@ -469,4 +591,13 @@ function fitMapToBounds(bbox) {
   let maxExtent = Math.max(width, height);
   let fitBbox = extendBbox(bbox, maxExtent / 16);
   map.fitBounds(fitBbox);
+}
+
+function extendBbox(bbox, buffer) {
+  bbox = bbox.slice();
+  bbox[0] -= buffer; // west
+  bbox[1] -= buffer; // south
+  bbox[2] += buffer; // east
+  bbox[3] += buffer; // north
+  return bbox;
 }

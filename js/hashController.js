@@ -1,3 +1,5 @@
+import { state } from "./stateController.js";
+
 function setHashParameters(params) {
   let searchParams = new URLSearchParams(window.location.hash.slice(1));
   for (let key in params) {
@@ -45,10 +47,47 @@ function selectedEntityInfoFromHash() {
   return null;
 }
 
-function updateForHash(skipMapUpdate) { 
-  setTravelMode(hashValue("mode"), skipMapUpdate);
-  setLens(hashValue("lens"), skipMapUpdate);
-  selectEntity(selectedEntityInfoFromHash(), skipMapUpdate);
-  focusEntity(focusedEntityInfoFromHash(), skipMapUpdate);
-  hashValue("inspect") ? openSidebar() : closeSidebar();
+function updateForHash() {
+  state.setInspectorOpen(hashValue("inspect"));
+  state.setTravelMode(hashValue("mode"));
+  state.setLens(hashValue("lens"));
+  state.selectEntity(selectedEntityInfoFromHash());
+  state.focusEntity(focusedEntityInfoFromHash());
 }
+
+window.addEventListener('load', function() {
+
+  updateForHash();
+
+  window.addEventListener("hashchange", function() {
+    updateForHash();
+  });
+
+  state.addEventListener('inspectorOpenChange', function() {
+    setHashParameters({ inspect: state.inspectorOpen ? '1' : null });
+  });
+  state.addEventListener('lensChange', function() {
+    setHashParameters({ lens: state.lens === state.defaultLens ? null : state.lens });
+  });
+  state.addEventListener('travelModeChange', function() {
+    setHashParameters({ mode: state.travelMode === state.defaultTravelMode ? null : state.travelMode });
+  });
+  state.addEventListener('selectedEntityChange', function() {
+    let selectedEntityInfo = state.selectedEntityInfo;
+    let type = selectedEntityInfo?.type;
+    let entityId = selectedEntityInfo?.id;
+    setHashParameters({
+      selected: selectedEntityInfo ? type + "/" + entityId : null
+    });
+  });
+  state.addEventListener('focusedEntityChange', function() {
+    let focusedEntityInfo = state.focusedEntityInfo;
+    let type = focusedEntityInfo?.type;
+    let entityId = focusedEntityInfo?.id;
+    setHashParameters({
+      focus: focusedEntityInfo ? type + "/" + entityId : null
+    });
+  });
+
+});
+
