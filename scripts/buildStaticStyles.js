@@ -26,6 +26,7 @@ for (let mode in lensOptionsByMode) {
     let style = generateStyle(baseStyleJsonString, mode, lens);
     let filename = `otm-${mode}`;
     if (lens !== '') filename += `-${lens}`;
+    filename = filename.replaceAll(':', '_');
     writeFileSync(`${outDir}/${filename}.json`, JSON.stringify(style, null, 2));
     writeFileSync(`${outDir}/${filename}.min.json`, JSON.stringify(style));
     total += 1;
