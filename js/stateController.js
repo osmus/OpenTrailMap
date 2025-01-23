@@ -39,14 +39,10 @@ class StateController extends EventTarget {
 
     this.focusedEntityInfo = entityInfo;
 
-    this.dispatchEvent(new Event('focusedEntityChange'));
-
     let bodyElement = document.getElementsByTagName('body')[0];
-
     this.focusedEntityInfo ? bodyElement.classList.add('area-focused') : bodyElement.classList.remove('area-focused');
 
-    document.getElementById("map-title").innerText = '';
-    document.getElementById("nameplate").style.display = this.focusedEntityInfo ? 'flex' : 'none';
+    this.dispatchEvent(new Event('focusedEntityChange'));
   }
 
   selectEntity(entityInfo) {

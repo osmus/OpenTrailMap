@@ -160,6 +160,10 @@ body.sidebar-open #map-wrap {
   border-bottom: 1px solid #ccc;
   background: #fff;
   text-align: left;
+  display: none;
+}
+.area-focused #nameplate {
+  display: flex !important;
 }
 #nameplate select {
   font-size: 16px;

@@ -135,6 +135,7 @@ async function initializeMap() {
     }
   });
   state.addEventListener('focusedEntityChange', function() {
+    document.getElementById("map-title").innerText = '';
     reloadFocusAreaIfNeeded();
     updateMapForSelection();
   });
