@@ -920,6 +920,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
         "icon-image": [
           "case",
           ["==", ["get", "protected_area"], "game_land"], ["image", "game_land"],
+          ["==", ["get", "protected_area"], "forest_reserve"], ["image", "forest_reserve"],
           ["==", ["get", "leisure"], "nature_reserve"], ["image", "nature_reserve"],
           ["==", ["get", "leisure"], "park"], ["image", "park"],
           ["image", "protected_area"],
