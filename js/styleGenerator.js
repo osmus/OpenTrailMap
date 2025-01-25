@@ -922,6 +922,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
           ["==", ["get", "protected_area"], "game_land"], ["image", "game_land"],
           ["==", ["get", "protected_area"], "forest_reserve"], ["image", "forest_reserve"],
           ["==", ["get", "protected_area"], "wildlife_refuge"], ["image", "wildlife_refuge"],
+          ["==", ["get", "protected_area"], "wilderness_preserve"], ["image", "wilderness_preserve"],
           ["==", ["get", "leisure"], "nature_reserve"], ["image", "nature_reserve"],
           ["==", ["get", "leisure"], "park"], ["image", "park"],
           ["image", "protected_area"],
