@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>bison_refuge</title>
+    <g id="bison_refuge" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" stroke="#FFFFFF" stroke-width="2" fill="#005908" x="1" y="1" width="30" height="30" rx="5.87368441"></rect>
+        <path d="M11.5,19 L11,20.5 L11,22 L10.5,23 L12,23 L12.5,21 L13.5,20 L13.5,21 L15,22.5 L15.5,22.5 L16,21.5 L14.5,20.5 L15.5,19 L17,19 L19.5,18 L19.5,20 L18,23 L19,23 L21,20 L21,19 L22,18 L24,20 L24,23 L25,22.5 L25,19 L24,17 L24,14 L25,15 L25.5,16 L26.5,17 L26.5,16 L27,16 L24,11.5 L17.5248466,9.2336963 C15.321899,8.46266466 12.8795785,8.84031614 11.0123936,10.2407048 L10,11 L10,11 L8,11 L8,8.5 L6.5,11 L5,12 L5,16 L6,19 L8.5,19.5 L10,18 L11.5,19 Z" id="Path-4" fill="#FFFFFF" transform="translate(16, 15.5) scale(-1, 1) translate(-16, -15.5)"></path>
+        <path d="M20,17 C20.2327908,18.0475585 20.8994574,18.7142251 22,19 L22,18 C21.4468838,17.3974265 21.1135504,16.8974265 21,16.5 C20.8864496,16.1025735 20.7197829,15.4359068 20.5,14.5 C19.9338759,15.1191082 19.7672092,15.9524415 20,17 Z" id="Rectangle" fill="#005908"></path>
+        <path d="M22.5,10 C22.7327908,11.0475585 23.3994574,11.5475585 24.5,11.5 L23.5,10.5 L23.5,8.5 C22.6005426,8.45244153 22.2672092,8.95244153 22.5,10 Z" id="Rectangle-Copy" fill="#005908"></path>
+    </g>
+</svg>
