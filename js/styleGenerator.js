@@ -921,6 +921,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
           "case",
           ["==", ["get", "protected_area"], "game_land"], ["image", "game_land"],
           ["==", ["get", "protected_area"], "forest_reserve"], ["image", "forest_reserve"],
+          ["==", ["get", "protected_area"], "grassland_reserve"], ["image", "grassland_reserve"],
           ["==", ["get", "protected_area"], "wildlife_refuge"], [
             "case",
             ["==", ["get", "wildlife_refuge"], "bird_refuge"], ["image", "bird_refuge"],
