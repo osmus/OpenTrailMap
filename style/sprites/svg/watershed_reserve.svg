@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>watershed_reserve</title>
+    <g id="watershed_reserve" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="Rectangle" stroke="#FFFFFF" stroke-width="2" fill="#005908" x="1" y="1" width="30" height="30" rx="5.87368441"></rect>
+        <path d="M16,25 C19.3137085,25 22,22.3137085 22,19 C22,17.8765462 21.5456266,16.7530924 20.6368797,15.6296387 L20.6344627,15.6315936 C18.9439441,13.5415095 17.5877844,11.2018987 16.6143299,8.69616703 C16.3850686,8.10642274 16.1803385,7.54101562 16,7 C15.8196615,7.54101562 15.6149314,8.10642274 15.3858099,8.69622135 L15.3856701,8.69616703 C14.4122156,11.2018987 13.0560559,13.5415095 11.3655373,15.6315936 C10.4543734,16.7530924 10,17.8765462 10,19 C10,22.3137085 12.6862915,25 16,25 Z" id="Oval" fill="#FFFFFF"></path>
+        <path d="M16.5,22.5 C18.1568542,22.5 19.5,21.1568542 19.5,19.5" id="Oval-Copy" stroke="#005908" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    </g>
+</svg>
