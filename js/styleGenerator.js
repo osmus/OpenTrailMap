@@ -869,6 +869,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
           ["==", ["get", "route"], "ferry"], 1,
           ["==", ["get", "man_made"], "monitoring_station"], 4,
           ["==", ["get", "tourism"], "camp_site"], 5,
+          ["==", ["get", "tourism"], "caravan_site"], 5,
           ["==", ["get", "amenity"], "ranger_station"], 6,
           ["==", ["get", "highway"], "trailhead"], 7,
           ["==", ["get", "tourism"], "wilderness_hut"], 8,
