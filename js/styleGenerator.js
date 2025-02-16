@@ -1489,6 +1489,21 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
       ]
     },
     {
+      caseSelector: ["any", ["==", ["get", "waterway"], "access_point"], ["==", ["get", "leisure"], "slipway"]],
+      selector: ["any", ["has", "name"], ["has", "ref"]],
+      label: ["coalesce", ["get", "name"], ["get", "ref"]],
+      sublabels: [
+        {
+          selector: ["==", ["get", "group_only"], "yes"], 
+          label: "Groups only",
+        },
+        {
+          selector: ["==", ["get", "reservation"], "required"],
+          label: "Reservations required",
+        }
+      ]
+    },
+    {
       caseSelector: ["==", ["get", "lock"], "yes"],
       selector: ["any", ["has", "lock_name"], ["has", "lock_ref"]],
       label: ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]],
