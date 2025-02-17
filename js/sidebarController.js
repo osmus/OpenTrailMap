@@ -1,6 +1,6 @@
 import { osm } from "./osmController.js";
 import { state } from "./stateController.js";
-import { createElement } from "./utils.js";
+import { createElement, getElementById } from "./utils.js";
 
 function isSidebarOpen() {
   return document.getElementsByTagName('body')[0].classList.contains('sidebar-open');
@@ -19,61 +19,73 @@ function closeSidebar() {
 
 function updateSidebar(entity) {
 
-  let sidebarElement = document.getElementById('sidebar');
+  let sidebarElement = getElementById('sidebar');
   if (!sidebarElement) return;
 
   if (!entity) {
-    sidebarElement.innerHTML = "";
+    sidebarElement.replaceChildren('');
     return;
   }
 
   let type = entity.type;
   let entityId = entity.id;
-  let focusLngLat = entity.focusLngLat;
 
-  let bbox = focusLngLat && {
-    left: focusLngLat.lng - 0.001,
-    right: focusLngLat.lng + 0.001,
-    bottom: focusLngLat.lat - 0.001,
-    top: focusLngLat.lat + 0.001,
-  };
+  // non-breaking space for placeholder
+  let nbsp = String.fromCharCode(160);
   
   let opQuery = encodeURIComponent(`${type}(${entityId});\n(._;>;);\nout;`);
 
   let xmlLink = `https://www.openstreetmap.org/api/0.6/${type}/${entityId}`;
   if (type == 'way' || type == 'relation') xmlLink += '/full';
-  
-  let html = '';
-  html += "<div class='body'>";
-  html += "<table id='tag-table'>";
-  html += `<tr><th>Key</th><th>Value</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
-  html += "</table><br/>";
-  html += "<table id='relations-table'>";
-  html += `<tr><th>Relation</th><th>Type</th><th>Route</th><th>Role</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
-  html += "</table><br/>";
-  html += "<table id='meta-table'>";
-  html += `<tr><th colspan='2'>Meta</th></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>`;
-  html += "</table><br/>";
-  html += "<h3>View</h3>";
-  html += "<p class='link-list'>";
-  html += `<a href="https://openstreetmap.org/${type}/${entityId}" target="_blank">osm.org</a> `;
-  html += `<a href="${xmlLink}" target="_blank">XML</a> `;
-  html += `<a href="https://pewu.github.io/osm-history/#/${type}/${entityId}" target="_blank">PeWu</a> `;
-  html += `<a href="https://overpass-turbo.eu?Q=${opQuery}&R=" target="_blank">Overpass Turbo</a> `;
-  html += `<a href="https://osmcha.org/changesets/${entity.changeset}" target="_blank">OSMCha</a> `;
-  if (type === 'relation') {
-    html += `<a href="http://ra.osmsurround.org/analyzeRelation?relationId=${entityId}" target="_blank">Relation Analyzer</a> `;
-  }
-  html += "</p>";
-  html += "<h3>Edit</h3>";
-  html += "<p class='link-list'>";
-  html += `<a href="https://openstreetmap.org/edit?${type}=${entityId}" target="_blank">iD</a> `;
-  if (bbox) html += `<a href="http://127.0.0.1:8111/load_and_zoom?left=${bbox.left}&right=${bbox.right}&top=${bbox.top}&bottom=${bbox.bottom}&select=${type}${entityId}" target="_blank">JOSM</a> `;
-  html += `<a href="https://level0.osmz.ru/?url=${type}/${entityId}" target="_blank">Level0</a> `;
-  html += "</p>";
-  html += "</div>";
 
-  sidebarElement.innerHTML = html;
+  sidebarElement.replaceChildren(
+    createElement('table')
+      .setAttribute('id', 'tag-table')
+      .append(
+        // placeholder layout, so transition is less jarring when data appears in a moment
+        createElement('tr').append(
+          createElement('th').append('Key'),
+          createElement('th').append('Value')
+        ),
+        createElement('tr').append(
+          createElement('td').append(nbsp),
+          createElement('td').append(nbsp)
+        )
+      ),
+    createElement('table')
+      .setAttribute('id', 'relations-table')
+      .append(
+        createElement('tr').append(createElement('th').append('Relations')),
+        createElement('tr').append(createElement('td').append(nbsp))
+      ),
+    createElement('table')
+      .setAttribute('id', 'meta-table')
+      .append(
+        createElement('tr').append(createElement('th').append('Meta')),
+        createElement('tr').append(createElement('td').append(nbsp))
+      ),
+    createElement('h3').append('View'),
+    createElement('p')
+      .setAttribute('class', 'link-list')
+      .append(
+        ...[
+          createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://openstreetmap.org/${type}/${entityId}`).append('osm.org'), ' ',
+          createElement('a').setAttribute('target', '_blank').setAttribute('href', xmlLink).append('XML'), ' ',
+          createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://pewu.github.io/osm-history/#/${type}/${entityId}`).append('PeWu'), ' ',
+          createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://overpass-turbo.eu?Q=${opQuery}&R=`).append('Overpass Turbo'), ' ',
+          createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://osmcha.org/changesets/${entity.changeset}`).append('OSMCha'), ' ',
+          type === 'relation' ? createElement('a').setAttribute('target', '_blank').setAttribute('href', `http://ra.osmsurround.org/analyzeRelation?relationId=${entityId}`).append('Relation Analyzer') : undefined
+        ].filter(i => i)
+      ),
+    createElement('h3').append('Edit'),
+    createElement('p')
+      .setAttribute('class', 'link-list')
+      .append(
+        createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://openstreetmap.org/edit?editor=id&${type}=${entityId}`).append('iD'), ' ',
+        createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://openstreetmap.org/edit?editor=remote&${type}=${entityId}`).append('JOSM'), ' ',
+        createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://level0.osmz.ru/?url=${type}/${entityId}`).append('Level0')
+      ),
+  );
 
   osm.fetchOsmEntity(type, entityId).then(function(entity) {
     if (entity) {
@@ -91,22 +103,57 @@ function updateSidebar(entity) {
 }
 
 function updateMetaTable(entity, changeset) {
-  const element = document.getElementById('meta-table');
-  if (!element) return;
+
+  const table = getElementById('meta-table');
+  if (!table) return;
 
   let formattedDate = getFormattedDate(new Date(entity.timestamp));
   let comment = changeset && changeset.tags && changeset.tags.comment || '';
   let sources = changeset && changeset.tags && changeset.tags.source || '';
-  let html = "";
-  html += `<tr><th colspan='2'>Meta</th></tr>`;
-  html += `<tr><td>ID</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}" target="_blank">${entity.type}/${entity.id}</a></td></tr>`;
-  html += `<tr><td>Version</td><td><a href="https://www.openstreetmap.org/${entity.type}/${entity.id}/history" target="_blank">${entity.version}</a></td></tr>`;
-  html += `<tr><td>Uploaded</td><td>${formattedDate}</td></tr>`;
-  html += `<tr><td>User</td><td><a href="https://www.openstreetmap.org/user/${entity.user}" target="_blank">${entity.user}</a></td></tr>`;
-  html += `<tr><td>Changeset</td><td><a href="https://www.openstreetmap.org/changeset/${entity.changeset}" target="_blank">${entity.changeset}</a></td></tr>`;
-  html += `<tr><td>Comment</td><td>${comment}</td></tr>`;
-  html += `<tr><td>Source</td><td>${sources}</td></tr>`;
-  element.innerHTML = html;
+
+  table.replaceChildren(
+    createElement('tr').append(
+      createElement('th')
+        .setAttribute('colspan', '2')
+        .append('Meta')
+    ),
+    createElement('tr').append(
+      createElement('td').append('ID'),
+      createElement('td').append(
+        createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://www.openstreetmap.org/${entity.type}/${entity.id}`).append(`${entity.type}/${entity.id}`)
+      )
+    ),
+    createElement('tr').append(
+      createElement('td').append('Version'),
+      createElement('td').append(
+        createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://www.openstreetmap.org/${entity.type}/${entity.id}/history`).append(entity.version)
+      )
+    ),
+    createElement('tr').append(
+      createElement('td').append('Uploaded'),
+      createElement('td').append(formattedDate)
+    ),
+    createElement('tr').append(
+      createElement('td').append('User'),
+      createElement('td').append(
+        createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://www.openstreetmap.org/user/${entity.user}`).append(entity.user)
+      )
+    ),
+    createElement('tr').append(
+      createElement('td').append('Changeset'),
+      createElement('td').append(
+        createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://www.openstreetmap.org/changeset/${entity.changeset}`).append(entity.changeset)
+      )
+    ),
+    createElement('tr').append(
+      createElement('td').append('Comment'),
+      createElement('td').append(comment)
+    ),
+    createElement('tr').append(
+      createElement('td').append('Source'),
+      createElement('td').append(sources)
+    ),
+  );
 }
 
 const urlRegex = /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/i;
@@ -114,39 +161,63 @@ const qidRegex = /^Q\d+$/;
 const wikipediaRegex = /^(.+):(.+)$/;
 const nwisRegex = /^\d{8,15}$/;
 
-function updateTagsTable(tags) {
-  const element = document.getElementById('tag-table');
-  if (!element) return;
-
-  let html = "";
-  html += `<tr><th>Key</th><th>Value</th></tr>`;
-  let keys = Object.keys(tags).sort();
-  for (let i in keys) {
-    let key = keys[i];
-    let value = tags[key];
-    let element = value;
-    if (urlRegex.test(value)) {
-      element = `<a target="_blank" rel="nofollow" href="${value}">${value}</a>`;
-    } else if ((key === 'wikidata' || key.endsWith(':wikidata')) && qidRegex.test(value)) {
-      element = `<a target="_blank" rel="nofollow" href="https://www.wikidata.org/wiki/${value}">${value}</a>`;
-    } else if ((key === 'wikipedia' || key.endsWith(':wikipedia')) && wikipediaRegex.test(value)) {
-      let results = wikipediaRegex.exec(value);
-      element = `<a target="_blank" rel="nofollow" href="https://${results[1]}.wikipedia.org/wiki/${results[2]}">${value}</a>`;
-    } else if (key === 'ref' && tags.man_made === 'monitoring_station' && tags.operator === "United States Geological Survey" && nwisRegex.test(value)) {
-      element = `<a target="_blank" rel="nofollow" href="https://waterdata.usgs.gov/monitoring-location/${value}/">${value}</a>`;
-    }
-    html += `<tr><td><a target="_blank" rel="nofollow" href="https://wiki.openstreetmap.org/wiki/Key:${key}">${key}</a></td><td>${element}</td></tr>`;
+function externalLinkForValue(key, value, tags) {
+  if (urlRegex.test(value)) {
+    return value;
+  } else if ((key === 'wikidata' || key.endsWith(':wikidata')) && qidRegex.test(value)) {
+    return `https://www.wikidata.org/wiki/${value}`;
+  } else if ((key === 'wikipedia' || key.endsWith(':wikipedia')) && wikipediaRegex.test(value)) {
+    let results = wikipediaRegex.exec(value);
+    return `https://${results[1]}.wikipedia.org/wiki/${results[2]}`;
+  } else if (key === 'ref' && tags.man_made === 'monitoring_station' && tags.operator === "United States Geological Survey" && nwisRegex.test(value)) {
+    return `https://waterdata.usgs.gov/monitoring-location/${value}/`;
   }
-  element.innerHTML = html;
+  return null;
+}
+
+function updateTagsTable(tags) {
+  const table = getElementById('tag-table');
+  if (!table) return;
+
+  table.replaceChildren(
+    createElement('tr')
+      .append(
+        createElement('th')
+          .append('Key'),
+        createElement('th')
+          .append('Value'),
+      ),
+    ...Object.keys(tags).sort().map(key => {
+      let value = tags[key];
+      let href = externalLinkForValue(key, value, tags);
+      let valElement = href ? createElement('a')
+          .setAttribute('target', '_blank')
+          .setAttribute('rel', 'nofollow')
+          .setAttribute('href', href)
+          .append(value) : value;
+  
+      return createElement('tr')
+        .append(
+          createElement('td')
+            .append(
+              createElement('a')
+                .setAttribute('target', '_blank')
+                .setAttribute('href', `https://wiki.openstreetmap.org/wiki/Key:${key}`)
+                .append(key)
+            ),
+          createElement('td')
+            .append(valElement)
+        );
+    })
+  );
 }
 
 function updateMembershipsTable(memberships) {
-  const table = document.getElementById('relations-table');
+  const table = getElementById('relations-table');
   if (!table) return;
-  table.innerHTML = "";
- 
+
   if (memberships.length) {
-    table.append(
+    table.replaceChildren(
       createElement('tr')
         .append(
           createElement('th')
@@ -185,10 +256,21 @@ function updateMembershipsTable(memberships) {
       );
     }
   } else {
-    let html = "";
-    html += `<tr><th>Relations</th></tr>`;
-    html += `<tr><td><i>none</i></td></tr>`;
-    table.innerHTML = html;
+    table.replaceChildren(
+      createElement('tr')
+        .append(
+          createElement('th')
+            .append('Relations')
+        ),
+      createElement('tr')
+        .append(
+          createElement('td')
+            .append(
+              createElement('i')
+                .append('none')
+            )
+        )
+    );
   }
 }
 
@@ -205,7 +287,7 @@ function getFormattedDate(date) {
 
 window.addEventListener('load', function() {
 
-  document.getElementById("inspect-toggle").addEventListener('click', function(e) {
+  getElementById("inspect-toggle").addEventListener('click', function(e) {
     e.preventDefault();
     state.setInspectorOpen(!isSidebarOpen());
   });

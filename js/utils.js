@@ -1,9 +1,22 @@
 
-// Creates a new HTML element but wraps certain function so they return the
-// element itself in order to enable chaining.
+// Creates a new HTML element where certain functions return the element itself.
 export function createElement(...args) {
-  let el = document.createElement(...args)
-  let fnNames = ['setAttribute', 'addEventListener', 'append', 'appendChild'];
+  let el = document.createElement(...args);
+  wrapElementFunctions(el);
+  return el;
+}
+
+// Gets an HTML element where certain functions return the element itself.
+export function getElementById(...args) {
+  let el = document.getElementById(...args);
+  if (el) wrapElementFunctions(el);
+  return el;
+}
+
+// Wraps certain functions of the element so they return the
+// element itself in order to enable chaining.
+function wrapElementFunctions(el) {
+  let fnNames = ['addEventListener', 'append', 'appendChild', 'replaceChildren', 'setAttribute'];
   for (let i in fnNames) {
     let fnName = fnNames[i];
     let fn = el[fnName];
@@ -12,5 +25,4 @@ export function createElement(...args) {
       return el;
     };
   }
-  return el;
-}
+} 

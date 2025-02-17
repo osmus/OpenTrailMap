@@ -1,46 +1,55 @@
 import { state } from "./stateController.js";
 import { lensOptionsByMode, lensStrings } from "./optionsData.js";
+import { createElement, getElementById } from "./utils.js";
 
 function updateLensControl() {
-  let html = "";
+  let select = getElementById("lens")
+    .replaceChildren(
+      createElement('option')
+        .setAttribute('value', '')
+        .append('General')
+    );
+
   let items = lensOptionsByMode[state.travelMode];
-  
-  html += '<option value="">General</option>';
   items.forEach(function(item) {
-    if (item.subitems) {
-      html += '<optgroup label="' + item.label + '">';
-      item.subitems.forEach(function(item) {
+    if (!item.subitems) return;
+    let group = createElement('optgroup')
+      .setAttribute('label', item.label)
+      .append('General');
+    group.append(
+      ...item.subitems.map(function(item) {
         let label = item.label ? item.label : lensStrings[item].label;
-        html += '<option value="' + item + '">' + label + '</option>';
+        return createElement('option')
+          .setAttribute('value', item)
+          .append(label)
       })
-      html += '</optgroup>';
-    }
+    );
+    select.append(group);
   });
-  let lensElement =  document.getElementById("lens");
-  lensElement.innerHTML = html;
-  lensElement.value = state.lens;
+
+  select.value = state.lens;
 }
 
 window.addEventListener('load', function() {
 
   updateLensControl();
 
-  document.getElementById("travel-mode").addEventListener('change', function(e) {
+  getElementById("travel-mode").addEventListener('change', function(e) {
     state.setTravelMode(e.target.value);
   });
-  document.getElementById("lens").addEventListener('change', function(e) {
+  getElementById("lens").addEventListener('change', function(e) {
     state.setLens(e.target.value);
   });
-  document.getElementById("clear-focus").addEventListener('click', function(e) {
+  getElementById("clear-focus").addEventListener('click', function(e) {
     e.preventDefault();
     state.focusEntity();
   });
 
   state.addEventListener('travelModeChange', function() {
     updateLensControl();
-    document.getElementById("travel-mode").value = state.travelMode;
+    getElementById("travel-mode").value = state.travelMode;
   });
   state.addEventListener('lensChange', function() {
-    document.getElementById("lens").value = state.lens;
+    getElementById("lens").value = state.lens;
   });
 });

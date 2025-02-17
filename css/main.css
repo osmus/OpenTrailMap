@@ -260,28 +260,19 @@ body:not(.sidebar-open) #inspect-toggle:before {
   height: 100%;
   min-width: 250px;
   width: 33.3333vw;
+  padding: 10px;
+  max-height: 100%;
+  overflow-y: auto;
 }
 body.sidebar-open #sidebar {
   display: flex;
 }
-#sidebar .top,
-#sidebar .body {
-  padding: 10px;
-}
-#sidebar .top {
-  background: white;
-  border-top-right-radius: inherit;
-  border-top-left-radius: inherit;
-  border-bottom: 1px solid #ddd;
-  background: #4A282A;
-  color: white;
-}
-#sidebar .body {
-  max-height: 100%;
-  overflow-y: auto;
-}
 #sidebar table {
   width: 100%;
+}
+#sidebar table,
+#sidebar p {
+  margin-bottom: 1em;
 }
 #sidebar table td {
   font-family: 'SF Mono', SFMono-Regular, ui-monospace, -apple-system, monospace;

@@ -1,7 +1,7 @@
 import { state } from "./stateController.js";
 import { osm } from "./osmController.js";
 import { generateStyle } from './styleGenerator.js'; 
-import { createElement } from "./utils.js";
+import { createElement, getElementById } from "./utils.js";
 
 let map;
 
@@ -135,7 +135,7 @@ async function initializeMap() {
     }
   });
   state.addEventListener('focusedEntityChange', function() {
-    document.getElementById("map-title").innerText = '';
+    getElementById("map-title").innerText = '';
     reloadFocusAreaIfNeeded();
     updateMapForSelection();
   });
@@ -189,7 +189,7 @@ function reloadFocusAreaIfNeeded() {
     focusAreaGeoJson = newFocusAreaGeoJson;
     focusAreaGeoJsonBuffered = focusAreaGeoJson?.geometry?.coordinates?.length ? turfBuffer.buffer(focusAreaGeoJson, 0.25, {units: 'kilometers'}) : focusAreaGeoJson;
 
-    if (focusAreaGeoJson) document.getElementById("map-title").innerText = focusAreaGeoJson.properties.name;
+    if (focusAreaGeoJson) getElementById("map-title").innerText = focusAreaGeoJson.properties.name;
 
     updateMapForFocus();
   }
