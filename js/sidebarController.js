@@ -75,7 +75,7 @@ function updateSidebar(entity) {
           createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://overpass-turbo.eu?Q=${opQuery}&R=`).append('Overpass Turbo'), ' ',
           createElement('a').setAttribute('target', '_blank').setAttribute('href', `https://osmcha.org/changesets/${entity.changeset}`).append('OSMCha'), ' ',
           type === 'relation' ? createElement('a').setAttribute('target', '_blank').setAttribute('href', `http://ra.osmsurround.org/analyzeRelation?relationId=${entityId}`).append('Relation Analyzer') : undefined
-        ].filter(i => i)
+        ].filter(Boolean)
       ),
     createElement('h3').append('Edit'),
     createElement('p')
