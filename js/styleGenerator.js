@@ -1256,26 +1256,26 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
       ],
       ["!=", ["get", "natural"], "tree"],
     ];
-    if (travelMode !== "canoe" && travelMode !== "all") {
-      // don't show canoe-specific POIs for other travel modes
-      filter.push([
-        "!", [
-          "any",
-          ["==", ["get", "natural"], "beaver_dam"],
-          ["==", ["get", "leisure"], "slipway"],
-          ["in", ["get", "waterway"], ["literal", ["dam", "weir", "access_point"]]],
-          ["==", ["get", "lock"], "yes"],
-          ["==", ["get", "man_made"], "monitoring_station"],
-        ]
-      ]);
-    }
+    
     if (travelMode !== "all") {
-      let poiKeys = [travelMode];
-      let poiKeysByTravelMode = {
+      if (travelMode !== "canoe") {
+        // don't show canoe-specific POIs for other travel modes
+        filter.push([
+          "!", [
+            "any",
+            ["==", ["get", "natural"], "beaver_dam"],
+            ["==", ["get", "leisure"], "slipway"],
+            ["in", ["get", "waterway"], ["literal", ["dam", "weir", "access_point"]]],
+            ["==", ["get", "lock"], "yes"],
+            ["==", ["get", "man_made"], "monitoring_station"],
+          ]
+        ]);
+      }
+      const poiKeysByTravelMode = {
         "foot": ["hiking"],
         "canoe": ["canoe", "portage"],
       };
-      if (poiKeysByTravelMode[travelMode]) poiKeys = poiKeysByTravelMode[travelMode];
+      const poiKeys = poiKeysByTravelMode[travelMode] ? poiKeysByTravelMode[travelMode] : [travelMode];
       filter.push([
         "any",
         [
@@ -1284,6 +1284,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
             ["==", ["get", "highway"], "trailhead"],
             ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
             ["==", ["get", "man_made"], "cairn"],
+            ["==", ["get", "route"], "ferry"],
           ]
         ],
         travelMode === "canoe" ? [
