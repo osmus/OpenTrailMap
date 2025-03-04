@@ -709,7 +709,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
         "duration": 0,
         "delay": 0
       },
-      "minzoom": 12,
+      "minzoom": lens === "oneway" ? 4 : 12,
       "layout": {
         "icon-padding": 2,
         "icon-size": [
