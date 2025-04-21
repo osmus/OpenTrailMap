@@ -9,11 +9,11 @@
         "sprites": "spreet --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap && spreet --retina --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap@2x"
     },
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^28.0.0",
-        "@rollup/plugin-node-resolve": "^16.0.0",
-        "@turf/buffer": "^7.0.0",
-        "maplibre-gl": "^5.0.0",
-        "rollup": "^4.19.1",
-        "rollup-plugin-polyfill-node": "^0.13.0"
+        "@rollup/plugin-commonjs": "~28.0.0",
+        "@rollup/plugin-node-resolve": "~16.0.0",
+        "@turf/buffer": "~7.0.0",
+        "maplibre-gl": "~5.0.0",
+        "rollup": "~4.19.1",
+        "rollup-plugin-polyfill-node": "~0.13.0"
     }
 }
