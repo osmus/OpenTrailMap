@@ -221,6 +221,7 @@ body.sidebar-open #map-wrap {
 #inspect-toggle {
   display: block;
   position: absolute;
+  overflow: hidden;
   top: calc(50% - 20px);
   right: 10px;
   height: 40px;
