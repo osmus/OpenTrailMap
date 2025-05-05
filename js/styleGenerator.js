@@ -274,6 +274,25 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
     wheelchair: ['foot', 'wheelchair'],
   };
 
+  // returns an expression that evaluates to true if `val` is listed in a semicolon-delimited list for `key`
+  function isInSemiExpression(key, val) {
+    return [
+      "all",
+      ["has", key],
+      [
+        "any",
+        // check if exact match (one item in list)
+        ["==", ["get", key], val],
+        // check if item is listed between others
+        ["in", `;${val};`, ["get", key]],
+        // check if item is first in list
+        ["==", ["slice", ["get", key], 0, ["length", `${val};`]], val],
+        // check if item is last in list
+        ["==", ["slice", ["get", key], ["-", ["length", ["get", key]], ["length", `;${val}`]]], `;${val}`]
+      ]
+    ];
+  }
+
   function addTrailLayers() {
 
     const showTrailCenterpoints = lens === 'fixme';
@@ -926,8 +945,8 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
           ["==", ["get", "protected_area"], "watershed_reserve"], ["image", "watershed_reserve"],
           ["==", ["get", "protected_area"], "wildlife_refuge"], [
             "case",
-            ["==", ["get", "wildlife_refuge"], "bird_refuge"], ["image", "bird_refuge"],
-            ["==", ["get", "wildlife_refuge"], "bison_refuge"], ["image", "bison_refuge"],
+            isInSemiExpression("wildlife_refuge:for", "bird"), ["image", "bird_refuge"],
+            isInSemiExpression("wildlife_refuge:for", "bison"), ["image", "bison_refuge"],
             ["image", "wildlife_refuge"],
           ],
           ["==", ["get", "protected_area"], "wilderness_preserve"], ["image", "wilderness_preserve"],
