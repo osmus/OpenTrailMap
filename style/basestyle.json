@@ -187,6 +187,7 @@
       "type": "line",
       "source": "trails",
       "source-layer": "barrier_line",
+      "filter": ["!=", "barrier", "floating_boom"],
       "layout": {"line-cap": "butt", "line-join": "round"},
       "paint": {
         "line-color": "#ccc",
@@ -194,6 +195,36 @@
           "interpolate", ["exponential", 2], ["zoom"],
           7, 0.5,
           18, 12
+        ]
+      }
+    },
+    {
+      "id": "floating_boom",
+      "type": "line",
+      "source": "trails",
+      "source-layer": "barrier_line",
+      "filter": ["==", "barrier", "floating_boom"],
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {
+        "line-color": "#f29557",
+        "line-opacity": 0.5,
+        "line-width": 1
+      }
+    },
+    {
+      "id": "floating_boom_buoys",
+      "type": "line",
+      "source": "trails",
+      "source-layer": "barrier_line",
+      "filter": ["==", "barrier", "floating_boom"],
+      "layout": {"line-cap": "round", "line-join": "round"},
+      "paint": {
+        "line-color": "#f29557",
+        "line-dasharray": [0.25, 3],
+        "line-width": [
+          "interpolate", ["exponential", 2], ["zoom"],
+          7, 2,
+          17, 8
         ]
       }
     },
