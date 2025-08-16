@@ -218,6 +218,7 @@
       "source-layer": "barrier_line",
       "filter": ["==", "barrier", "floating_boom"],
       "layout": {"line-cap": "round", "line-join": "round"},
+      "minzoom": 12,
       "paint": {
         "line-color": "#f29557",
         "line-dasharray": [0.25, 3],
