@@ -12,19 +12,19 @@
   "sources": {
     "openmaptiles": {
       "type": "vector",
-      "url": "https://tiles.openstreetmap.us/openmaptiles.json"
+      "url": "https://tiles.openstreetmap.us/vector/openmaptiles.json"
     },
     "trails": {
       "type": "vector",
-      "url": "https://tiles.openstreetmap.us/trails.json"
+      "url": "https://tiles.openstreetmap.us/vector/trails.json"
     },
     "hillshade": {
       "type": "raster",
-      "url": "https://tiles.openstreetmap.us/hillshade.json"
+      "url": "https://tiles.openstreetmap.us/raster/hillshade.json"
     },
     "contours": {
       "type": "vector",
-      "url": "https://tiles.openstreetmap.us/contours-feet.json"
+      "url": "https://tiles.openstreetmap.us/vector/contours-feet.json"
     }
   },
   "glyphs": "https://font.americanamap.org/{fontstack}/{range}.pbf",
