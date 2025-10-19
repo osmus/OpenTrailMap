@@ -1090,19 +1090,10 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
         // only expect open_water tag on certain features
         return ["!", ["in", ["get", "waterway"], ["literal", ["fairway", "flowline"]]]];
       case "rapids" : 
-        // only expect rapids tag on  
+        // we assume non-tidal flowlines do not have rapids   
         return ["all",
-          //  features that could have current    
-          ["!",["in", ["get", "waterway"], ["literal", [
-            "river",
-            "stream",
-            "canal",
-            "drain",
-            "ditch",
-            "canoe_pass"
-          ]]]],
-          // or tidal features
-          ["!=", ["get", "tidal"], "yes"]
+          ["==", ["get", "waterway"], "flowline"],
+          ["==", ["get", "tidal"], "no"]
         ];
       case 'width':
         // don't expect width tag on links
