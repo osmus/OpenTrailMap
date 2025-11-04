@@ -9,7 +9,7 @@
         "sprites": "spreet --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap && spreet --retina --unique --minify-index-file style/sprites/svg style/sprites/opentrailmap@2x"
     },
     "devDependencies": {
-        "@rollup/plugin-commonjs": "~28.0.0",
+        "@rollup/plugin-commonjs": "~29.0.0",
         "@rollup/plugin-node-resolve": "~16.0.0",
         "@turf/buffer": "~7.2.0",
         "maplibre-gl": "~5.8.0",
