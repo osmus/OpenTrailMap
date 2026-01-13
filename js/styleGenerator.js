@@ -899,7 +899,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
           ["==", ["get", "man_made"], "cairn"], 20,
           ["==", ["get", "information"], "route_marker"], 20,
           canoeNoaccessExpression, 21,
-          ["==", ["get", "parking"], "no"], 11,
+          ["==", ["get", "backcountry"], "yes"], 11,
           10,
         ],
         "text-field": [
@@ -1260,7 +1260,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
       ],
       ["==", ["get", "waterway"], "access_point"], [
         "case",
-        ["==", ["get", "parking"], "no"], ["image", "access_point-minor"],
+        ["==", ["get", "backcountry"], "yes"], ["image", "access_point-minor"],
         ["image", "access_point"],
       ],
       ""
