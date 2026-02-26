@@ -638,7 +638,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
       },
       "paint": {
         "line-width": lineWidth,
-        "line-pattern": ["image", "disallowed-stripes"],
+        "line-pattern": ["image", "stroke-disallowed-stripes"],
       }
     });
     addTrailLayer({
@@ -1340,9 +1340,9 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
         ["has", key],
         [
           "case",
-          ["==", ["get", key], "yes"], ["image", "arrow-right"],
-          ["==", ["get", key], "-1"], ["image", "arrow-left"],
-          ["in", ["get", key], ["literal", ["alternating", "reversible"]]], ["image", "arrows-leftright"],
+          ["==", ["get", key], "yes"], ["image", "oneway-arrow-right"],
+          ["==", ["get", key], "-1"], ["image", "oneway-arrow-left"],
+          ["in", ["get", key], ["literal", ["alternating", "reversible"]]], ["image", "oneway-arrows-leftright"],
           ""
         ]
       ]);
@@ -1363,7 +1363,7 @@ export function generateStyle(baseStyleJsonString, travelMode, lens) {
           // unless they're tidal
           ["!=", ["get", "tidal"], "yes"],
         ],
-        ["image", "arrow-right"],
+        ["image", "oneway-arrow-right"],
         "",
       ]);
 

@@ -56,7 +56,7 @@
         ["in", "class", "military"]
       ],
       "layout": {"visibility": "visible"},
-      "paint": {"fill-pattern": ["image", "restricted-zone"], "fill-opacity": 1}
+      "paint": {"fill-pattern": ["image", "fill-restricted-zone"], "fill-opacity": 1}
     },
     {
       "id": "hillshade-background",
