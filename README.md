@@ -105,4 +105,6 @@ Source vector images for use in the map are located at [/style/sprites/svg/](/st
 
 ## License
 
-The OpenTrailMap source code is distributed under the [MIT license](https://github.com/osmus/OpenTrailMap/blob/main/LICENSE). Dependencies are subject to their respective licenses.
+The OpenTrailMap source code is distributed under the [MIT license](./LICENSE). Dependencies are subject to their respective licenses.
+
+The icons used in OpenTrailMap are available under the CC0 license and are in the public domain. See [style/sprites/LICENSE](./style/sprites/LICENSE) for details.
