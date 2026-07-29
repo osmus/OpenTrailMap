@@ -1,24 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <!--<script type="text/javascript">
-      (function(window, document, dataLayerName, id) {
-      window[dataLayerName]=window[dataLayerName]||[],window[dataLayerName].push({start:(new Date).getTime(),event:"stg.start"});var scripts=document.getElementsByTagName('script')[0],tags=document.createElement('script');
-      function stgCreateCookie(a,b,c){var d="";if(c){var e=new Date;e.setTime(e.getTime()+24*c*60*60*1e3),d="; expires="+e.toUTCString();f="; SameSite=Strict"}document.cookie=a+"="+b+d+f+"; path=/"}
-      var isStgDebug=(window.location.href.match("stg_debug")||document.cookie.match("stg_debug"))&&!window.location.href.match("stg_disable_debug");stgCreateCookie("stg_debug",isStgDebug?1:"",isStgDebug?14:-1);
-      var qP=[];dataLayerName!=="dataLayer"&&qP.push("data_layer_name="+dataLayerName),isStgDebug&&qP.push("stg_debug");var qPString=qP.length>0?("?"+qP.join("&")):"";
-      tags.async=!0,tags.src="https://openstreetmapus.containers.piwik.pro/"+id+".js"+qPString,scripts.parentNode.insertBefore(tags,scripts);
-      !function(a,n,i){a[n]=a[n]||{};for(var c=0;c<i.length;c++)!function(i){a[n][i]=a[n][i]||{},a[n][i].api=a[n][i].api||function(){var a=[].slice.call(arguments,0);"string"==typeof a[0]&&window[dataLayerName].push({event:n+"."+i+":"+a[0],parameters:[].slice.call(arguments,1)})}}(i[c])}(window,"ppms",["tm","cm"]);
-      })(window, document, 'dataLayer', '0245a355-96b9-47f5-997e-8cafd843c18a');
-    </script>-->
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VB5V88HCS8"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-VB5V88HCS8');
-    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"/>
     <title>OpenTrailMap by OpenStreetMap US</title>
@@ -26,8 +8,11 @@
     <link rel="icon" type="image/x-icon" href="img/favicon.ico" />
     <link href="css/reset.css" rel="stylesheet" />
     <link href="css/main.css" rel="stylesheet" />
-    <link rel="stylesheet" href="dist/maplibre/maplibre-gl.css" />
-    <script type="text/javascript" src="dist/maplibre/maplibre-gl.js"></script>
+    <script async src="https://analytics.openstreetmap.us/js/pa-Rg1FovK4zxBRjNR6MzWn5.js"></script>
+    <script>
+      window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||((i)=> {plausible.o=i||{}});
+      plausible.init()
+    </script>
   </head>
   <body>
     <div id="header">
@@ -41,43 +26,17 @@
       </ul>
     </div>
     <div id="body">
-      <div id="top-left">
-        <div id="nameplate" style="display: none;">
-          <h1 style="display:flex;"><span style="flex-basis: 100%;"><span class="swatch"></span><span id="map-title"></span></span><a href="" title="Clear focus area" id="clear-focus">⨯</a></h1>
-        </div>
-      </div>
       <div id="map-wrap">
-        <a href="" id="inspect-toggle" title="Toggle sidebar"></a>
+        <button type="button" id="inspect-toggle" title="Close sidebar" aria-label="Close sidebar"></button>
         <div id="controls">
-          <select id="travel-mode">
-            <option value="all" selected>All Trails</option>
-            <optgroup label="Trails">
-              <option value="foot">Hiking & Walking Trails</option>
-              <option value="wheelchair">Wheelchair Trails</option>
-              <option value="bicycle">Biking Trails</option>
-              <option value="mtb">Mountain Biking Trails</option>
-              <option value="inline_skates">Inline Skating Trails</option>
-              <option value="horse">Horseback Riding Trails</option>
-              <option value="atv">ATV Trails</option>
-            </optgroup>
-            <optgroup label="Snow Trails">
-              <option value="ski:nordic">Cross-Country Ski Trails</option>
-              <option value="snowmobile">Snowmobile Trails</option>
-            </optgroup>
-            <optgroup label="Water Trails">
-              <option value="canoe">Canoe & Kayak Trails</option>
-            </optgroup>
-          </select>
-          <select id="lens"></select>
+          <select id="travel-mode" aria-label="Travel mode"></select>
+          <select id="lens" aria-label="Attribute lens"></select>
         </div>
         <div id="map"></div>
+        <div id="zoom-message" style="display:none;">Zoom in to see trail data</div>
       </div>
       <div id="sidebar"></div>
     </div>
-    <script type="application/javascript" src="dist/turf-buffer.js"></script>
-    <script type="module" src="js/mapController.js"></script>
-    <script type="module" src="js/sidebarController.js"></script>
-    <script type="module" src="js/controlsController.js"></script>
-    <script type="module" src="js/hashController.js"></script>
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>

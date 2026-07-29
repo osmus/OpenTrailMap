@@ -4,7 +4,8 @@ _[opentrailmap.us](https://opentrailmap.us)_
 
 This is a prototype web map application for viewing [OpenStreetMap](https://openstreetmap.org/about) (OSM) trail data. The tool is being developed in support of our [Trails Stewardship Initiative](https://openstreetmap.us/our-work/trails/), a community project to improve the quality of trail data in OSM. 
 
-⚠️ This tool is still in early development and serves as a proof-of-concept. OpenStreetMap US is seeking funding partners to build out the tool as the primary app for visualizing, updating, validating, and maintaining OpenStreetMap trail data in the United States. The app will close the feedback loop between trail users, trail managers, and trail mappers. If you or your organization are interested in supporting this tool, please [contact us](https://openstreetmap.us/contact/) or consider [donating](https://openstreetmap.app.neoncrm.com/forms/trails-stewardship-initiative).
+> [!WARNING]
+> This tool is still in early development and serves as a proof-of-concept. OpenStreetMap US is seeking funding partners to build out the tool as the primary app for visualizing, updating, validating, and maintaining OpenStreetMap trail data in the United States. The app will close the feedback loop between trail users, trail managers, and trail mappers. If you or your organization are interested in supporting this tool, please [contact us](https://openstreetmap.us/contact/) or consider [donating](https://openstreetmap.app.neoncrm.com/forms/trails-stewardship-initiative).
 
 ## Prototype functionality
 
@@ -32,15 +33,21 @@ The following styles show allowed trail access for different travel modes. Dark 
 - Cross-Country Ski Trails ([`ski:nordic`](https://wiki.openstreetmap.org/wiki/Key:ski:nordic) access)
 - Snowmobile Trails ([`snowmobile`](https://wiki.openstreetmap.org/wiki/Key:snowmobile) access)
 
-The following styles highlight the presence and values of trail attribute tags. Purple lines mean an attribute is missing, incomplete, or needs review, while teal lines indicate the attribute is good to go.
+Selecting a _lens_ highlights the presence and values of a single trail attribute tag. Purple lines mean an attribute is missing, incomplete, or needs review, while teal lines indicate the attribute is good to go. The set of lenses offered depends on the selected travel mode.
 
 - [`operator`](https://wiki.openstreetmap.org/wiki/Key:operator)/[`informal`](https://wiki.openstreetmap.org/wiki/Key:informal)
 - [`name`](https://wiki.openstreetmap.org/wiki/Key:name)/[`noname`](https://wiki.openstreetmap.org/wiki/Key:noname)
 - [`surface`](https://wiki.openstreetmap.org/wiki/Key:surface)
 - [`smoothness`](https://wiki.openstreetmap.org/wiki/Key:smoothness)
 - [`trail_visibility`](https://wiki.openstreetmap.org/wiki/Key:trail_visibility)
+- [`sac_scale`](https://wiki.openstreetmap.org/wiki/Key:sac_scale) (hiking only)
 - [`width`](https://wiki.openstreetmap.org/wiki/Key:width)
 - [`incline`](https://wiki.openstreetmap.org/wiki/Key:incline)
+- [`covered`](https://wiki.openstreetmap.org/wiki/Key:covered)/[`tunnel`](https://wiki.openstreetmap.org/wiki/Key:tunnel)
+- [`lit`](https://wiki.openstreetmap.org/wiki/Key:lit)
+- [`dog`](https://wiki.openstreetmap.org/wiki/Key:dog)
+- [`maxspeed`](https://wiki.openstreetmap.org/wiki/Key:maxspeed) (wheeled modes only)
+- [`oneway`](https://wiki.openstreetmap.org/wiki/Key:oneway)
 - [`fixme`](https://wiki.openstreetmap.org/wiki/Key:fixme)/[`todo`](https://wiki.openstreetmap.org/wiki/Key:todo)
 - [`check_date`](https://wiki.openstreetmap.org/wiki/Key:check_date)/[`survey:date`](https://wiki.openstreetmap.org/wiki/Key:survey:date)
 - Last Edited Date: the timestamp of the latest version of the feature
@@ -71,11 +78,16 @@ The following water trail attribute styles are supported:
 - [`check_date`](https://wiki.openstreetmap.org/wiki/Key:check_date)/[`survey:date`](https://wiki.openstreetmap.org/wiki/Key:survey:date)
 - Last Edited Date: the timestamp of the latest version of the feature
 
-### Map tiles
-Trail vector tiles are rendered and hosted by OpenStreetMap US using the schema files [here](https://github.com/osmus/tileservice/blob/main/renderer/layers). Thank you to [@zelonewolf](https://github.com/zelonewolf) for setting up the vector tile pipeline. Render time is currently about 4 hours, so any changes you make will take 4 to 8 hours to appear on the map. Map tiles are not available for public use at this time.
+### Static stylesheet
 
-### Static stylesheets
-OpenTrailMap has complex, parameter-driven styling. For performance, styles are generated at runtime. However, static stylesheets are also generated at build time for ease-of-use by other apps. You can browse the full list of available styles [here](https://opentrailmap.us/dist/styles/). Generated styles are subject to the same license as the rest of OpenTrailMap (see below).
+The basemap is a general-purpose trail map in its own right, independent of the QA overlay. `npm run build` writes it to `dist/style.json` as a plain MapLibre stylesheet, published at [opentrailmap.us/style.json](https://opentrailmap.us/style.json), for use in other applications. The stylesheet is subject to the same license as the rest of OpenTrailMap (see below), but note that the tiles it points at are not currently available for public use.
+
+### Embedding
+
+An embeddable version of the basemap is served from [opentrailmap.us/embed.html](https://opentrailmap.us/embed.html), intended for use in an `<iframe>`. It accepts two parameters:
+
+- `#map=zoom/lat/lon` sets the initial camera position.
+- `?highlight=relation/123` highlights one or more parks or protected areas, as a comma-separated list of OSM element IDs.
 
 ## Get involved
 
@@ -89,19 +101,23 @@ You can open an [issue](https://github.com/osmus/OpenTrailMap/issues) in this re
 We also collaborate via the [#opentrailmap](https://osmus.slack.com/archives/opentrailmap) channel on [OpenStreetMap US Slack](https://openstreetmap.us/slack). Anyone is free to join.
 
 ### Development setup
+
+Requires Node.js 22 or newer.
+
 1. [Clone the repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
 2. Open your terminal and `cd` into the repo's directory
-3. Run `npm install` and `npm run build` (first-time setup only)
-4. Run `node serve.js` to start the development server
-5. Visit [http://localhost:4001](http://localhost:4001) in your browser
+3. Run `npm install` (first-time setup only)
+4. Run `npm run dev` to start the development server
+5. Visit [http://localhost:5173](http://localhost:5173) in your browser
 6. That's it!
 
 #### Building sprites
 
-Source vector images for use in the map are located at [/style/sprites/svg/](/style/sprites/svg/). If you add or change any of these, you'll need to rebuild the spritesheets.
+Source vector images for use in the map are located at [/style/sprites/icons/](/style/sprites/icons/). Most are vendored from the CC0-licensed Pinhead icon library. Each icon is composited into plain, rounded-rectangle and circular variants, then packed into SDF sprite sheets under `public/sprites/`, which are committed to the repository. If you add or change any icon, you'll need to rebuild the sheets.
 
 1. Install the [spreet](https://github.com/flother/spreet) command line tool
 2. Run `npm run sprites`
+3. Commit the regenerated files in `public/sprites/`
 
 ## License
 
