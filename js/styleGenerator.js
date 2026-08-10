@@ -1,1652 +1,492 @@
-export function generateStyle(baseStyleJsonString, travelMode, lens) {
+// Generates the QA trail overlay using the trails tileset, and inserts
+// it into the Sourdough basemap.
 
-  // parse anew every time to avoid object references
-  const style = JSON.parse(baseStyleJsonString);
+import {
+  DISALLOWED_WATER_COLOR,
+  FERRY_COLOR,
+  LABEL_COLOR,
+  LABEL_HALO_COLOR,
+  NOACCESS_TRAIL_COLOR,
+  SELECTION_COLOR,
+  SPECIFIED_COLOR,
+  TIDAL_COLOR,
+  TRAIL_COLOR,
+  UNSPECIFIED_COLOR,
+  WATER_COLOR,
+} from "../style/constants.js";
+import { TRAIL_LABELS, TRAILS } from "../style/layers/trails.js";
+import { QA_INSERTION_POINT } from "../style/style.js";
+import {
+  accessIsSpecifiedExpression,
+  attributeIsSpecifiedExpression,
+  isHighwayExpression,
+  isWaterwayExpression,
+  modeIsAllowedExpression,
+  onewayArrowsIconImageExpression,
+} from "./accessExpressions.js";
+import { keysForLens, lenses } from "./optionsData.js";
+import { getTrailLabelExpression } from "./trailLabels.js";
 
-  const highwayOnlyLenses = [
-    "hand_cart",
-    "incline",
-    "lit",
-    "maxspeed",
-    "operator",
-    "sac_scale",
-    "smoothness",
-    "surface",
-    "trail_visibility",
-  ];
-  const waterwayOnlyLenses = [
-    "tidal",
-    "intermittent",
-    "rapids",
-    "open_water",
-  ];
+const TRAILS_SOURCE = {
+  "type": "vector",
+  "url": "https://tiles.openstreetmap.us/vector/trails.json",
+};
 
-  const poiLabelZoom = 14;
-  const thisYear = new Date().getFullYear();
-  const colors = {
-    trail: "#4f2e28",
-    noaccessTrail: "#cc9e7e",//"#A2D61D",
-    ferry: "#009FBE",
-    natural: "#005908",
-    specified: "#007f79",
-    unspecified: "#c100cc",
-    tidal: "#0041e5",
-    disallowedWater: "#a6b2c4",
-    water: "#003b93",
-    label: "#333",
-    labelHalo: "rgba(255, 255, 255, 1)",
-    selection: "yellow",
-  };
-  const noaccessValsLiteral = ["literal", ["no", "private", "discouraged", "limited"]]; // `limited` for `wheelchair`
-  const canoeNoaccessExpression = [
-    "any",
-    ["in", ["get", "canoe"], noaccessValsLiteral],
-    [
-      "all",
-      ["!", ["has", "canoe"]],
-      ["in", ["get", "boat"], noaccessValsLiteral]
-    ],
-    [
-      "all",
-      ["!", ["has", "canoe"]],
-      ["!", ["has", "boat"]],
-      ["in", ["get", "access"], noaccessValsLiteral]
-    ]
-  ];
-  const lineWidth = [
-    "interpolate", ["linear"], ["zoom"],
-    12, 1,
-    22, 5
-  ];
-  const selectedLineWidth = [
-    "interpolate", ["linear"], ["zoom"],
-    12, 9,
-    22, 13
-  ];
-  const hoverLineWidth = [
-    "interpolate", ["linear"], ["zoom"],
-    12, 5,
-    22, 7
-  ];
-  const hoveredPoiPaint = {
-    "circle-radius": [
-      "interpolate", ["linear"], ["zoom"],
-      12, 9,
-      22, 18
-    ],
-    "circle-opacity": 0.25,
-    "circle-color": colors.selection,
-  };
-  const selectedPoiPaint = {
-    "circle-radius": [
-      "interpolate", ["linear"], ["zoom"],
-      12, 10,
-      22, 20
-    ],
-    "circle-opacity": 0.4,
-    "circle-color": colors.selection,
-  };
-  const checkDateColors = [
-    "interpolate", ["linear"], [
-      "to-number",
-      ["slice", ["get", "check_date"], 0, 4],
-      ["slice", ["get", "survey:date"], 0, 4],
-    ],
-    2010, '#e7e1ef',
-    2014, '#d4b9da',
-    2016, '#c994c7',
-    2018, '#df65b0',
-    2020, '#e7298a',
-    2021, '#ce1256',
-    2022, '#980043',
-    thisYear, '#67001f',
-  ];
-  const editedDateColors = [
-    "interpolate", ["linear"], [
-      // convert unix timestamp to year
-      "floor", ["+", ["/", ["get", "OSM_TIMESTAMP"], 31536000], 1970],
-    ],
-    2004, '#e7e1ef',
-    2008, '#d4b9da',
-    2012, '#c994c7',
-    2016, '#df65b0',
-    2018, '#e7298a',
-    2020, '#ce1256',
-    2022, '#980043',
-    thisYear, '#380010',
-  ];
-  const isWaterwayExpression = [
-    "in", ["get", "waterway"],
-    ["literal", [
-        "river",
-        "stream",
-        "tidal_channel",
-        "canal",
-        "drain",
-        "ditch",
-        "canoe_pass",
-        "fairway",
-        "link",
-        "flowline"
-      ]
-    ]
-  ];
-  const isHighwayExpression = [
-    "any",
-    ["has", "highway"],
-    ["==", ["get", "route"], "ferry"],
-  ];
-  const isNotHighwayExpression = [
-    "!", isHighwayExpression
-  ];
-  const impliedYesExpression = {
-    bicycle: [
-      "in", ["get", "highway"],
-      ["literal", [
-      "cycleway",
-      "service",
-      "unclassified",
-      "residential",
-      "tertiary",
-      "secondary",
-      "primary",
-      "tertiary_link",
-      "secondary_link",
-      "primary_link"]]
-    ],
-    foot: [
-      "in", ["get", "highway"],
-      ["literal", [
-      "path",
-      "footway",
-      "steps",
-      "service",
-      "unclassified",
-      "residential",
-      "tertiary",
-      "secondary",
-      "primary",
-      "tertiary_link",
-      "secondary_link",
-      "primary_link"]]
-    ],
-    horse: ["==", ["get", "highway"], "bridleway"],
-    inline_skates: [
-      "all",
-      // cycleways commonly allow skating
-      ["==", ["get", "highway"], "cycleway"],
-      // as long as they're multi-use
-      ["in", ["get", "foot"], ["literal", ["yes", "designated", "permissive"]]],
-      // and have the highest smoothness
-      ["==", ["get", "smoothness"], "excellent"],
-      // and are properly paved (redundant to smoothness but the additional check is nice)
-      ["in", ["get", "surface"], ["literal", ["paved", "asphalt", "concrete"]]],
-    ],
-  };
+// Basemap layers that would double-render the trails the overlay draws itself.
+const BASEMAP_TRAIL_LAYER_IDS = [...TRAILS, ...TRAIL_LABELS].map((layer) => layer.id);
 
-  const impliedNoExpression = {
-    atv: [
-        "any",
-        ["in", ["get", "highway"], ["literal", ["footway", "steps"]]],
-        ["in", ["get", "vehicle"], noaccessValsLiteral],
-        ["in", ["get", "motor_vehicle"], noaccessValsLiteral],
-        isNotHighwayExpression,
-    ],
-    bicycle: [
+// Minimum zoom for the overlay. The trail tileset is far too dense to draw
+// whole-country, and the QA filters are only meaningful at street scale.
+const MIN_ZOOM = 10;
+
+const ALL_MODES = [
+  "foot",
+  "wheelchair",
+  "bicycle",
+  "horse",
+  "atv",
+  "mtb",
+  "inline_skates",
+  "snowmobile",
+  "ski:nordic",
+  "canoe",
+];
+
+const lineWidth = ["interpolate", ["linear"], ["zoom"], 12, 1, 22, 5];
+const selectedLineWidth = ["interpolate", ["linear"], ["zoom"], 12, 9, 22, 13];
+const hoverLineWidth = ["interpolate", ["linear"], ["zoom"], 12, 5, 22, 7];
+
+const thisYear = new Date().getFullYear();
+
+// Dates are stored as ISO strings; take the leading year and fall back to a
+// year below the ramp when neither key is present, so that a feature which
+// somehow reaches these layers untagged renders at the oldest color rather
+// than erroring out (which would paint it the default black).
+const checkDateYear = [
+  "to-number",
+  ["slice", ["coalesce", ["get", "check_date"], ["get", "survey:date"], "0"], 0, 4],
+  0,
+];
+
+const checkDateColors = [
+  "interpolate",
+  ["linear"],
+  checkDateYear,
+  2010,
+  "#e7e1ef",
+  2014,
+  "#d4b9da",
+  2016,
+  "#c994c7",
+  2018,
+  "#df65b0",
+  2020,
+  "#e7298a",
+  2021,
+  "#ce1256",
+  2022,
+  "#980043",
+  thisYear,
+  "#67001f",
+];
+
+const editedDateColors = [
+  "interpolate",
+  ["linear"],
+  [
+    // convert unix timestamp to year
+    "floor",
+    ["+", ["/", ["coalesce", ["get", "OSM_TIMESTAMP"], 0], 31536000], 1970],
+  ],
+  2004,
+  "#e7e1ef",
+  2008,
+  "#d4b9da",
+  2012,
+  "#c994c7",
+  2016,
+  "#df65b0",
+  2018,
+  "#e7298a",
+  2020,
+  "#ce1256",
+  2022,
+  "#980043",
+  thisYear,
+  "#380010",
+];
+
+const colorRamps = {
+  checkDate: checkDateColors,
+  editedDate: editedDateColors,
+};
+
+// Filter for features with enough tags to positively determine the value of
+// the given lens' attribute (accounting for implied values and special cases).
+function specifiedForLens(lens, travelMode) {
+  const config = lenses[lens];
+  let expression = attributeIsSpecifiedExpression(keysForLens(lens, travelMode));
+
+  if (config.implied) {
+    expression = ["any", expression, config.implied];
+  }
+  if (config.invert) {
+    // for fixmes we're looking for extant values instead of missing values
+    expression = ["!", expression];
+  }
+  if (config.allowlist) {
+    expression = ["all", expression, ["in", ["get", lens], ["literal", config.allowlist]]];
+  }
+  if (lens === "oneway" && travelMode === "canoe") {
+    // canoe routes are oneway by current, portages by their own oneway tags
+    expression = [
       "any",
+      ["all", expression, isWaterwayExpression],
       [
         "all",
-        ["==", ["get", "highway"], "steps"],
-        ["!=", ["get", "ramp:bicycle"], "yes"],
+        attributeIsSpecifiedExpression(keysForLens("oneway", "portage")),
+        ["!", isWaterwayExpression],
       ],
-      ["in", ["get", "vehicle"], noaccessValsLiteral],
-      isNotHighwayExpression,
-    ],
-    canoe: ["!", ["has", "canoe"]],
-    foot: isNotHighwayExpression,
-    horse: [
-      "any",
-      ["==", ["get", "highway"], "steps"],
-      isNotHighwayExpression,
-    ],
-    inline_skates: [
-      "any",
-      [
-        "all",
-        ["has", "smoothness"],
-        ["!", ["in", ["get", "smoothness"], ["literal", ["excellent", "good", "intermediate"]]]],
-      ],
-      [
-        "all",
-        ["has", "surface"],
-        ["in", ["get", "surface"], ["literal", ["dirt", "grass", "sand", "sett", "cobblestone", "clay", "unhewn_cobblestone", "pebblestone", "grass_paver", "earth", "ground", "artificial_turf", "mud", "rock", "stone", "woodchips"]]],
-      ],
-      isNotHighwayExpression,
-    ],
-    mtb: [
-      "any",
-      ["in", ["get", "vehicle"], noaccessValsLiteral],
-      ["in", ["get", "bicycle"], noaccessValsLiteral],
-      isNotHighwayExpression,
-    ],
-    portage: ["!", ["has", "portage"]],
-    'ski:nordic': [
-      "any",
-      ["in", ["get", "ski"], noaccessValsLiteral],
-      isNotHighwayExpression,
-    ],
-    snowmobile: [
-      "any",
-      ["in", ["get", "highway"], ["literal", ["footway", "steps"]]],
-      ["in", ["get", "vehicle"], noaccessValsLiteral],
-      ["in", ["get", "motor_vehicle"], noaccessValsLiteral],
-      isNotHighwayExpression,
-    ],
-    wheelchair: [
-      "any",
-      ["==", ["get", "highway"], "steps"],
-      [
-        "all",
-        ["has", "sac_scale"],
-        ["!=", ["get", "sac_scale"], "hiking"],
-      ],
-      [
-        "all",
-        ["has", "smoothness"],
-        ["!", ["in", ["get", "smoothness"], ["literal", ["excellent", "very_good", "good", "intermediate"]]]],
-      ],
-      isNotHighwayExpression,
-    ],
-  };
+    ];
+  }
+  return expression;
+}
 
-  const accessHierarchy = {
-    all: [],
-    atv: ['vehicle', 'motor_vehicle', 'atv'],
-    bicycle:  ['vehicle', 'bicycle'],
-    canoe: ['boat', 'canoe'],
-    foot: ['foot'],
-    horse: ['horse'],
-    inline_skates: ['foot', 'inline_skates'],
-    mtb: ['vehicle', 'bicycle', 'mtb'],
-    portage: ['foot', 'portage'],
-    'ski:nordic': ['foot', 'ski', 'ski:nordic'],
-    snowmobile: ['vehicle', 'motor_vehicle', 'snowmobile'],
-    wheelchair: ['foot', 'wheelchair'],
-  };
-
-  // returns an expression that evaluates to true if `val` is listed in a semicolon-delimited list for `key`
-  function isInSemiExpression(key, val) {
+function pathsColorForLens(lens) {
+  const config = lenses[lens];
+  if (config.colorRamp) return colorRamps[config.colorRamp];
+  if (lens === "tidal") {
     return [
+      "case",
+      ["any", ["==", ["get", "tidal"], "yes"], config.implied],
+      TIDAL_COLOR,
+      ["==", ["get", "tidal"], "no"],
+      SPECIFIED_COLOR,
+      UNSPECIFIED_COLOR,
+    ];
+  }
+  return SPECIFIED_COLOR;
+}
+
+// Resolves a (travel mode, lens) pair into the handful of expressions that
+// every overlay layer is built from.
+function overlayContext(travelMode, lens) {
+  const isLensActive = lens !== "" && lens !== "access";
+
+  let allowed;
+  if (travelMode === "all") {
+    allowed = ["any", ...ALL_MODES.map(modeIsAllowedExpression)];
+  } else {
+    const modes = travelMode === "canoe" ? ["canoe", "portage"] : [travelMode];
+    allowed = ["any", ...modes.map(modeIsAllowedExpression)];
+  }
+
+  let accessSpecified = null;
+  if (travelMode !== "all") {
+    accessSpecified = accessIsSpecifiedExpression(travelMode);
+  } else if (lens === "access" || lens === "") {
+    accessSpecified = [
       "all",
-      ["has", key],
-      [
-        "any",
-        // check if exact match (one item in list)
-        ["==", ["get", key], val],
-        // check if item is listed between others
-        ["in", `;${val};`, ["get", key]],
-        // check if item is first in list
-        ["==", ["slice", ["get", key], 0, ["length", `${val};`]], val],
-        // check if item is last in list
-        ["==", ["slice", ["get", key], ["-", ["length", ["get", key]], ["length", `;${val}`]]], `;${val}`]
-      ]
+      // access not fully specified if any access tag is explicitly set to `unknown`
+      ["!=", ["get", "access"], "unknown"],
+      ...ALL_MODES.concat("portage").map((mode) => ["!=", ["get", mode], "unknown"]),
     ];
   }
 
-  function addTrailLayers() {
+  let pathsColor = ["case", ["==", ["get", "route"], "ferry"], FERRY_COLOR, TRAIL_COLOR];
+  let waterwaysColor = WATER_COLOR;
+  let specified = accessSpecified;
+  let included = allowed;
 
-    const showTrailCenterpoints = lens === 'fixme';
+  if (isLensActive) {
+    pathsColor = pathsColorForLens(lens);
+    waterwaysColor = pathsColor;
+    specified = specifiedForLens(lens, travelMode);
 
-    // ["!=", "true", "false"] always evalutes to true because "true" actually refers to the name of a
-    // data attribute key, which is always undefined, while "false" is the string it's compared to.
-    let allowedAccessExpression = ["!=", ["get", "true"], "false"];
-    let specifiedAccessExpression = ["!=", ["get", "true"], "false"];
-    let specifiedExpression;
+    const terms = travelMode === "all" ? [] : [allowed];
+    if (accessSpecified) terms.push(accessSpecified);
+    const scope = lenses[lens].scope;
+    if (scope === "waterway") terms.push(isWaterwayExpression);
+    else if (scope === "highway") terms.push(isHighwayExpression);
+    included = terms.length === 0 ? true : terms.length === 1 ? terms[0] : ["all", ...terms];
+  }
 
-    let showDisallowedExpression = [lens === "access" ? "!=" : "==", ["get", "true"], "false"];
-    let showUnspecifiedExpression = [lens !== "" ? "!=" : "==", ["get", "true"], "false"];
+  return {
+    allowed,
+    included,
+    specified,
+    pathsColor,
+    waterwaysColor,
+    // Disallowed trails are only shown in "all" mode; picking a travel mode
+    // means you want to see where you can actually go.
+    showDisallowed: travelMode === "all",
+    // Unspecified trails are only meaningful when a lens is asking a question.
+    showUnspecified: lens !== "",
+  };
+}
 
-    let pathsColors = [
-      "case",
-      ["==", ["get", "route"], "ferry"], colors.ferry,
-      colors.trail
-    ];
-    let waterwaysColors = colors.water;
+// Per-layer filters, keyed by layer id. Insertion order matters only in that
+// the combined filter (used by labels, arrows and hit targets) is their union.
+function trailFilters(ctx) {
+  const { included, specified, showDisallowed, showUnspecified } = ctx;
+  const informal = ["==", ["get", "informal"], "yes"];
+  const formal = ["!=", ["get", "informal"], "yes"];
 
-    if (travelMode === "all") {
-      allowedAccessExpression = [
-        "any",
-        modeIsAllowedExpression("foot"),
-        modeIsAllowedExpression("wheelchair"),
-        modeIsAllowedExpression("bicycle"),
-        modeIsAllowedExpression("horse"),
-        modeIsAllowedExpression("atv"),
-        modeIsAllowedExpression("mtb"),
-        modeIsAllowedExpression("inline_skates"),
-        modeIsAllowedExpression("snowmobile"),
-        modeIsAllowedExpression("ski:nordic"),
-        modeIsAllowedExpression("canoe"),
-      ];
-    } else {
-      let modes = [travelMode];
-      if (travelMode == "canoe") modes.push('portage');
-      allowedAccessExpression = [
-        "any",
-        ...modes.map(function(mode) {  
-          return modeIsAllowedExpression(mode);
-        })
-      ];
-    }
-
-    if (travelMode !== "all") {
-      specifiedAccessExpression = accessIsSpecifiedExpression(travelMode);
-    } else if (lens === 'access' || lens === '') {
-      specifiedAccessExpression = [
-        "all",
-        // access not fully specified if any access tag is explicitly set to `unknown`
-        ["!=", ["get", "access"], "unknown"],
-        ["!=", ["get", "foot"], "unknown"],
-        ["!=", ["get", "wheelchair"], "unknown"],
-        ["!=", ["get", "bicycle"], "unknown"],
-        ["!=", ["get", "horse"], "unknown"],
-        ["!=", ["get", "atv"], "unknown"],
-        ["!=", ["get", "mtb"], "unknown"],
-        ["!=", ["get", "inline_skates"], "unknown"],
-        ["!=", ["get", "portage"], "unknown"],
-        ["!=", ["get", "snowmobile"], "unknown"],
-        ["!=", ["get", "ski:nordic"], "unknown"],
-      ];  
-    }
-
-    if (lens !== "" && lens !== "access") {
-
-      pathsColors = lens === 'check_date' ? checkDateColors :
-        lens === 'OSM_TIMESTAMP' ? editedDateColors :
-        lens === 'tidal' ? [
-          "case",
-          ["any", ["==", ["get", "tidal"], "yes"], isImpliedExpressionForLens("tidal")], colors.tidal,
-          ["==", ["get", "tidal"], "no"], colors.specified,
-          colors.unspecified
-        ] :
-        colors.specified;
-      
-      waterwaysColors = pathsColors;
-    
-      specifiedExpression = isSpecifiedExpressionForLens(lens, travelMode);
-      allowedAccessExpression = [
-        "all",
-        allowedAccessExpression,
-        specifiedAccessExpression
-      ];
-
-      if (waterwayOnlyLenses.includes(lens)) {
-        allowedAccessExpression.push(isWaterwayExpression);
-      } else if (highwayOnlyLenses.includes(lens)) {
-        allowedAccessExpression.push(isHighwayExpression);
-      }
-    } else {
-      specifiedExpression = specifiedAccessExpression;
-    }
-
-    let trailFiltersById = {};
-    let combinedFilterExpression = ["any"];
-    function registerTrailsLayerFilter(layerId, filter) {
-      trailFiltersById[layerId] = filter;
-      combinedFilterExpression.push(filter);
-    }
-    
-    registerTrailsLayerFilter('paths', [
+  return {
+    "paths": ["all", included, specified, formal, isHighwayExpression],
+    "informal-paths": ["all", included, specified, informal, isHighwayExpression],
+    "disallowed-paths": [
       "all",
-      allowedAccessExpression,
-      specifiedExpression,
-      ["!=", ["get", "informal"], "yes"],
+      showDisallowed,
+      ["!", included],
+      specified,
+      formal,
       isHighwayExpression,
-    ]);
-    registerTrailsLayerFilter('informal-paths', [
+    ],
+    "disallowed-informal-paths": [
       "all",
-      allowedAccessExpression,
-      specifiedExpression,
-      ["==", ["get", "informal"], "yes"],
+      showDisallowed,
+      ["!", included],
+      specified,
+      informal,
       isHighwayExpression,
-    ]);
-    registerTrailsLayerFilter('disallowed-paths', [
+    ],
+    "unspecified-paths": [
       "all",
-      showDisallowedExpression,
-      ["!", allowedAccessExpression],
-      specifiedExpression,
-      ["!=", ["get", "informal"], "yes"],
+      showUnspecified,
+      included,
+      ["!", specified],
+      formal,
       isHighwayExpression,
-    ]);
-    registerTrailsLayerFilter('disallowed-informal-paths', [
+    ],
+    "unspecified-informal-paths": [
       "all",
-      showDisallowedExpression,
-      ["!", allowedAccessExpression],
-      specifiedExpression,
-      ["==", ["get", "informal"], "yes"],
+      showUnspecified,
+      included,
+      ["!", specified],
+      informal,
       isHighwayExpression,
-    ]);
-    registerTrailsLayerFilter('unspecified-paths', [
+    ],
+    "waterways": ["all", included, specified, isWaterwayExpression],
+    "disallowed-waterways": [
       "all",
-      showUnspecifiedExpression,
-      allowedAccessExpression,
-      ["!", specifiedExpression],
-      ["!=", ["get", "informal"], "yes"],
-      isHighwayExpression,
-    ]);
-    registerTrailsLayerFilter('unspecified-informal-paths', [
-      "all",
-      showUnspecifiedExpression,
-      allowedAccessExpression,
-      ["!", specifiedExpression],
-      ["==", ["get", "informal"], "yes"],
-      isHighwayExpression,
-    ]);
-    registerTrailsLayerFilter('disallowed-waterways', [
-      "all",
-      showDisallowedExpression,
-      ["!", allowedAccessExpression],
-      specifiedExpression,
+      showDisallowed,
+      ["!", included],
+      specified,
       isWaterwayExpression,
-    ]);
-    registerTrailsLayerFilter('unspecified-waterways', [
+    ],
+    "unspecified-waterways": [
       "all",
-      showUnspecifiedExpression,
-      allowedAccessExpression,
-      ["!", specifiedExpression],
+      showUnspecified,
+      included,
+      ["!", specified],
       isWaterwayExpression,
-    ]);
-    registerTrailsLayerFilter('waterways', [
-      "all",
-      allowedAccessExpression,
-      specifiedExpression,
-      isWaterwayExpression,
-    ]);
+    ],
+  };
+}
 
-    function addTrailLayer(def) {
-      if (trailFiltersById[def.id]) def.filter = trailFiltersById[def.id];
-      style.layers.push(def);
-    }
-
-    addTrailLayer({
-      "id": "hovered-paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-opacity": 0.25,
-        "line-color": colors.selection,
-        "line-width": hoverLineWidth,
-      },
-      "filter": [
-        "==", "OSM_ID", -1 
-      ],
-    });
-    addTrailLayer({
-      "id": "hovered-peaks",
-      "source": "openmaptiles",
-      "source-layer": "mountain_peak",
-      "type": "circle",
-      "paint": hoveredPoiPaint,
-      "filter": [
-        "==", "OSM_ID", -1 
-      ],
-    });
-    if (showTrailCenterpoints) {
-      addTrailLayer({
-        "id": "hovered-trail-centerpoints",
-        "source": "trails",
-        "source-layer": "trail_centerpoint",
-        "type": "circle",
-        "paint": hoveredPoiPaint,
-        "filter": [
-          "==", "OSM_ID", -1 
-        ],
-      });
-    }
-    addTrailLayer({
-      "id": "hovered-pois",
-      "source": "trails",
-      "source-layer": "trail_poi",
-      "type": "circle",
-      "paint": hoveredPoiPaint,
-      "filter": [
-        "==", "OSM_ID", -1 
-      ],
-    });
-    addTrailLayer({
-      "id": "selected-paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-opacity": 0.4,
-        "line-color": colors.selection,
-        "line-width": selectedLineWidth,
-      },
-      "filter": [
-        "==", "OSM_ID", -1 
-      ],
-    });
-    addTrailLayer({
-      "id": "selected-peaks",
-      "source": "openmaptiles",
-      "source-layer": "mountain_peak",
-      "type": "circle",
-      "paint": selectedPoiPaint,
-      "filter": [
-        "==", "OSM_ID", -1 
-      ],
-    });
-    if (showTrailCenterpoints) {
-      addTrailLayer({
-        "id": "selected-trail-centerpoints",
-        "source": "trails",
-        "source-layer": "trail_centerpoint",
-        "type": "circle",
-        "paint": selectedPoiPaint,
-        "filter": [
-          "==", "OSM_ID", -1 
-        ],
-      });
-    }
-    addTrailLayer({
-      "id": "selected-pois",
-      "source": "trails",
-      "source-layer": "trail_poi",
-      "type": "circle",
-      "paint": selectedPoiPaint,
-      "filter": [
-        "==", "OSM_ID", -1 
-      ],
-    });
-    addTrailLayer({
-      "id": "disallowed-waterways",
-      "source": 'trails',
-      "source-layer": 'trail',
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": colors.disallowedWater,
-      }
-    });
-    addTrailLayer({
-      "id": "informal-paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": colors.trail,
-        "line-dasharray": [2, 2],
-        "line-color": pathsColors,
-      }
-    });
-    addTrailLayer({
-      "id": "disallowed-informal-paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": colors.noaccessTrail,
-        "line-dasharray": [2, 2],
-      }
-    });
-    addTrailLayer({
-      "id": "unspecified-informal-paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round",
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": colors.unspecified,
-        "line-dasharray": [2, 2],
-      }
-    });
-    addTrailLayer({
-      "id": "disallowed-paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round",
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-pattern": ["image", "stroke-disallowed-stripes"],
-      }
-    });
-    addTrailLayer({
-      "id": "unspecified-paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round",
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": colors.unspecified,
-      }
-    });
-    addTrailLayer({
-      "id": "unspecified-waterways",
-      "source": 'trails',
-      "source-layer": 'trail',
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": colors.unspecified,
-      }
-    });
-    addTrailLayer({
-      "id": "waterways",
-      "source": 'trails',
-      "source-layer": 'trail',
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round"
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": waterwaysColors,
-      }
-    });
-    addTrailLayer({
-      "id": "paths",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "layout": {
-        "line-cap": "round",
-        "line-join": "round",
-      },
-      "paint": {
-        "line-width": lineWidth,
-        "line-color": pathsColors,
-      }
-    });
-    addTrailLayer({
-      "id": "bridge-casings",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "minzoom": 14,
-      "layout": {
-      "line-cap": "butt",
+function trailLine(id, paint, extra) {
+  return {
+    "id": id,
+    "source": "trails",
+    "source-layer": "trail",
+    "type": "line",
+    "layout": {
+      "line-cap": "round",
       "line-join": "round",
-      },
-      "paint": {
-        "line-gap-width": lineWidth, 
+    },
+    "paint": paint,
+    ...extra,
+  };
+}
+
+// A wide invisible line under the cursor, so thin trails are still easy to
+// click. queryRenderedFeatures hits this layer rather than the drawn lines.
+function pointerTargets(filter) {
+  return {
+    "id": "trails-pointer-targets",
+    "source": "trails",
+    "source-layer": "trail",
+    "type": "line",
+    "paint": {
+      "line-color": "transparent",
+      "line-width": 16,
+    },
+    "metadata": { "clickable": true },
+    "filter": filter,
+  };
+}
+
+function highlightLine(id, stateKey, opacity, width) {
+  return trailLine(id, {
+    "line-opacity": ["case", ["boolean", ["feature-state", stateKey], false], opacity, 0],
+    "line-color": SELECTION_COLOR,
+    "line-width": width,
+  });
+}
+
+// The overlay's layers, bottom to top.
+function trailLayers(ctx, travelMode, lens, filters, combinedFilter) {
+  const dashed = { "line-dasharray": [2, 2] };
+
+  // id, color and whether the line is dashed; informal (unofficial) trails are
+  // dashed, as are trails the selected travel mode isn't allowed on.
+  const lines = [
+    ["disallowed-waterways", DISALLOWED_WATER_COLOR, false],
+    ["informal-paths", ctx.pathsColor, true],
+    ["disallowed-informal-paths", NOACCESS_TRAIL_COLOR, true],
+    ["unspecified-informal-paths", UNSPECIFIED_COLOR, true],
+    ["disallowed-paths", NOACCESS_TRAIL_COLOR, true],
+  ];
+  const linesAboveSymbols = [
+    ["unspecified-paths", UNSPECIFIED_COLOR, false],
+    ["unspecified-waterways", UNSPECIFIED_COLOR, false],
+    ["waterways", ctx.waterwaysColor, false],
+    ["paths", ctx.pathsColor, false],
+  ];
+
+  const lineLayer = ([id, color, isDashed]) =>
+    trailLine(
+      id,
+      {
         "line-width": lineWidth,
+        "line-color": color,
+        ...(isDashed ? dashed : {}),
+      },
+      { "filter": filters[id] },
+    );
+
+  return [
+    trailLine(
+      "bridge-casings",
+      {
+        "line-gap-width": lineWidth,
+        "line-width": ["interpolate", ["linear"], ["zoom"], 16, 2, 20, 6],
         "line-color": "#bbb",
       },
-      "filter": [
-        "all",
-        ["has", "bridge"],
-        ["!", ["in", ["get", "bridge"], ["literal", ["no", "abandoned", "raised", "proposed", "dismantled"]]]],
-        combinedFilterExpression
-      ]
-    });
-    addTrailLayer({
+      {
+        "minzoom": 14,
+        "layout": { "line-cap": "butt", "line-join": "round" },
+        "filter": [
+          "all",
+          ["has", "bridge"],
+          [
+            "!",
+            [
+              "in",
+              ["get", "bridge"],
+              ["literal", ["no", "abandoned", "raised", "proposed", "dismantled"]],
+            ],
+          ],
+          combinedFilter,
+        ],
+      },
+    ),
+    highlightLine("hovered-paths", "hover", 0.25, hoverLineWidth),
+    highlightLine("selected-paths", "selected", 0.4, selectedLineWidth),
+    ...lines.map(lineLayer),
+    {
+      "id": "disallowed-symbols",
+      "source": "trails",
+      "source-layer": "trail",
+      "type": "symbol",
+      "minzoom": 13,
+      "filter": ["all", ctx.showDisallowed, ["!", ctx.allowed], combinedFilter],
+      "layout": {
+        "symbol-placement": "line",
+        "symbol-spacing": 200,
+        "icon-image": "no_entry",
+        "icon-size": 0.4,
+        "icon-overlap": "always",
+        "icon-rotation-alignment": "viewport",
+      },
+      "paint": {
+        "icon-color": "#ee2222",
+        "icon-halo-color": "#ffffff",
+        "icon-halo-width": 1.75,
+        "icon-halo-blur": 0.5,
+      },
+    },
+    ...linesAboveSymbols.map(lineLayer),
+    {
       "id": "oneway-arrows",
       "source": "trails",
       "source-layer": "trail",
       "type": "symbol",
       "transition": {
         "duration": 0,
-        "delay": 0
+        "delay": 0,
       },
-      "minzoom": lens === "oneway" ? 4 : 12,
+      "minzoom": lens === "oneway" ? 4 : 13,
       "layout": {
-        "icon-padding": 2,
-        "icon-size": [
-          "interpolate", ["linear"], ["zoom"],
-          14, 0.5,
-          22, 1
-        ],
         "symbol-placement": "line",
-        "symbol-spacing": [
-          "interpolate", ["linear"], ["zoom"],
-          14, 10,
-          18, 50,
-          22, 140
-        ],
-        "icon-overlap": "always",
-        "icon-rotation-alignment": "map",
+        "symbol-spacing": ["interpolate", ["linear"], ["zoom"], 14, 10, 18, 50, 22, 140],
         "icon-image": onewayArrowsIconImageExpression(travelMode),
+        "icon-overlap": "always",
+        "icon-padding": 2,
+        "icon-rotation-alignment": "map",
+        "icon-size": ["interpolate", ["linear"], ["zoom"], 14, 0.3, 22, 0.7],
       },
       "paint": {
-        "icon-opacity": 0.8,
+        "icon-color": ["case", ["has", "waterway"], WATER_COLOR, TRAIL_COLOR],
+        "icon-halo-color": LABEL_HALO_COLOR,
+        "icon-halo-width": 1.0,
+        "icon-halo-blur": 0.25,
       },
-      // A specific filter isn't needed since the icon-image doesn't display anything if there isn't a relevant oneway value.
-      "filter": /*["all", onewayArrowsFilter(travelMode), */ combinedFilterExpression //],
-    });
-    addTrailLayer({
+      // A specific filter isn't needed since the icon-image doesn't display
+      // anything if there isn't a relevant oneway value.
+      "filter": combinedFilter,
+    },
+    {
       "id": "trails-labels",
       "source": "trails",
       "source-layer": "trail",
       "type": "symbol",
       "layout": {
         "text-field": getTrailLabelExpression(lens, travelMode),
-        "text-font": ["Americana-Regular"],
+        "text-font": ["Noto Sans Regular"],
         "text-size": 12,
         "symbol-placement": "line",
       },
       "paint": {
-        "text-color": colors.label,
+        "text-color": LABEL_COLOR,
         "text-halo-width": 1.5,
-        "text-halo-color": colors.labelHalo,
+        "text-halo-color": LABEL_HALO_COLOR,
       },
-      "filter": combinedFilterExpression,
-    });
-    addTrailLayer({
-      "id": "trails-pointer-targets",
-      "source": "trails",
-      "source-layer": "trail",
-      "type": "line",
-      "paint": {
-          "line-color": "transparent",
-          "line-width": 16
-      },
-      "filter": combinedFilterExpression,
-    });
-    addTrailLayer({
-      "id": "trees",
-      "source": "trails",
-      "source-layer": "trail_poi",
-      "type": "circle",
-      "minzoom": 16,
-      "paint": {
-        "circle-radius": [
-          "interpolate", ["exponential", 2], ["zoom"],
-          16, 2,
-          22, 128
-        ],
-        "circle-opacity": [
-          "interpolate", ["linear"], ["zoom"],
-          16, 0.25,
-          22, 0.075
-        ],
-        "circle-color": colors.natural,
-      },
-      "filter": [
-        "==", ["get", "natural"], "tree" 
-      ],
-    });
-    addTrailLayer({
-      "id": "peaks",
-      "source": "openmaptiles",
-      "source-layer": "mountain_peak",
-      "type": "symbol",
-      "layout": {
-        "icon-image": ["image", "peak"],
-        "icon-size": [
-          "interpolate", ["linear"], ["zoom"],
-          12, 0.5,
-          22, 1
-        ],
-        "symbol-placement": "point",
-        "text-field": [
-          "step", ["zoom"], "",
-          poiLabelZoom, [
-            'format',
-            ["concat", ["get", "name"], '\n'],
-            {"text-font": ['literal', ["Americana-Bold"]]},
-            ["concat", [
-              "number-format",
-              ['get', 'ele_ft'],
-              {}
-            ], " ft"],
-          ]
-        ],
-        "text-optional": true,
-        "text-size": 11,
-        "text-line-height": 1.1,
-        "text-font": ["Americana-Regular"],
-        "text-variable-anchor": ["left", "right", "top", "bottom"],
-        "text-padding": 5,
-        "text-offset": [
-          "interpolate", ["linear"], ["zoom"],
-          12, ["literal", [0.4, 0.4]],
-          22, ["literal", [1.5, 1.5]]
-        ],
-        "text-justify": "auto",
-      },
-      "paint": {
-        "text-color":  colors.natural,
-        "text-halo-width": 2,
-        "text-halo-blur": 1,
-        "text-halo-color": colors.labelHalo,
-      },
-      "filter": [
-        "all",
-        ["has", "name"],
-        ["has", "ele_ft"],
-      ],
-    });
-    addTrailLayer({
-      "id": "trail-pois",
-      "source": 'trails',
-      "source-layer": 'trail_poi',
-      "type": "symbol",
-      "minzoom": 12,
-      "transition": {
-        "duration": 0,
-        "delay": 0
-      },
-      "layout": {
-        "icon-image": poiIconImageExpression(travelMode),
-        "icon-anchor": [
-          "case",
-          [
-            "any",
-            ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
-            ["==", ["get", "man_made"], "cairn"],
-          ], "bottom",
-          "center",
-        ],
-        "icon-size": [
-          "interpolate", ["linear"], ["zoom"],
-          12, 0.5,
-          22, 1
-        ],
-        "symbol-placement": "point",
-        "symbol-sort-key": [
-          "case",
-          ["==", ["get", "route"], "ferry"], 1,
-          ["==", ["get", "man_made"], "monitoring_station"], 4,
-          ["==", ["get", "tourism"], "camp_site"], 5,
-          ["==", ["get", "tourism"], "caravan_site"], 5,
-          ["==", ["get", "amenity"], "ranger_station"], 6,
-          ["==", ["get", "highway"], "trailhead"], 7,
-          ["==", ["get", "tourism"], "wilderness_hut"], 8,
-          ["==", ["get", "tourism"], "camp_pitch"], 8,
-          ["==", ["get", "shelter_type"], "lean_to"], 9,
-          ["==", ["get", "tourism"], "viewpoint"], 18,
-          ["==", ["get", "information"], "guidepost"], 19,
-          ["==", ["get", "man_made"], "cairn"], 20,
-          ["==", ["get", "information"], "route_marker"], 20,
-          canoeNoaccessExpression, 21,
-          ["==", ["get", "backcountry"], "yes"], 11,
-          10,
-        ],
-        "text-field": [
-          "step", ["zoom"], "",
-          poiLabelZoom, getLabelExpression(poiLabelData)
-        ],
-        "text-optional": true,
-        "text-size": 11,
-        "text-line-height": 1.1,
-        "text-font": ["Americana-Regular"],
-        "text-variable-anchor": ["left", "right", "top", "bottom"],
-        "text-padding": 5,
-        "text-offset": [
-          "interpolate", ["linear"], ["zoom"],
-          12, ["literal", [0.4, 0.4]],
-          22, ["literal", [1.5, 1.5]]
-        ],
-        "text-justify": "auto",
-      },
-      "paint": {
-        "text-color": colors.label,
-        "text-halo-width": 2,
-        "text-halo-blur": 1,
-        "text-halo-color": colors.labelHalo,
-      },
-      "filter": trailPoisFilter(travelMode),
-    });
-    addTrailLayer({
-      "id": "major-trail-pois",
-      "source": 'trails',
-      "source-layer": 'trail_poi',
-      "type": "symbol",
-      "transition": {
-        "duration": 0,
-        "delay": 0
-      },
-      "layout": {
-        "icon-image": [
-          "case",
-          ["==", ["get", "protected_area"], "game_land"], ["image", "game_land"],
-          ["==", ["get", "protected_area"], "forest_reserve"], ["image", "forest_reserve"],
-          ["==", ["get", "protected_area"], "grassland_reserve"], ["image", "grassland_reserve"],
-          ["==", ["get", "protected_area"], "watershed_reserve"], ["image", "watershed_reserve"],
-          ["==", ["get", "protected_area"], "wildlife_refuge"], [
-            "case",
-            isInSemiExpression("wildlife_refuge:for", "bird"), ["image", "bird_refuge"],
-            isInSemiExpression("wildlife_refuge:for", "bison"), ["image", "bison_refuge"],
-            ["image", "wildlife_refuge"],
-          ],
-          ["==", ["get", "protected_area"], "wilderness_preserve"], ["image", "wilderness_preserve"],
-          ["==", ["get", "leisure"], "nature_reserve"], ["image", "nature_reserve"],
-          ["==", ["get", "leisure"], "park"], ["image", "park"],
-          ["image", "protected_area"],
-        ],
-        "icon-size": [
-          "interpolate", ["linear"], ["zoom"],
-          12, 0.5,
-          22, 1
-        ],
-        "symbol-placement": "point",
-        "symbol-sort-key": ["-", ["get", "AREA_Z0_PX2"]],
-        "text-field": ["get", "name"],
-        "text-optional": true,
-        "text-size": 11,
-        "text-line-height": 1.1,
-        "text-font": ["Americana-Bold"],
-        "text-variable-anchor": ["top", "bottom", "left", "right"],
-        "text-padding": 5,
-        "text-offset": [
-          "interpolate", ["linear"], ["zoom"],
-          12, ["literal", [0.9, 0.9]],
-          22, ["literal", [2, 2]]
-        ],
-        "text-justify": "auto",
-      },
-      "paint": {
-        "text-color": colors.natural,
-        "text-halo-width": 2,
-        "text-halo-blur": 1,
-        "text-halo-color": colors.labelHalo,
-      },
-      "filter": [
-        "all",
-        [
-          "any",
-          ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]],
-          ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]
-        ],
-        [">=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.000000075],
-        ["<=", ["*", ["get", "AREA_Z0_PX2"], ["^", ["^", 2, ["zoom"]], 2]], 0.0001],
-        ["!", ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]]],
-      ],
-    });
-    if (showTrailCenterpoints) {
-      addTrailLayer({
-        "id": "trail-centerpoints",
-        "source": "trails",
-        "source-layer": "trail_centerpoint",
-        "type": "symbol",
-        "transition": {
-          "duration": 0,
-          "delay": 0
-        },
-        "layout": {
-          "icon-image": ["image", "question"],
-          "icon-size": [
-            "interpolate", ["linear"], ["zoom"],
-            12, 0.5,
-            22, 1
-          ],
-          "symbol-placement": "point"
-        },
-        "filter": [
-          "all",
-          [
-            "any",
-            ["has", "fixme"],
-            ["has", "FIXME"],
-            ["has", "todo"],
-            ["has", "TODO"],
-          ],
-          combinedFilterExpression
-        ]
-      });
-    }
-  }
-
-  function onewayKeysForTravelMode(travelMode) {
-    let keys = [];
-    // basic `oneway` tag is ambiguous on waterways
-    if (travelMode !== "canoe") keys.push('oneway');
-    return keys.concat(accessHierarchy[travelMode].map(function(val) {
-      return 'oneway:' + val;
-    }));
-  }
-
-  function maxspeedKeysForTravelMode(travelMode) {
-    let keys = ["maxspeed"];
-    return keys.concat(accessHierarchy[travelMode].map(function(val) {
-      return 'maxspeed:' + val;
-    }));
-  }
-
-  function specifyingKeysForLens(lens, travelMode) {
-    switch (lens) {
-      case 'access':
-        let keys = accessHierarchy[travelMode].slice().reverse();
-        if (travelMode === 'canoe') keys.push('portage');
-        keys.push('access');
-        return keys;
-      case 'name': 
-        switch (travelMode) {
-          case "canoe": return ['name', 'waterbody:name', 'noname'];
-          case 'mtb': return ['name', 'mtb:name', 'noname'];
-        }
-        return ['name', 'noname'];
-      case 'oneway': return onewayKeysForTravelMode(travelMode);
-      case 'maxspeed': return maxspeedKeysForTravelMode(travelMode);
-      case 'check_date': return ['check_date', 'survey:date'];
-      case 'covered': return ['covered', 'tunnel', 'indoor'];
-      case 'fixme': return ['fixme', 'FIXME', 'todo', 'TODO'];
-    }
-    return [lens];
-  }
-
-  function attributeIsSpecifiedExpression(keys) {
-    return [
-      "any",
-      ...keys.map(function(key) {
-        return [
-          "all",
-          ["has", key],
-          ["!=", ["get", key], "unknown"],
-        ];
-      }),
-    ];
-  }
-
-  function isImpliedExpressionForLens(lens) {
-    switch (lens) {
-      case 'operator':
-        // if a path is `informal=yes` then there's probably no operator, always style as complete
-        return ["==", ["get", "informal"], "yes"];
-      case 'tidal':
-        // assume tidal channels are always tidal=yes
-        return ["==", ["get", "waterway"], "tidal_channel"];
-      case 'open_water':
-        // only expect open_water tag on certain features
-        return ["!", ["in", ["get", "waterway"], ["literal", ["fairway", "flowline"]]]];
-      case "rapids" : 
-        // we assume non-tidal flowlines do not have rapids   
-        return ["all",
-          ["==", ["get", "waterway"], "flowline"],
-          ["==", ["get", "tidal"], "no"]
-        ];
-      case 'width':
-        // don't expect width tag on links
-        return ["==", ["get", "waterway"], "link"];
-    }
-    return null;
-  }
-
-  function isSpecifiedExpressionForLens(lens, travelMode) {
-
-    let specifiedAttributeExpression = attributeIsSpecifiedExpression(
-      specifyingKeysForLens(lens, travelMode)
-    );
-    let impliedAttributeExpression = isImpliedExpressionForLens(lens);
-    if (impliedAttributeExpression) {
-      specifiedAttributeExpression = [
-        "any",
-        specifiedAttributeExpression,
-        impliedAttributeExpression
-      ];
-    }
-    switch (lens) {
-      case 'fixme':
-        // for fixmes we're looking for extant values instead of missing values
-        specifiedAttributeExpression = ["!", specifiedAttributeExpression];
-        break;
-      case 'sac_scale':
-        // there are a lot of junk sac_scale values, so require one from a known set
-        specifiedAttributeExpression = [
-          "all",
-          specifiedAttributeExpression,
-          ["in", ["get", "sac_scale"], ["literal", ['no', 'hiking', 'mountain_hiking', 'demanding_mountain_hiking', 'alpine_hiking', 'demanding_alpine_hiking', 'difficult_alpine_hiking']]],
-        ];
-        break;
-      case 'oneway':
-        if (travelMode === 'canoe') {
-          specifiedAttributeExpression = [
-            "any",
-            [
-              "all",
-              specifiedAttributeExpression,
-              isWaterwayExpression,
-            ],
-            [
-              "all",
-              attributeIsSpecifiedExpression(specifyingKeysForLens(lens, 'portage')),
-              ["!", isWaterwayExpression],
-            ],
-          ];
-        }
-        break;
-      default:
-        break;
-    }
-    return specifiedAttributeExpression;
-  }
-/*
-  function onewayArrowsFilter(travelMode) {
-    let filter = ["any"];
-    let onewayKeys = onewayKeysForTravelMode(travelMode);
-    while (onewayKeys.length) {
-      let leastSpecificKey = onewayKeys.shift();
-      filter.push([
-        "all",
-        // if there isn't a more specific key (e.g. 'oneway:foot')
-        ...onewayKeys.map(function(key) {
-          return ["!", ["has", key]];
-        }),
-        // then pay attention to the most specific key we have (e.g. 'oneway')
-        ["in", ["get", leastSpecificKey], ["literal", ["yes", "-1", "alternating", "reversible"]]],
-      ]);
-    }
-    if (travelMode === "canoe") {
-      filter = [
-        "any",
-        [
-          "all",
-          filter,
-          isWaterwayExpression,
-        ],
-        [
-          "all",
-          onewayArrowsFilter('portage'),
-          ["!", isWaterwayExpression],
-        ],
-      ];
-    }
-    return filter;
-  }
-*/
-  function poiIconImageExpression(travelMode) {
-    let showHazards = travelMode === "canoe";
-    return [
-      "case",
-      ["==", ["get", "route"], "ferry"], [
-        "case",
-        ["in", ["get", "access"], noaccessValsLiteral], ["image", "ferry-noaccess"],
-        ["image", "ferry"],
-      ],
-      ["==", ["get", "amenity"], "ranger_station"], [
-        "case",
-        ["in", ["get", "access"], noaccessValsLiteral], ["image", "ranger_station-noaccess"],
-        ["image", "ranger_station"],
-      ],
-      ["==", ["get", "highway"], "trailhead"], [
-        "case",
-        ["in", ["get", "access"], noaccessValsLiteral], ["image", "trailhead-noaccess"],
-        ["image", "trailhead"],
-      ],
-      ["==", ["get", "man_made"], "cairn"], ["image", "cairn"],
-      ["==", ["get", "information"], "guidepost"], ["image", "guidepost"],
-      ["==", ["get", "information"], "route_marker"], ["image", "route_marker"],
-      ["==", ["get", "man_made"], "monitoring_station"], ["image", "streamgage"],
-      ["==", ["get", "tourism"], "camp_site"], [
-        "case",
-        ["in", ["get", "access"], noaccessValsLiteral], ["image", "campground-noaccess"],
-        ["image", "campground"],
-      ],
-      ["==", ["get", "tourism"], "caravan_site"], [
-        "case",
-        ["in", ["get", "access"], noaccessValsLiteral], ["image", "caravan_site-noaccess"],
-        ["image", "caravan_site"],
-      ],
-      ["==", ["get", "tourism"], "camp_pitch"], ["image", "campsite"],
-      ["==", ["get", "shelter_type"], "lean_to"], ["image", "lean_to"],
-      ["==", ["get", "tourism"], "wilderness_hut"], ["image", "lean_to"],
-      ["==", ["get", "tourism"], "viewpoint"], ["image", "viewpoint"],
-      [
-        "any",
-        ["==", ["get", "natural"], "beaver_dam"],
-        ["in", ["get", "waterway"], ["literal", ["dam", "weir", "waterfall"]]],
-        ["==", ["get", "lock"], "yes"],
-      ], [
-        "case",
-        [
-          "all",
-          ["has", "canoe"],
-          ["!", ["in", ["get", "canoe"], noaccessValsLiteral]]
-        ], [
-          "case",
-          ["==", ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-canoeable" : "beaver_dam"],
-          ["==", ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-canoeable" : "waterfall"],
-          ["in", ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-canoeable" : "dam"],
-          ["image", showHazards ? "lock-canoeable" : "lock"],
-        ],
-        ["==", ["get", "natural"], "beaver_dam"], ["image", showHazards ? "beaver_dam-hazard" : "beaver_dam"],
-        ["==", ["get", "waterway"], "waterfall"], ["image", showHazards ? "waterfall-hazard" : "waterfall"],
-        ["in", ["get", "waterway"], ["literal", ["dam", "weir"]]], ["image", showHazards ? "dam-hazard" : "dam"],
-        ["image", showHazards ? "lock-hazard" : "lock"],
-      ],
-      canoeNoaccessExpression, [
-        "case",
-        ["==", ["get", "leisure"], "slipway"], ["case",
-          ["==", ["get", "trailer"], "no"], ["image", "slipway-canoe-noaccess"],
-          ["image", "slipway-canoe-trailer-noaccess"],
-        ],
-        ["==", ["get", "waterway"], "access_point"], ["image", "access_point-noaccess"],
-        ""
-      ],
-      ["==", ["get", "leisure"], "slipway"], [
-        "case",
-        ["==", ["get", "trailer"], "no"], ["image", "slipway-canoe"],
-        ["image", "slipway-canoe-trailer"],
-      ],
-      ["==", ["get", "waterway"], "access_point"], [
-        "case",
-        ["==", ["get", "backcountry"], "yes"], ["image", "access_point-minor"],
-        ["image", "access_point"],
-      ],
-      ""
-    ];
-  }
-
-  function trailPoisFilter(travelMode) {
-    let filter = [
-      "all",
-      [
-        "any",
-        [
-          "all",
-          ["!", ["in", ["get", "leisure"], ["literal", ["park", "nature_reserve"]]]],
-          ["!", ["in", ["get", "boundary"], ["literal", ["protected_area", "national_park"]]]],
-        ],
-        ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
-      ],
-      ["!=", ["get", "natural"], "tree"],
-    ];
-    
-    if (travelMode !== "all") {
-      if (travelMode !== "canoe") {
-        // don't show canoe-specific POIs for other travel modes
-        filter.push([
-          "!", [
-            "any",
-            ["==", ["get", "natural"], "beaver_dam"],
-            ["==", ["get", "leisure"], "slipway"],
-            ["in", ["get", "waterway"], ["literal", ["dam", "weir", "access_point"]]],
-            ["==", ["get", "lock"], "yes"],
-            ["==", ["get", "man_made"], "monitoring_station"],
-          ]
-        ]);
-      }
-      const poiKeysByTravelMode = {
-        "foot": ["hiking"],
-        "canoe": ["canoe", "portage"],
-      };
-      const poiKeys = poiKeysByTravelMode[travelMode] ? poiKeysByTravelMode[travelMode] : [travelMode];
-      filter.push([
-        "any",
-        [
-          "!", [
-            "any",
-            ["==", ["get", "highway"], "trailhead"],
-            ["in", ["get", "information"], ["literal", ["guidepost", "route_marker"]]],
-            ["==", ["get", "man_made"], "cairn"],
-            ["==", ["get", "route"], "ferry"],
-          ]
-        ],
-        travelMode === "canoe" ? [
-          "any",
-          ...poiKeys.map(function(key) {
-            return ["==", ["get", key], "yes"];
-          })
-        ] :
-        [
-          "all",
-          ...poiKeys.map(function(key) {
-            return [
-              "any",
-              ["!", ["has", key]],
-              ["==", ["get", key], "yes"],
-            ];
-          })
-        ]
-      ]);
-    }
-    return filter;
-  }
-
-  function onewayArrowsIconImageExpression(travelMode, fromAll) {
-    let expression = ["case"];
-    onewayKeysForTravelMode(travelMode).reverse().forEach(function(key) {
-      expression = expression.concat([
-        ["has", key],
-        [
-          "case",
-          ["==", ["get", key], "yes"], ["image", "oneway-arrow-right"],
-          ["==", ["get", key], "-1"], ["image", "oneway-arrow-left"],
-          ["in", ["get", key], ["literal", ["alternating", "reversible"]]], ["image", "oneway-arrows-leftright"],
-          ""
-        ]
-      ]);
-    });
-    if (travelMode === "canoe") {
-
-      expression = expression.concat([
-        ["all",
-          // assume features with current are oneway
-          ["in", ["get", "waterway"], ["literal", [
-            "river",
-            "stream",
-            "canal",
-            "drain",
-            "ditch",
-            "canoe_pass"
-          ]]],
-          // unless they're tidal
-          ["!=", ["get", "tidal"], "yes"],
-        ],
-        ["image", "oneway-arrow-right"],
-        "",
-      ]);
-
-      if (!fromAll) {
-        expression = [
-          "case",
-          isWaterwayExpression, expression,
-          onewayArrowsIconImageExpression('portage'),
-        ];
-      }
-      
-    } else {
-      expression.push("");
-    }
-
-    if (travelMode === 'all') {
-      expression = [
-        "case",
-        isWaterwayExpression, onewayArrowsIconImageExpression('canoe', true),
-        expression,
-      ];
-    }
-
-    return expression;
-  }
-
-  // returns a filter that evaluates to true for features with enough tags to positively
-  // determine whether access is allowed or not allowed
-  function accessIsSpecifiedExpression(travelMode) {
-    let filter = [
-      "!", [
-        "any",
-        [
-          "all",
-          ["!", ["has", travelMode]],
-          notNoAccessExpression("access"),
-          ...(impliedYesExpression[travelMode] ? [["!", impliedYesExpression[travelMode]]] : []),
-          ...(impliedNoExpression[travelMode] ? [["!", impliedNoExpression[travelMode]]] : []),
-        ],
-        // access if always unspecified if mode is explicitly set to `unknown`
-        ["==", ["get", travelMode], "unknown"],
-      ]
-    ];
-    if (travelMode === "canoe") {
-      filter = [
-        "any",
-        [
-          "all",
-          filter,
-          isWaterwayExpression,
-        ],
-        [
-          "all",
-          accessIsSpecifiedExpression('portage'),
-          ["!", isWaterwayExpression],
-        ],
-      ];
-    }
-    return filter;
-  }
-
-  function notNoAccessExpression(mode) {
-    return ["!", ["in", ["get", mode], noaccessValsLiteral]];
-  }
-
-  function modeIsAllowedExpression(mode) {
-    let allowedAccessExpression = [
-      "all",
-      [
-        "any",
-        [
-          "all",
-          ["!", ["has", mode]],
-          notNoAccessExpression("access"),
-        ],
-        [
-          "all",
-          ["has", mode],
-          notNoAccessExpression(mode),
-        ],
-      ],
-    ];
-    if (impliedNoExpression[mode]) {
-      allowedAccessExpression.push(
-        [
-          "any",
-          ["has", mode],
-          ["!", impliedNoExpression[mode]],
-        ]
-      );
-    }
-    return allowedAccessExpression;
-  }
-
-  function getTrailLabelExpression(lens, travelMode) {
-
-    let sublabels = null;
-
-    if (lens !== "") {
-      let keys = specifyingKeysForLens(lens, travelMode);
-      sublabels = [{
-        selector: ["any", ...keys.map(key => ["has", key])],
-        label: ["case", ...keys.map(key => {
-          let val = ["concat", key, "=", ["get", key]];
-          if (key === 'name' || key.endsWith(':name')) val = key;
-          return [["has", key], val];
-        }).flat(1), ""],
-      }];
-    }
-    const trailLabelData = [
-      {
-        caseSelector: isWaterwayExpression,
-        selector: ["any", ["has", "name"], ["has", "waterbody:name"]],
-        label: ["coalesce", ["get", "name"], ["get", "waterbody:name"]],
-        sublabels: sublabels
-      },
-      {
-        selector: ["any", ["has", "name"], ["has", "mtb:name"]],
-        label: ["coalesce", ["get", "name"], ["get", "mtb:name"]],
-        sublabels: sublabels
-      }
-    ];
-
-    return getLabelExpression(trailLabelData);
-  }
-
-  const poiLabelData = [
-    {
-      caseSelector: ["in", ["get", "tourism"], ["literal", ["camp_site", "caravan_site"]]],
-      selector: ["any", ["has", "name"], ["has", "ref"]],
-      label: ["coalesce", ["get", "name"], ["get", "ref"]],
-      sublabels: [
-        {
-          selector: ["==", ["get", "tents"], "no"],
-          label: "No tents",
-        },
-        {
-          selector: ["==", ["get", "group_only"], "yes"], 
-          label: "Groups only",
-        },
-        {
-          selector: ["==", ["get", "reservation"], "required"],
-          label: "Reservations required",
-        },
-        {
-          selector: ["==", ["get", "reservation"], "no"],
-          label: "First-come, first-served",
-        }
-      ]
+      "filter": combinedFilter,
     },
-    {
-      caseSelector: ["any", ["==", ["get", "waterway"], "access_point"], ["==", ["get", "leisure"], "slipway"]],
-      selector: ["any", ["has", "name"], ["has", "ref"]],
-      label: ["coalesce", ["get", "name"], ["get", "ref"]],
-      sublabels: [
-        {
-          selector: ["==", ["get", "group_only"], "yes"], 
-          label: "Groups only",
-        },
-        {
-          selector: ["==", ["get", "reservation"], "required"],
-          label: "Reservations required",
-        }
-      ]
-    },
-    {
-      caseSelector: ["==", ["get", "lock"], "yes"],
-      selector: ["any", ["has", "lock_name"], ["has", "lock_ref"]],
-      label: ["coalesce", ["get", "lock_name"], ["get", "lock_ref"]],
-      sublabels: [
-        {
-          selector: ["has", "lock:height"],
-          label: ["concat", [
-            "number-format",
-            ["/", ["to-number", ['get', 'lock:height']], 0.3048],
-            { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
-          ], " ft"],
-        },
-        {
-          selector: ["has", "lock:height"],
-          label: " ↕︎",
-          font: "Americana-Bold",
-          conjoined: true
-        }
-      ]
-    },
-    {
-      caseSelector: ["in", ["get", "waterway"], ["literal", ["waterfall", "dam", "weir"]]],
-      selector: ["any", ["has", "name"], ["has", "ref"]],
-      label: ["coalesce", ["get", "name"], ["get", "ref"]],
-      sublabels: [
-        {
-          selector: ["has", "height"],
-          label:  ["concat", [
-            "number-format",
-            ["/", ["to-number", ['get', 'height']], 0.3048],
-            { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
-          ], " ft"],
-        },
-        {
-          selector: ["has", "height"],
-          label: " ↕︎",
-          font: "Americana-Bold",
-          conjoined: true
-        }
-      ]
-    },
-    {
-      selector: ["any", ["has", "name"], ["has", "ref"]],
-      label: ["coalesce", ["get", "name"], ["get", "ref"]],
-      sublabels: [
-        {
-          selector: ["has", "ele"],
-          label:  ["concat", [
-            "number-format",
-            ["/", ["to-number", ['get', 'ele']], 0.3048],
-            { "max-fraction-digits": 0.1 } // for some reason 0 doesn't work
-          ], " ft"],
-        },
-      ]
-    },
+    pointerTargets(combinedFilter),
   ];
+}
 
-  function getLabelExpression(items) {
-    let filters = ["case"];
-    for(let i in items) {
-      let item = items[i];
+export function generateStyle(baseStyleObj, travelMode, lens) {
+  // deep-copy to avoid mutating the original
+  const style = structuredClone(baseStyleObj);
 
-      if (item.caseSelector) filters.push(item.caseSelector);
+  // copied, so that generated styles never share a mutable source object
+  style.sources.trails = { ...TRAILS_SOURCE };
 
-      let filter = [
-        "format",
-        [
-          "case",
-          item.selector, item.sublabels ? [
-            "concat",
-            item.label,
-            [
-              "case",
-              ["any", ...item.sublabels.map(item => item.selector)], '\n',
-              ""
-            ]
-          ] : item.label,
-          ""
-        ],
-        {"text-font": ['literal', [item.font ? item.font : "Americana-Bold"]]},
-      ]
-
-      if (item.sublabels) {
-        filter = filter.concat(getSublabelExpressions(item.sublabels));
-      }
-      filters.push(filter);
+  // Hide the basemap's own trail layers to avoid double-rendering.
+  for (const layer of style.layers) {
+    if (BASEMAP_TRAIL_LAYER_IDS.includes(layer.id)) {
+      layer.layout = { ...layer.layout, visibility: "none" };
     }
-    return filters;
   }
 
-  function getSublabelExpressions(items) {
-    let filters = [];
-    for(let i in items) {
-      let item = items[i];
+  const ctx = overlayContext(travelMode, lens);
+  const filters = trailFilters(ctx);
+  const combinedFilter = ["any", ...Object.values(filters)];
 
-      let sublabelsFilter = [];
-      if (item.sublabels) {
-        sublabelsFilter = [["any", ...item.sublabels.map(item => item.selector)], '\n'];
-      }
-      filters.push([
-          "case",
-          item.selector, [
-            "concat", item.label,
-            [
-              "case",
-              ["any", ...items.slice(parseInt(i) + 1).filter(item => !item.conjoined).map(item => item.selector)], " · ",
-              ...sublabelsFilter,
-              ""
-            ]
-          ],
-          ""
-        ]);
-      filters.push({"text-font": ['literal', [item.font ? item.font : "Americana-Regular"]]});
-    }
-    return filters;
+  const layers = trailLayers(ctx, travelMode, lens, filters, combinedFilter).map((layer) => ({
+    "minzoom": MIN_ZOOM,
+    ...layer,
+  }));
+
+  const insertionIndex = style.layers.findIndex((l) => l.id === QA_INSERTION_POINT);
+  if (insertionIndex < 0) {
+    throw new Error(`Base style is missing its "${QA_INSERTION_POINT}" marker layer`);
   }
+  style.layers.splice(insertionIndex, 0, ...layers);
 
-  addTrailLayers();
   return style;
 }
